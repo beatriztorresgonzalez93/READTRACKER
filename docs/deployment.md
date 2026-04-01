@@ -14,7 +14,8 @@
 3. Comando start: `npm run start`.
 4. Variables:
    - `PORT`
-   - `CLIENT_ORIGIN` (una URL del frontend) **o** `CLIENT_ORIGINS` (varias URLs separadas por coma, útil para Vercel producción + previews)
+   - `CLIENT_ORIGIN` (una URL del frontend) **o** `CLIENT_ORIGINS` (varias URLs separadas por coma)
+   - `CORS_ORIGIN_SUFFIXES` (opcional): para previews de Vercel, añade el sufijo estable del host, p. ej. `-tuteam-projects.vercel.app`, para no tener que actualizar la lista en cada deploy
 
 ## Recomendacion
 

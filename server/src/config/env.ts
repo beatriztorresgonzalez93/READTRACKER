@@ -11,8 +11,17 @@ function parseClientOrigins(): string[] {
   return [process.env.CLIENT_ORIGIN ?? "http://localhost:5173"];
 }
 
+/** Sufijos HTTPS de host (p. ej. previews Vercel: `-teamslug.vercel.app`) — una URL por preview distinta. */
+function parseCorsOriginSuffixes(): string[] {
+  return (
+    process.env.CORS_ORIGIN_SUFFIXES?.split(",").map((s) => s.trim()).filter(Boolean) ?? []
+  );
+}
+
 export const env = {
   port: Number(process.env.PORT ?? 4000),
   clientOrigins: parseClientOrigins(),
+  /** Orígenes https://... que terminan en uno de estos sufijos pasan CORS (útil para previews Vercel). */
+  corsOriginSuffixes: parseCorsOriginSuffixes(),
   databaseUrl: process.env.DATABASE_URL ?? ""
 };

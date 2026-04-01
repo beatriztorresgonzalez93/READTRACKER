@@ -11,6 +11,16 @@ import { BooksService } from "./services/booksService";
 
 const app = express();
 
+function isCorsAllowedOrigin(origin: string): boolean {
+  if (env.clientOrigins.includes(origin)) {
+    return true;
+  }
+  if (!origin.startsWith("https://")) {
+    return false;
+  }
+  return env.corsOriginSuffixes.some((suffix) => origin.endsWith(suffix));
+}
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -18,11 +28,7 @@ app.use(
         callback(null, true);
         return;
       }
-      if (env.clientOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-      callback(null, false);
+      callback(null, isCorsAllowedOrigin(origin));
     }
   })
 );
