@@ -13,7 +13,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: env.clientOrigin
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (env.clientOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    }
   })
 );
 app.use(express.json());

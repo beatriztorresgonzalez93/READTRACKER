@@ -33,7 +33,8 @@ API disponible en `http://localhost:4000/api/v1`.
 
 Variables backend importantes:
 - `DATABASE_URL`: cadena de conexión de Neon Postgres.
-- `CLIENT_ORIGIN`: URL del frontend para CORS.
+- `CLIENT_ORIGIN`: URL del frontend para CORS (una sola).
+- `CLIENT_ORIGINS`: lista separada por comas si necesitas varios dominios (p. ej. Vercel producción y previews); si está definida, sustituye el uso de `CLIENT_ORIGIN` para CORS.
 
 ### 2) Frontend
 

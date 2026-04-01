@@ -14,7 +14,7 @@
 3. Comando start: `npm run start`.
 4. Variables:
    - `PORT`
-   - `CLIENT_ORIGIN`
+   - `CLIENT_ORIGIN` (una URL del frontend) **o** `CLIENT_ORIGINS` (varias URLs separadas por coma, útil para Vercel producción + previews)
 
 ## Recomendacion
 
