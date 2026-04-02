@@ -11,14 +11,21 @@ import { BooksService } from "./services/booksService";
 
 const app = express();
 
+function normalizeOrigin(origin: string): string {
+  // El header `Origin` normalmente viene sin path; normalizamos también
+  // un slash final accidental y forzamos minúsculas.
+  return origin.trim().replace(/\/$/, "").toLowerCase();
+}
+
 function isCorsAllowedOrigin(origin: string): boolean {
-  if (env.clientOrigins.includes(origin)) {
+  const normalized = normalizeOrigin(origin);
+  if (env.clientOrigins.includes(normalized)) {
     return true;
   }
-  if (!origin.startsWith("https://")) {
+  if (!normalized.startsWith("https://")) {
     return false;
   }
-  return env.corsOriginSuffixes.some((suffix) => origin.endsWith(suffix));
+  return env.corsOriginSuffixes.some((suffix) => normalized.endsWith(suffix));
 }
 
 app.use(
