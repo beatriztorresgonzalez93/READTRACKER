@@ -36,6 +36,7 @@ Variables backend importantes:
 - `CLIENT_ORIGIN`: URL del frontend para CORS (una sola).
 - `CLIENT_ORIGINS`: lista separada por comas si necesitas varios dominios (p. ej. Vercel producción y previews); si está definida, sustituye el uso de `CLIENT_ORIGIN` para CORS.
 - `CORS_ORIGIN_SUFFIXES`: sufijos de host separados por coma; cualquier origen `https://...` que termine en uno de ellos será permitido (útil para previews de Vercel, que cambian el subdominio en cada deploy).
+- Nota: el backend tambien permite orígenes `https://*.vercel.app` para evitar bloqueos de CORS en URLs dinámicas de deployment.
 
 ### 2) Frontend
 
@@ -55,5 +56,5 @@ La carpeta `docs/` incluye decisiones de arquitectura, API, routing, formularios
 ## Espacios para completar
 
 - Trello: [pendiente]
-- Frontend URL (deploy): [pendiente]
-- Backend URL (deploy): [pendiente]
+- Frontend URL (deploy): `https://readtracker.vercel.app`
+- Backend URL (deploy): `https://readtracker-api.onrender.com/api/v1`

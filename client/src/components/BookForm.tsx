@@ -1,5 +1,5 @@
 // Formulario controlado reutilizable para crear y editar libros.
-import { FormEvent, useState } from "react";
+import { FormEvent, KeyboardEvent, useState } from "react";
 import { CreateBookDto, ReadingStatus } from "../types/book";
 
 interface BookFormProps {
@@ -10,19 +10,26 @@ interface BookFormProps {
 
 type Errors = Partial<Record<keyof CreateBookDto, string>>;
 
+const getProgressByStatus = (status: ReadingStatus, currentProgress?: number): number => {
+  if (status === "leido") return 100;
+  if (status === "pendiente") return 0;
+  return currentProgress ?? 0;
+};
+
 export const BookForm = ({
   onSubmit,
   initialValues,
   submitLabel = "Guardar libro"
 }: BookFormProps) => {
+  const initialStatus = initialValues?.status ?? "pendiente";
   const [form, setForm] = useState<CreateBookDto>({
     title: initialValues?.title ?? "",
     author: initialValues?.author ?? "",
     genre: initialValues?.genre ?? "",
-    status: initialValues?.status ?? "pendiente",
+    status: initialStatus,
     rating: initialValues?.rating,
     review: initialValues?.review ?? "",
-    progress: initialValues?.progress,
+    progress: getProgressByStatus(initialStatus, initialValues?.progress),
     coverUrl: initialValues?.coverUrl ?? ""
   });
   const [errors, setErrors] = useState<Errors>({});
@@ -52,7 +59,11 @@ export const BookForm = ({
     if (!validate()) return;
     setSubmitting(true);
     try {
-      await onSubmit(form);
+      const payload: CreateBookDto = {
+        ...form,
+        progress: getProgressByStatus(form.status, form.progress)
+      };
+      await onSubmit(payload);
     } finally {
       setSubmitting(false);
     }
@@ -93,6 +104,13 @@ export const BookForm = ({
     }
   };
 
+  const handleCoverSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    if (coverLoading) return;
+    void handleSearchCovers();
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-indigo-100 bg-gradient-to-br from-white to-indigo-50/40 p-6 shadow-sm dark:border-indigo-900/40 dark:from-slate-900 dark:to-indigo-950/20">
       <div>
@@ -100,6 +118,7 @@ export const BookForm = ({
         <input
           value={form.title}
           onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+          onKeyDown={handleCoverSearchKeyDown}
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-slate-500"
         />
         {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title}</p>}
@@ -150,6 +169,7 @@ export const BookForm = ({
           <input
             value={coverSearch}
             onChange={(event) => setCoverSearch(event.target.value)}
+            onKeyDown={handleCoverSearchKeyDown}
             placeholder="Ej: Señor de los Anillos"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-slate-500"
           />
@@ -195,9 +215,14 @@ export const BookForm = ({
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Estado</label>
         <select
           value={form.status}
-          onChange={(event) =>
-            setForm((prev) => ({ ...prev, status: event.target.value as ReadingStatus }))
-          }
+          onChange={(event) => {
+            const nextStatus = event.target.value as ReadingStatus;
+            setForm((prev) => ({
+              ...prev,
+              status: nextStatus,
+              progress: getProgressByStatus(nextStatus, prev.progress)
+            }));
+          }}
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500"
         >
           <option value="pendiente">pendiente</option>
@@ -230,11 +255,22 @@ export const BookForm = ({
           onChange={(event) =>
             setForm((prev) => ({
               ...prev,
-              progress: event.target.value === "" ? undefined : Number(event.target.value)
+              progress:
+                prev.status !== "leyendo"
+                  ? getProgressByStatus(prev.status, prev.progress)
+                  : event.target.value === ""
+                    ? undefined
+                    : Number(event.target.value)
             }))
           }
+          disabled={form.status !== "leyendo"}
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500"
         />
+        {form.status !== "leyendo" && (
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            El progreso se ajusta automáticamente según el estado.
+          </p>
+        )}
         {errors.progress && <p className="mt-1 text-xs text-red-600">{errors.progress}</p>}
       </div>
 

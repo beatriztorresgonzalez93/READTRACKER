@@ -16,8 +16,10 @@ export const BookCard = ({ book, index = 0 }: BookCardProps) => {
   const progress = Math.max(0, Math.min(100, book.progress ?? 0));
 
   return (
-    <article
-      className="group animate-fade-in-up min-h-[430px] w-full max-w-xs rounded-2xl border border-indigo-100/80 bg-gradient-to-b from-white to-indigo-50/40 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-indigo-900/40 dark:from-slate-900 dark:to-indigo-950/20"
+    <Link
+      to={`/books/${book.id}`}
+      aria-label={`Ver detalle de ${book.title}`}
+      className="group animate-fade-in-up min-h-[430px] w-full max-w-xs rounded-2xl border border-indigo-100/80 bg-gradient-to-b from-white to-indigo-50/40 p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-indigo-900/40 dark:from-slate-900 dark:to-indigo-950/20"
       style={{ animationDelay: `${index * 40}ms` }}
     >
       {book.coverUrl ? (
@@ -49,9 +51,6 @@ export const BookCard = ({ book, index = 0 }: BookCardProps) => {
           style={{ width: `${progress}%` }}
         />
       </div>
-      <Link to={`/books/${book.id}`} className="inline-flex items-center rounded-md bg-indigo-50 px-2.5 py-1 text-sm font-medium text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/50">
-        Ver detalle
-      </Link>
-    </article>
+    </Link>
   );
 };
