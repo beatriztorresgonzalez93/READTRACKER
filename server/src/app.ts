@@ -22,6 +22,11 @@ function isCorsAllowedOrigin(origin: string): boolean {
   if (env.clientOrigins.includes(normalized)) {
     return true;
   }
+  // Vercel usa dominios dinámicos por deployment; aceptar subdominios vercel.app
+  // evita tener que tocar CORS en cada nuevo build.
+  if (normalized.startsWith("https://") && normalized.endsWith(".vercel.app")) {
+    return true;
+  }
   if (!normalized.startsWith("https://")) {
     return false;
   }
