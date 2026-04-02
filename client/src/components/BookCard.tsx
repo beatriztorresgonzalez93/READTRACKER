@@ -1,5 +1,6 @@
 // Tarjeta visual de un libro con portada, estado, progreso y acceso a detalle.
-import { Link } from "react-router-dom";
+import { KeyboardEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Book } from "../types/book";
 
 interface BookCardProps {
@@ -8,16 +9,26 @@ interface BookCardProps {
 }
 
 export const BookCard = ({ book, index = 0 }: BookCardProps) => {
+  const navigate = useNavigate();
   const statusStyles: Record<Book["status"], string> = {
     pendiente: "bg-amber-100 text-amber-700",
     leyendo: "bg-indigo-100 text-indigo-700",
     leido: "bg-emerald-100 text-emerald-700"
   };
   const progress = Math.max(0, Math.min(100, book.progress ?? 0));
+  const goToDetails = () => navigate(`/books/${book.id}`);
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    goToDetails();
+  };
 
   return (
-    <Link
-      to={`/books/${book.id}`}
+    <article
+      role="button"
+      tabIndex={0}
+      onClick={goToDetails}
+      onKeyDown={handleCardKeyDown}
       aria-label={`Ver detalle de ${book.title}`}
       className="group animate-fade-in-up min-h-[430px] w-full max-w-xs rounded-2xl border border-indigo-100/80 bg-gradient-to-b from-white to-indigo-50/40 p-4 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-indigo-900/40 dark:from-slate-900 dark:to-indigo-950/20"
       style={{ animationDelay: `${index * 40}ms` }}
@@ -51,6 +62,16 @@ export const BookCard = ({ book, index = 0 }: BookCardProps) => {
           style={{ width: `${progress}%` }}
         />
       </div>
-    </Link>
+      <div className="mt-2 flex justify-end">
+        <Link
+          to={`/books/${book.id}/edit`}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+          className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500"
+        >
+          Editar
+        </Link>
+      </div>
+    </article>
   );
 };

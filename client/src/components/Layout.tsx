@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 type Theme = "light" | "dark";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
     const saved = localStorage.getItem("readtracker-theme");
-    const initial: Theme = saved === "dark" ? "dark" : "light";
+    const initial: Theme = saved === "light" ? "light" : "dark";
     setTheme(initial);
     document.documentElement.classList.toggle("dark", initial === "dark");
   }, []);
