@@ -55,6 +55,6 @@ La carpeta `docs/` incluye decisiones de arquitectura, API, routing, formularios
 
 ## Espacios para completar
 
-- Trello: [pendiente]
+- Trello: [ReadTracker board](https://trello.com/b/g4VaV0oc)
 - Frontend URL (deploy): `https://readtracker.vercel.app`
 - Backend URL (deploy): `https://readtracker-api.onrender.com/api/v1`

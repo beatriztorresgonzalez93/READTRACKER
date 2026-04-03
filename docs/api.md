@@ -3,6 +3,9 @@
 Base URL local:
 `http://localhost:4000/api/v1`
 
+Base URL producción:
+`https://readtracker-api.onrender.com/api/v1`
+
 ## Endpoints
 
 - `GET /books`
@@ -10,6 +13,8 @@ Base URL local:
 - `POST /books`
 - `PUT /books/:id`
 - `DELETE /books/:id`
+- `GET /health`
+- `GET /covers/search?title=...`
 
 ## Ejemplo POST /books
 
@@ -46,3 +51,10 @@ Errores:
 ```json
 { "error": "mensaje claro" }
 ```
+
+## Notas de comportamiento
+
+- `GET /books` acepta query params opcionales:
+  - `search` (texto libre),
+  - `status` (`pendiente`, `leyendo`, `leido`).
+- `GET /covers/search` devuelve array de URLs de portada en `data`.
