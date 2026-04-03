@@ -1,5 +1,5 @@
 // Formulario controlado reutilizable para crear y editar libros.
-import { FormEvent, KeyboardEvent, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
 import { API_BASE_URL } from "../api/apiBaseUrl";
 import { CreateBookDto, ReadingStatus } from "../types/book";
 
@@ -39,6 +39,11 @@ export const BookForm = ({
   const [coverResults, setCoverResults] = useState<string[]>([]);
   const [coverLoading, setCoverLoading] = useState(false);
   const [coverError, setCoverError] = useState<string | null>(null);
+  const [previewCoverBroken, setPreviewCoverBroken] = useState(false);
+
+  useEffect(() => {
+    setPreviewCoverBroken(false);
+  }, [form.coverUrl]);
 
   const validate = () => {
     const nextErrors: Errors = {};
@@ -203,11 +208,18 @@ export const BookForm = ({
       {form.coverUrl && (
         <div>
           <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-200">Vista previa</p>
-          <img
-            src={form.coverUrl}
-            alt="Vista previa de portada"
-            className="h-44 w-32 rounded object-cover"
-          />
+          {!previewCoverBroken ? (
+            <img
+              src={form.coverUrl}
+              alt="Vista previa de portada"
+              className="h-44 w-32 rounded object-cover"
+              onError={() => setPreviewCoverBroken(true)}
+            />
+          ) : (
+            <div className="flex h-44 w-32 items-center justify-center rounded bg-gradient-to-b from-indigo-100 to-indigo-200 text-center text-xs font-semibold text-indigo-700 dark:from-indigo-900/40 dark:to-indigo-800/40 dark:text-indigo-300">
+              Sin portada
+            </div>
+          )}
         </div>
       )}
 

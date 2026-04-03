@@ -1,5 +1,19 @@
 # Testing
 
+## Tests automatizados (cliente)
+
+El frontend usa [Vitest](https://vitest.dev/) con jsdom y [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
+
+- **Ejecutar una vez (CI):** desde `client/`, `npm run test`
+- **Modo observación:** `npm run test:watch`
+
+**Qué cubren:**
+
+- `src/api/client.test.ts` — `apiFetch`: URL base, JSON en éxito, `ApiError` con cuerpo de error y fallback si el JSON falla.
+- `src/components/BookForm.test.tsx` — validación de campos obligatorios; envío con estado `leido` fuerza `progress: 100` en el payload.
+
+Configuración: `vite.config.ts` (`test.environment`, `setupFiles`), setup en `src/test/setup.ts`.
+
 ## Pruebas manuales minimas
 
 1. Levantar backend y frontend.
@@ -20,6 +34,7 @@
 
 ## Checklist
 
+- [x] Tests automatizados del cliente (`npm run test` en `client/`).
 - [x] Rutas frontend funcionan.
 - [x] Endpoints REST responden con codigos correctos.
 - [x] Validaciones basicas se aplican.

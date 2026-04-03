@@ -1,5 +1,6 @@
 // Middleware global para capturar errores no controlados y responder 500.
 import { NextFunction, Request, Response } from "express";
+import { logError } from "../logger";
 
 export const errorHandler = (
   error: Error,
@@ -7,6 +8,6 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ) => {
-  console.error(error);
+  logError("errorHandler", error);
   res.status(500).json({ error: "Error interno del servidor" });
 };

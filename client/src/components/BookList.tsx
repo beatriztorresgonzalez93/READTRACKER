@@ -10,7 +10,9 @@ interface BookListProps {
 
 export const BookList = ({ books, deletingId, onDelete }: BookListProps) => {
   if (books.length === 0) {
-    return <p className="text-sm text-slate-600">No hay libros para mostrar.</p>;
+    return (
+      <p className="text-sm text-slate-600 dark:text-slate-300">No hay libros para mostrar.</p>
+    );
   }
 
   return (

@@ -9,6 +9,11 @@ export const BookDetailPage = () => {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [coverBroken, setCoverBroken] = useState(false);
+
+  useEffect(() => {
+    setCoverBroken(false);
+  }, [book?.coverUrl, book?.id]);
 
   useEffect(() => {
     const loadBook = async () => {
@@ -34,13 +39,18 @@ export const BookDetailPage = () => {
   return (
     <section className="space-y-6 rounded-2xl border border-indigo-100 bg-gradient-to-br from-white to-indigo-50/40 p-6 shadow-sm dark:border-indigo-900/40 dark:from-slate-900 dark:to-indigo-950/20">
       <div className="flex flex-col gap-6 md:flex-row">
-        {book.coverUrl && (
+        {book.coverUrl && !coverBroken ? (
           <img
             src={book.coverUrl}
             alt={`Portada de ${book.title}`}
             className="h-64 w-48 rounded-xl object-cover ring-1 ring-slate-200 dark:ring-slate-700"
+            onError={() => setCoverBroken(true)}
           />
-        )}
+        ) : book.coverUrl && coverBroken ? (
+          <div className="flex h-64 w-48 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-indigo-100 to-indigo-200 text-center text-sm font-semibold text-indigo-700 ring-1 ring-indigo-200 dark:from-indigo-900/40 dark:to-indigo-800/40 dark:text-indigo-300 dark:ring-indigo-900/40">
+            Sin portada
+          </div>
+        ) : null}
         <div className="flex-1 space-y-3">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{book.title}</h1>
           <p className="text-slate-700 dark:text-slate-300"><span className="font-medium">Autor:</span> {book.author}</p>

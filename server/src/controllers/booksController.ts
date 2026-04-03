@@ -1,5 +1,6 @@
 // Capa HTTP: recibe req/res, llama al servicio y devuelve respuestas JSON.
 import { Request, Response } from "express";
+import { logError } from "../logger";
 import { BooksService } from "../services/booksService";
 
 export class BooksController {
@@ -19,7 +20,8 @@ export class BooksController {
       const status = this.getSingleQueryValue(req.query.status);
       const books = await this.service.getBooks(search, status);
       res.status(200).json({ data: books });
-    } catch {
+    } catch (err) {
+      logError("BooksController.getBooks", err);
       res.status(500).json({ error: "No se pudieron cargar los libros" });
     }
   };
@@ -38,7 +40,8 @@ export class BooksController {
         return;
       }
       res.status(200).json({ data: book });
-    } catch {
+    } catch (err) {
+      logError("BooksController.getBookById", err);
       res.status(500).json({ error: "No se pudo cargar el libro" });
     }
   };
@@ -47,7 +50,8 @@ export class BooksController {
     try {
       const book = await this.service.createBook(req.body);
       res.status(201).json({ data: book });
-    } catch {
+    } catch (err) {
+      logError("BooksController.createBook", err);
       res.status(500).json({ error: "No se pudo crear el libro" });
     }
   };
@@ -66,7 +70,8 @@ export class BooksController {
         return;
       }
       res.status(200).json({ data: updated });
-    } catch {
+    } catch (err) {
+      logError("BooksController.updateBook", err);
       res.status(500).json({ error: "No se pudo actualizar el libro" });
     }
   };
@@ -85,7 +90,8 @@ export class BooksController {
         return;
       }
       res.status(200).json({ data: { id } });
-    } catch {
+    } catch (err) {
+      logError("BooksController.deleteBook", err);
       res.status(500).json({ error: "No se pudo eliminar el libro" });
     }
   };

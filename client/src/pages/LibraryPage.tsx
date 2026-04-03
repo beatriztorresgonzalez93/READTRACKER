@@ -12,17 +12,16 @@ export const LibraryPage = () => {
   const { books, loading, error, reloadBooks } = useBooksContext();
   const { search, setSearch, status, setStatus, sortBy, setSortBy, filteredBooks } = useBookFilters(books);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleDeleteBook = async (id: string) => {
-    const confirmed = window.confirm("¿Seguro que quieres eliminar este libro?");
-    if (!confirmed) return;
-
     try {
+      setDeleteError(null);
       setDeletingId(id);
       await deleteBook(id);
       await reloadBooks();
     } catch {
-      window.alert("No se pudo eliminar el libro");
+      setDeleteError("No se pudo eliminar el libro. Inténtalo de nuevo.");
     } finally {
       setDeletingId(null);
     }
@@ -59,6 +58,22 @@ export const LibraryPage = () => {
           </select>
         </div>
       </div>
+
+      {deleteError && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200"
+        >
+          <span>{deleteError}</span>
+          <button
+            type="button"
+            onClick={() => setDeleteError(null)}
+            className="shrink-0 rounded-md border border-rose-300 bg-white px-2.5 py-1 text-xs font-medium text-rose-800 hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-900/60 dark:text-rose-100 dark:hover:bg-rose-900"
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
 
       {loading && <p className="text-sm text-slate-600 dark:text-slate-300">Cargando libros...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
