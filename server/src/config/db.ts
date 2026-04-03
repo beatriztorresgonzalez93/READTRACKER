@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import { env } from "./env";
 
 if (!env.databaseUrl) {
-  throw new Error("Missing DATABASE_URL in environment variables");
+  throw new Error("Falta DATABASE_URL en las variables de entorno");
 }
 
 export const pool = new Pool({

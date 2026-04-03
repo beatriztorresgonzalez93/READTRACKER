@@ -8,5 +8,5 @@ export const errorHandler = (
   _next: NextFunction
 ) => {
   console.error(error);
-  res.status(500).json({ error: "Internal server error" });
+  res.status(500).json({ error: "Error interno del servidor" });
 };

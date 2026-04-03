@@ -57,7 +57,7 @@ app.get("/api/v1/health", (_req, res) => {
 app.get("/api/v1/covers/search", async (req, res) => {
   const title = typeof req.query.title === "string" ? req.query.title.trim() : "";
   if (!title) {
-    res.status(400).json({ error: "title es requerido" });
+    res.status(400).json({ error: "El parámetro title es obligatorio" });
     return;
   }
 
@@ -115,7 +115,7 @@ app.get("/api/v1/covers/search", async (req, res) => {
 app.use("/api/v1/books", createBooksRouter(booksController));
 
 app.use((_req, res) => {
-  res.status(404).json({ error: "Route not found" });
+  res.status(404).json({ error: "Ruta no encontrada" });
 });
 
 app.use(errorHandler);

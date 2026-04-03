@@ -27,14 +27,14 @@ export class BooksController {
   getBookById = async (req: Request, res: Response) => {
     const id = this.getSingleParamValue(req.params.id);
     if (!id) {
-      res.status(400).json({ error: "Invalid book id" });
+      res.status(400).json({ error: "El id del libro no es válido" });
       return;
     }
 
     try {
       const book = await this.service.getBookById(id);
       if (!book) {
-        res.status(404).json({ error: "Book not found" });
+        res.status(404).json({ error: "Libro no encontrado" });
         return;
       }
       res.status(200).json({ data: book });
@@ -55,14 +55,14 @@ export class BooksController {
   updateBook = async (req: Request, res: Response) => {
     const id = this.getSingleParamValue(req.params.id);
     if (!id) {
-      res.status(400).json({ error: "Invalid book id" });
+      res.status(400).json({ error: "El id del libro no es válido" });
       return;
     }
 
     try {
       const updated = await this.service.updateBook(id, req.body);
       if (!updated) {
-        res.status(404).json({ error: "Book not found" });
+        res.status(404).json({ error: "Libro no encontrado" });
         return;
       }
       res.status(200).json({ data: updated });
@@ -74,14 +74,14 @@ export class BooksController {
   deleteBook = async (req: Request, res: Response) => {
     const id = this.getSingleParamValue(req.params.id);
     if (!id) {
-      res.status(400).json({ error: "Invalid book id" });
+      res.status(400).json({ error: "El id del libro no es válido" });
       return;
     }
 
     try {
       const deleted = await this.service.deleteBook(id);
       if (!deleted) {
-        res.status(404).json({ error: "Book not found" });
+        res.status(404).json({ error: "Libro no encontrado" });
         return;
       }
       res.status(200).json({ data: { id } });

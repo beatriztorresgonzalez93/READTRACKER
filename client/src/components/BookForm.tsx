@@ -1,5 +1,6 @@
 // Formulario controlado reutilizable para crear y editar libros.
 import { FormEvent, KeyboardEvent, useState } from "react";
+import { API_BASE_URL } from "../api/apiBaseUrl";
 import { CreateBookDto, ReadingStatus } from "../types/book";
 
 interface BookFormProps {
@@ -79,9 +80,8 @@ export const BookForm = ({
     try {
       setCoverLoading(true);
       setCoverError(null);
-      const apiBase = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api/v1";
       const response = await fetch(
-        `${apiBase}/covers/search?title=${encodeURIComponent(query)}`
+        `${API_BASE_URL}/covers/search?title=${encodeURIComponent(query)}`
       );
       const payload = (await response.json()) as { data?: string[]; error?: string };
 

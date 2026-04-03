@@ -1,5 +1,5 @@
 // Cliente HTTP base reutilizable para llamadas a la API con manejo de errores.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api/v1";
+import { API_BASE_URL } from "./apiBaseUrl";
 
 interface ApiErrorBody {
   error?: string;
@@ -23,7 +23,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => ({}))) as ApiErrorBody;
-    throw new ApiError(errorBody.error ?? "Request failed", response.status);
+    throw new ApiError(errorBody.error ?? "No se pudo completar la petición", response.status);
   }
 
   if (response.status === 204) {

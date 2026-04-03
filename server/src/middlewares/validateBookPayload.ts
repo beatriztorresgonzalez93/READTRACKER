@@ -15,17 +15,17 @@ export const validateCreateBook = (
   const { title, author, genre, status, rating, progress } = req.body;
 
   if (!title || !author || !genre || !isValidStatus(status)) {
-    res.status(400).json({ error: "title, author, genre y status son requeridos" });
+    res.status(400).json({ error: "Título, autor, género y estado son obligatorios" });
     return;
   }
 
   if (rating !== undefined && (rating < 0 || rating > 5)) {
-    res.status(400).json({ error: "rating debe estar entre 0 y 5" });
+    res.status(400).json({ error: "La calificación debe estar entre 0 y 5" });
     return;
   }
 
   if (progress !== undefined && (progress < 0 || progress > 100)) {
-    res.status(400).json({ error: "progress debe estar entre 0 y 100" });
+    res.status(400).json({ error: "El progreso debe estar entre 0 y 100" });
     return;
   }
 
@@ -40,17 +40,17 @@ export const validateUpdateBook = (
   const { status, rating, progress } = req.body;
 
   if (status !== undefined && !isValidStatus(status)) {
-    res.status(400).json({ error: "status invalido" });
+    res.status(400).json({ error: "El estado no es válido" });
     return;
   }
 
   if (rating !== undefined && (rating < 0 || rating > 5)) {
-    res.status(400).json({ error: "rating debe estar entre 0 y 5" });
+    res.status(400).json({ error: "La calificación debe estar entre 0 y 5" });
     return;
   }
 
   if (progress !== undefined && (progress < 0 || progress > 100)) {
-    res.status(400).json({ error: "progress debe estar entre 0 y 100" });
+    res.status(400).json({ error: "El progreso debe estar entre 0 y 100" });
     return;
   }
 

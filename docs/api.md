@@ -47,9 +47,9 @@ Response 201:
 }
 ```
 
-Errores:
+Errores (cuerpo JSON, mensajes en español):
 ```json
-{ "error": "mensaje claro" }
+{ "error": "Descripción del error" }
 ```
 
 ## Notas de comportamiento
