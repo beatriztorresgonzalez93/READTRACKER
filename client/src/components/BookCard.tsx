@@ -6,9 +6,11 @@ import { Book } from "../types/book";
 interface BookCardProps {
   book: Book;
   index?: number;
+  isDeleting?: boolean;
+  onDelete?: (id: string) => void | Promise<void>;
 }
 
-export const BookCard = ({ book, index = 0 }: BookCardProps) => {
+export const BookCard = ({ book, index = 0, isDeleting = false, onDelete }: BookCardProps) => {
   const navigate = useNavigate();
   const statusStyles: Record<Book["status"], string> = {
     pendiente: "bg-amber-100 text-amber-700",
@@ -62,7 +64,19 @@ export const BookCard = ({ book, index = 0 }: BookCardProps) => {
           style={{ width: `${progress}%` }}
         />
       </div>
-      <div className="mt-2 flex justify-end">
+      <div className="mt-2 flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            void onDelete?.(book.id);
+          }}
+          onKeyDown={(event) => event.stopPropagation()}
+          disabled={isDeleting}
+          className="rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/40"
+        >
+          {isDeleting ? "Eliminando..." : "Eliminar"}
+        </button>
         <Link
           to={`/books/${book.id}/edit`}
           onClick={(event) => event.stopPropagation()}

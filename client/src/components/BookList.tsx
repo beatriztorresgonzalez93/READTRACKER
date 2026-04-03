@@ -4,9 +4,11 @@ import { BookCard } from "./BookCard";
 
 interface BookListProps {
   books: Book[];
+  deletingId: string | null;
+  onDelete: (id: string) => void | Promise<void>;
 }
 
-export const BookList = ({ books }: BookListProps) => {
+export const BookList = ({ books, deletingId, onDelete }: BookListProps) => {
   if (books.length === 0) {
     return <p className="text-sm text-slate-600">No hay libros para mostrar.</p>;
   }
@@ -14,7 +16,13 @@ export const BookList = ({ books }: BookListProps) => {
   return (
     <section className="grid justify-items-center gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {books.map((book, index) => (
-        <BookCard key={book.id} book={book} index={index} />
+        <BookCard
+          key={book.id}
+          book={book}
+          index={index}
+          isDeleting={deletingId === book.id}
+          onDelete={onDelete}
+        />
       ))}
     </section>
   );

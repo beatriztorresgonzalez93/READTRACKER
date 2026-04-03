@@ -1,5 +1,7 @@
 // Página principal con listado, búsqueda y filtros de la biblioteca.
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { deleteBook } from "../api/booksApi";
 import { BookList } from "../components/BookList";
 import { SearchBar } from "../components/SearchBar";
 import { StatusFilter } from "../components/StatusFilter";
@@ -7,8 +9,24 @@ import { useBooksContext } from "../context/BooksContext";
 import { useBookFilters } from "../hooks/useBookFilters";
 
 export const LibraryPage = () => {
-  const { books, loading, error } = useBooksContext();
+  const { books, loading, error, reloadBooks } = useBooksContext();
   const { search, setSearch, status, setStatus, sortBy, setSortBy, filteredBooks } = useBookFilters(books);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDeleteBook = async (id: string) => {
+    const confirmed = window.confirm("¿Seguro que quieres eliminar este libro?");
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(id);
+      await deleteBook(id);
+      await reloadBooks();
+    } catch {
+      window.alert("No se pudo eliminar el libro");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <section className="space-y-6">
@@ -44,7 +62,9 @@ export const LibraryPage = () => {
 
       {loading && <p className="text-sm text-slate-600 dark:text-slate-300">Cargando libros...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {!loading && !error && <BookList books={filteredBooks} />}
+      {!loading && !error && (
+        <BookList books={filteredBooks} deletingId={deletingId} onDelete={handleDeleteBook} />
+      )}
     </section>
   );
 };
