@@ -1,10 +1,8 @@
 // Página principal con listado, búsqueda y filtros de la biblioteca.
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { deleteBook } from "../api/booksApi";
+import { deleteBook } from "../api/client";
 import { BookList } from "../components/BookList";
-import { SearchBar } from "../components/SearchBar";
-import { StatusFilter } from "../components/StatusFilter";
 import { useBooksContext } from "../context/BooksContext";
 import { useBookFilters } from "../hooks/useBookFilters";
 
@@ -43,8 +41,23 @@ export const LibraryPage = () => {
           </Link>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_220px_220px]">
-          <SearchBar value={search} onChange={setSearch} />
-          <StatusFilter value={status} onChange={setStatus} />
+          <input
+            type="text"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar por título, autor o género..."
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm ring-1 ring-transparent transition focus:border-slate-300 focus:outline-none focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-600 dark:focus:ring-slate-600"
+          />
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value as typeof status)}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm ring-1 ring-transparent transition focus:border-slate-300 focus:outline-none focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-600 dark:focus:ring-slate-600"
+          >
+            <option value="todos">Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="leyendo">Leyendo</option>
+            <option value="leido">Leído</option>
+          </select>
           <select
             value={sortBy}
             onChange={(event) => setSortBy(event.target.value as typeof sortBy)}

@@ -1,7 +1,7 @@
 // Página de detalle de un libro con acciones de volver y editar.
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getBookById } from "../api/booksApi";
+import { getBookById } from "../api/client";
 import { Book } from "../types/book";
 
 export const BookDetailPage = () => {

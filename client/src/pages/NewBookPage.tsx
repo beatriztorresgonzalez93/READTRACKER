@@ -1,7 +1,7 @@
 // Página para crear un nuevo libro usando el formulario reutilizable.
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBook } from "../api/booksApi";
+import { createBook } from "../api/client";
 import { BookForm } from "../components/BookForm";
 import { useBooksContext } from "../context/BooksContext";
 import { CreateBookDto } from "../types/book";

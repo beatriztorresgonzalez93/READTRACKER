@@ -1,7 +1,7 @@
 // Página para editar un libro existente cargando sus datos por id.
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getBookById, updateBook } from "../api/booksApi";
+import { getBookById, updateBook } from "../api/client";
 import { BookForm } from "../components/BookForm";
 import { useBooksContext } from "../context/BooksContext";
 import { Book, CreateBookDto } from "../types/book";

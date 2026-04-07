@@ -1,9 +1,6 @@
+// Pruebas unitarias de apiFetch: éxito, errores HTTP y fallback de mensaje.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiFetch } from "./client";
-
-vi.mock("./apiBaseUrl", () => ({
-  API_BASE_URL: "http://test.api/api/v1",
-}));
 
 describe("apiFetch", () => {
   afterEach(() => {
@@ -23,7 +20,7 @@ describe("apiFetch", () => {
 
     expect(result.data).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://test.api/api/v1/books?search=a",
+      "http://localhost:4000/api/v1/books?search=a",
       expect.objectContaining({
         headers: expect.objectContaining({ "Content-Type": "application/json" }),
       })

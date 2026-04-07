@@ -1,6 +1,6 @@
 // Formulario controlado reutilizable para crear y editar libros.
 import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
-import { API_BASE_URL } from "../api/apiBaseUrl";
+import { API_BASE_URL } from "../api/client";
 import { CreateBookDto, ReadingStatus } from "../types/book";
 
 interface BookFormProps {

@@ -1,6 +1,6 @@
 // Contexto global de libros para compartir estado, carga y recarga en toda la app.
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { getBooks } from "../api/booksApi";
+import { getBooks } from "../api/client";
 import { Book } from "../types/book";
 
 interface BooksContextValue {
