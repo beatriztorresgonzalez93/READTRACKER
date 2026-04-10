@@ -25,20 +25,14 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#cffafe_0%,_#f8fafc_45%,_#f8fafc_100%)] dark:bg-[radial-gradient(circle_at_top,_#0891b2_0%,_#0f172a_45%,_#020617_100%)]">
-      <header className="sticky top-0 z-20 border-b border-base-300/70 bg-base-100/85 backdrop-blur dark:border-cyan-900/40 dark:bg-slate-900/85">
+    <div className="min-h-screen bg-[#e7eee7] dark:bg-[#1f2b25]">
+      <header className="sticky top-0 z-20 border-b border-[#c7d5c4]/80 bg-[#eef4eb]/90 backdrop-blur dark:border-[#36493d]/85 dark:bg-[#1f2b25]/90">
         <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-900 dark:text-slate-100">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-cyan-600" aria-hidden="true" />
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#5f7a65] dark:bg-[#7b9982]" aria-hidden="true" />
             <span className="text-xl font-bold tracking-tight">ReadTracker</span>
           </Link>
           <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-            <Link
-              to="/"
-              className="inline-flex h-8 items-center rounded-md px-3 text-xs text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
-              Biblioteca
-            </Link>
             <Button variant="outline" size="sm" onClick={toggleTheme}>
               {theme === "dark" ? "Claro" : "Oscuro"}
             </Button>

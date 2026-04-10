@@ -39,7 +39,7 @@ export const BookDetailPage = () => {
   if (error || !book) return <Alert variant="destructive">{error ?? "Error"}</Alert>;
 
   return (
-    <section className="space-y-6 rounded-2xl border border-slate-200 bg-[radial-gradient(circle_at_top_right,_#cffafe_0%,_#ffffff_65%)] p-6 shadow-sm dark:border-slate-800 dark:bg-[radial-gradient(circle_at_top_right,_rgba(8,145,178,0.35)_0%,_#0f172a_75%)]">
+    <section className="space-y-6 rounded-2xl border border-[#d5dfd2] bg-[radial-gradient(circle_at_top_right,_#f5faf2_0%,_#ffffff_65%)] p-6 shadow-sm dark:border-[#3d5346] dark:bg-[radial-gradient(circle_at_top_right,_#2d3f35_0%,_#1f2b25_75%)]">
       <div className="flex flex-col gap-6 md:flex-row">
         {book.coverUrl && !coverBroken ? (
           <img
@@ -49,11 +49,11 @@ export const BookDetailPage = () => {
             onError={() => setCoverBroken(true)}
           />
         ) : book.coverUrl && coverBroken ? (
-          <div className="flex h-80 w-56 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-cyan-100 to-cyan-200 text-center text-sm font-semibold text-cyan-700 ring-1 ring-cyan-200 dark:from-cyan-900/40 dark:to-cyan-800/40 dark:text-cyan-300 dark:ring-cyan-900/40">
+          <div className="flex h-80 w-56 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-[#d5e2d3] to-[#b8ccb9] text-center text-sm font-semibold text-[#36513c] ring-1 ring-[#b4c6b0] dark:from-[#3a4d41] dark:to-[#2b3a31] dark:text-[#c9d9c5] dark:ring-[#4a5f52]">
             Sin portada
           </div>
         ) : null}
-        <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-700 dark:bg-slate-800/60">
+        <div className="flex-1 rounded-xl border border-[#d5dfd2] bg-[#f4f8f2]/90 p-5 dark:border-[#4a5f52] dark:bg-[#26352d]/75">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{book.title}</h1>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <p className="text-slate-700 dark:text-slate-200"><span className="font-semibold">Autor:</span> {book.author}</p>
@@ -68,7 +68,7 @@ export const BookDetailPage = () => {
           </div>
         </div>
       </div>
-      <div className="flex justify-end border-t border-slate-200 pt-4 dark:border-slate-800">
+      <div className="flex justify-end border-t border-[#d5dfd2] pt-4 dark:border-[#3d5346]">
         <Link to={`/books/${book.id}/edit`}>
           <Button size="sm">Editar</Button>
         </Link>

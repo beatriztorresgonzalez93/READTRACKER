@@ -124,7 +124,7 @@ export const BookForm = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card className="bg-gradient-to-br from-white to-cyan-50/40 dark:from-slate-900 dark:to-cyan-950/20 dark:ring-1 dark:ring-cyan-900/40">
+      <Card className="bg-gradient-to-br from-[#f8fbf6] to-[#e6efe4] dark:from-[#233229] dark:to-[#1c2922] dark:ring-1 dark:ring-[#3d5346]">
         <CardContent className="space-y-4 p-6">
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Título</label>
@@ -171,7 +171,7 @@ export const BookForm = ({
         />
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+      <div className="rounded-lg border border-[#d5dfd2] bg-[#f4f8f2] p-3 dark:border-[#4a5f52] dark:bg-[#26352d]/75">
         <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Buscar portada automática</p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
@@ -214,7 +214,7 @@ export const BookForm = ({
               onError={() => setPreviewCoverBroken(true)}
             />
           ) : (
-            <div className="flex h-44 w-32 items-center justify-center rounded bg-gradient-to-b from-cyan-100 to-cyan-200 text-center text-xs font-semibold text-cyan-700 dark:from-cyan-900/40 dark:to-cyan-800/40 dark:text-cyan-300">
+            <div className="flex h-44 w-32 items-center justify-center rounded bg-gradient-to-b from-[#d5e2d3] to-[#b8ccb9] text-center text-xs font-semibold text-[#36513c] dark:from-[#3a4d41] dark:to-[#2b3a31] dark:text-[#c9d9c5]">
               Sin portada
             </div>
           )}
