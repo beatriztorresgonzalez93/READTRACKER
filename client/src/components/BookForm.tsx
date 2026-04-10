@@ -1,6 +1,12 @@
 // Formulario controlado reutilizable para crear y editar libros.
 import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
 import { API_BASE_URL } from "../api/client";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { FormError } from "./ui/form-error";
+import { Input } from "./ui/input";
+import { Select } from "./ui/select";
+import { Textarea } from "./ui/textarea";
 import { CreateBookDto, ReadingStatus } from "../types/book";
 
 interface BookFormProps {
@@ -117,77 +123,69 @@ export const BookForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-indigo-100 bg-gradient-to-br from-white to-indigo-50/40 p-6 shadow-sm dark:border-indigo-900/40 dark:from-slate-900 dark:to-indigo-950/20">
+    <form onSubmit={handleSubmit}>
+      <Card className="bg-gradient-to-br from-white to-cyan-50/40 dark:from-slate-900 dark:to-cyan-950/20 dark:ring-1 dark:ring-cyan-900/40">
+        <CardContent className="space-y-4 p-6">
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Título</label>
-        <input
+        <Input
           value={form.title}
           onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
           onKeyDown={handleCoverSearchKeyDown}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-slate-500"
         />
-        {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title}</p>}
+        {errors.title && <FormError>{errors.title}</FormError>}
       </div>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Autor</label>
-        <input
+        <Input
           value={form.author}
           onChange={(event) => setForm((prev) => ({ ...prev, author: event.target.value }))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-slate-500"
         />
-        {errors.author && <p className="mt-1 text-xs text-red-600">{errors.author}</p>}
+        {errors.author && <FormError>{errors.author}</FormError>}
       </div>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Género</label>
-        <input
+        <Input
           value={form.genre}
           onChange={(event) => setForm((prev) => ({ ...prev, genre: event.target.value }))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-slate-500"
         />
-        {errors.genre && <p className="mt-1 text-xs text-red-600">{errors.genre}</p>}
+        {errors.genre && <FormError>{errors.genre}</FormError>}
       </div>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Reseña</label>
-        <textarea
+        <Textarea
           value={form.review ?? ""}
           onChange={(event) => setForm((prev) => ({ ...prev, review: event.target.value }))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-slate-500"
           rows={3}
         />
       </div>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">URL de portada</label>
-        <input
+        <Input
           value={form.coverUrl ?? ""}
           onChange={(event) => setForm((prev) => ({ ...prev, coverUrl: event.target.value }))}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-slate-500"
         />
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
         <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Buscar portada automática</p>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <input
+          <Input
             value={coverSearch}
             onChange={(event) => setCoverSearch(event.target.value)}
             onKeyDown={handleCoverSearchKeyDown}
             placeholder="Ej: Señor de los Anillos"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-slate-500"
           />
-          <button
-            type="button"
-            onClick={() => void handleSearchCovers()}
-            className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
-          >
+          <Button onClick={() => void handleSearchCovers()} className="sm:min-w-[110px]">
             Buscar
-          </button>
+          </Button>
         </div>
         {coverLoading && <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">Buscando portadas...</p>}
-        {coverError && <p className="mt-2 text-xs text-red-600">{coverError}</p>}
+        {coverError && <FormError className="mt-2">{coverError}</FormError>}
 
         {coverResults.length > 0 && (
           <div className="mt-3 grid grid-cols-4 gap-2">
@@ -216,7 +214,7 @@ export const BookForm = ({
               onError={() => setPreviewCoverBroken(true)}
             />
           ) : (
-            <div className="flex h-44 w-32 items-center justify-center rounded bg-gradient-to-b from-indigo-100 to-indigo-200 text-center text-xs font-semibold text-indigo-700 dark:from-indigo-900/40 dark:to-indigo-800/40 dark:text-indigo-300">
+            <div className="flex h-44 w-32 items-center justify-center rounded bg-gradient-to-b from-cyan-100 to-cyan-200 text-center text-xs font-semibold text-cyan-700 dark:from-cyan-900/40 dark:to-cyan-800/40 dark:text-cyan-300">
               Sin portada
             </div>
           )}
@@ -225,7 +223,7 @@ export const BookForm = ({
 
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Estado</label>
-        <select
+        <Select
           value={form.status}
           onChange={(event) => {
             const nextStatus = event.target.value as ReadingStatus;
@@ -235,17 +233,17 @@ export const BookForm = ({
               progress: getProgressByStatus(nextStatus, prev.progress)
             }));
           }}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500"
+          className="w-full"
         >
           <option value="pendiente">pendiente</option>
           <option value="leyendo">leyendo</option>
           <option value="leido">leido</option>
-        </select>
+        </Select>
       </div>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Calificación</label>
-        <input
+        <Input
           type="number"
           value={form.rating ?? ""}
           onChange={(event) =>
@@ -254,14 +252,13 @@ export const BookForm = ({
               rating: event.target.value === "" ? undefined : Number(event.target.value)
             }))
           }
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500"
         />
-        {errors.rating && <p className="mt-1 text-xs text-red-600">{errors.rating}</p>}
+        {errors.rating && <FormError>{errors.rating}</FormError>}
       </div>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Progreso</label>
-        <input
+        <Input
           type="number"
           value={form.progress ?? ""}
           onChange={(event) =>
@@ -276,23 +273,20 @@ export const BookForm = ({
             }))
           }
           disabled={form.status !== "leyendo"}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500"
         />
         {form.status !== "leyendo" && (
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             El progreso se ajusta automáticamente según el estado.
           </p>
         )}
-        {errors.progress && <p className="mt-1 text-xs text-red-600">{errors.progress}</p>}
+        {errors.progress && <FormError>{errors.progress}</FormError>}
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
-      >
+      <Button type="submit" disabled={submitting}>
         {submitting ? "Guardando..." : submitLabel}
-      </button>
+      </Button>
+        </CardContent>
+      </Card>
     </form>
   );
 };

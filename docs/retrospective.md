@@ -26,7 +26,7 @@
 - La IA me ayudo sobre todo a avanzar mas rapido en tareas repetitivas: ajustes de UI, refactors pequeños, pruebas base y documentacion.
 - Para no confiar "a ciegas", fui validando cada cambio con build, tests y pruebas manuales en pantalla.
 - Las decisiones importantes (prioridades, alcance, que aceptar o descartar) las tome yo; la IA fue apoyo de ejecucion.
-- En general, la senti como una buena compañia de trabajo para mantener ritmo sin perder control del proyecto.
+- En general, la senti como una buena compañia de trabajo para mantener el ritmo sin perder control del proyecto.
 
 ### 5) Aprendizajes tecnicos
 - Aprendi que una buena base tecnica acelera, pero los detalles de UX son los que realmente se notan.

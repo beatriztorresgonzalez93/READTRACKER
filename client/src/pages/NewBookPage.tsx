@@ -3,6 +3,8 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createBook } from "../api/client";
 import { BookForm } from "../components/BookForm";
+import { Alert } from "../components/ui/alert";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { useBooksContext } from "../context/BooksContext";
 import { CreateBookDto } from "../types/book";
 
@@ -26,12 +28,19 @@ export const NewBookPage = () => {
   );
 
   return (
-    <section className="space-y-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Formulario</p>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Nuevo libro</h1>
-      </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+    <section className="space-y-5">
+      <Card className="bg-white/90 dark:bg-slate-900/80">
+        <CardHeader className="pb-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Formulario</p>
+          <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Añadir nuevo libro</h1>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Completa los datos principales y, si quieres, busca una portada automáticamente.
+          </p>
+        </CardContent>
+      </Card>
+      {error && <Alert variant="destructive">{error}</Alert>}
       <BookForm onSubmit={handleCreateBook} />
     </section>
   );
