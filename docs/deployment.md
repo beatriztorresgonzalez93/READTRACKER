@@ -15,7 +15,7 @@
 3. Comando start: `npm run start`.
 4. Variables:
    - `PORT`
-   - `CLIENT_ORIGIN` (una URL del frontend) **o** `CLIENT_ORIGINS` (varias URLs separadas por coma)
+   - `CLIENT_ORIGIN` (una URL del frontend) **o** `CLIENT_ORIGINS` (varias URLs separadas por coma). En desarrollo local, si usas Vite, incluye al menos `http://localhost:5173` y, por si el puerto está ocupado, `http://localhost:5174`.
    - `CORS_ORIGIN_SUFFIXES` (opcional): para previews de Vercel, añade el sufijo estable del host, p. ej. `-tuteam-projects.vercel.app`, para no tener que actualizar la lista en cada deploy
    - `DATABASE_URL`
 5. Este backend tambien acepta orígenes `https://*.vercel.app` para reducir fallos de CORS con dominios dinámicos de Vercel.
