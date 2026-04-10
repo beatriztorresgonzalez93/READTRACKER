@@ -70,7 +70,7 @@ Variable opcional del cliente:
 
 ## Documentación
 
-La carpeta `docs/` incluye decisiones de arquitectura, API, routing, formularios, componentes, diseño, testing y despliegue. Conviene mantenerla alineada con el código al cambiar rutas o dependencias.
+La carpeta `docs/` incluye (entre otros) `design.md`, `components.md`, `routing.md`, `api.md`, `api-client.md`, `forms.md`, `context.md`, `hooks.md`, `testing.md`, `deployment.md`, `agile.md` y `retrospective.md`. Conviene mantenerlos alineados con el código al cambiar rutas o dependencias.
 
 ## Enlaces útiles
 
