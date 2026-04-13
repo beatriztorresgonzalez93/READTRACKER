@@ -120,7 +120,7 @@ export const BookDetailPage = () => {
         />
 
         <div className="relative grid gap-10 p-6 sm:p-8 lg:grid-cols-[minmax(0,340px)_1fr] lg:items-start lg:gap-12">
-          <div className="flex flex-col items-center lg:items-start">
+          <div className="animate-fade-in-soft flex flex-col items-center lg:items-start">
             <div className="relative w-full max-w-[320px]">
               <div
                 className="absolute -inset-3 -z-0 rounded-2xl bg-gradient-to-br from-[#8ea892]/40 to-[#5f7a65]/25 opacity-80 dark:from-[#4a6b52]/30 dark:to-[#1f2b25]/60"
@@ -145,7 +145,7 @@ export const BookDetailPage = () => {
             </dl>
           </div>
 
-          <div className="min-w-0 space-y-8">
+          <div className="animate-slide-in-right-soft min-w-0 space-y-8">
             <header className="space-y-4">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#5f7a65] dark:text-[#9eb79f]">
                 Ficha de lectura
@@ -185,16 +185,19 @@ export const BookDetailPage = () => {
                     <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       Avance
                     </p>
-                    <span className="font-['Fraunces',serif] text-2xl font-semibold tabular-nums text-[#45634b] dark:text-[#b8ccb9]">
+                    <span className="rounded-lg bg-[#dbe7d8] px-2.5 py-1 font-['Fraunces',serif] text-2xl font-semibold tabular-nums text-[#45634b] shadow-sm dark:bg-[#32443a] dark:text-[#d7e7d5]">
                       {progress}%
                     </span>
                   </div>
-                  <div className="h-3 w-full overflow-hidden rounded-full bg-[#d5e2d3] dark:bg-[#1f2b25]">
+                  <div className="h-3.5 w-full overflow-hidden rounded-full bg-[#d5e2d3] ring-1 ring-[#bdd0bc] dark:bg-[#1f2b25] dark:ring-[#42594c]">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#5f7a65] to-[#9eb79f] transition-[width] duration-500"
+                      className="h-full rounded-full bg-gradient-to-r from-[#4f6955] via-[#6f8f75] to-[#a9bea9] transition-[width] duration-700"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {progress >= 100 ? "Libro completado" : progress >= 60 ? "Buen ritmo de lectura" : "Lectura en curso"}
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -209,7 +212,7 @@ export const BookDetailPage = () => {
                 </h2>
               </div>
               <p
-                className={`min-h-[8rem] whitespace-pre-wrap text-base leading-[1.75] text-slate-700 dark:text-slate-200 ${!hasReview ? "italic text-slate-500 dark:text-slate-400" : ""}`}
+                className={`min-h-[8rem] whitespace-pre-wrap text-base leading-[1.9] text-slate-700 dark:text-slate-200 ${!hasReview ? "italic text-slate-500 dark:text-slate-400" : "first-letter:mr-1 first-letter:float-left first-letter:font-['Fraunces',serif] first-letter:text-4xl first-letter:leading-[0.9] first-letter:text-[#5f7a65] dark:first-letter:text-[#a5bda6]"}`}
               >
                 {hasReview ? book.review : "Todavía no escribiste una reseña. Cuando la tengas, aparecerá aquí con calma de cuaderno de lectura."}
               </p>
