@@ -6,11 +6,11 @@ import { Button } from "./ui/button";
 type Theme = "light" | "dark";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const saved = localStorage.getItem("readtracker-theme");
-    const initial: Theme = saved === "light" ? "light" : "dark";
+    const initial: Theme = saved === "dark" ? "dark" : "light";
     setTheme(initial);
     document.documentElement.setAttribute("data-theme", initial === "dark" ? "night" : "light");
     document.documentElement.classList.toggle("dark", initial === "dark");
