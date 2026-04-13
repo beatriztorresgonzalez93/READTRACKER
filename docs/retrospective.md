@@ -7,6 +7,7 @@
 - Me gusto haber resuelto detalles que mejoran mucho la sensacion de calidad, como el fallback de portadas cuando una imagen falla.
 - Tambien fue un acierto sumar tests automatizados en el cliente, porque ahora hay mas confianza antes de tocar cosas sensibles.
 - La documentacion quedo mas alineada con el codigo real, y eso ayuda mucho a no perder tiempo despues.
+- Hubo una iteracion fuerte de UI (paleta salvia, biblioteca con baldas, detalle con tipografia y estrellas) y conviene seguir revisando que README y `docs/` reflejen el stack y las rutas actuales.
 
 ### 2) Que se puede mejorar
 - Todavia hay momentos donde la carga inicial se siente lenta, y eso es de lo primero que quiero mejorar.

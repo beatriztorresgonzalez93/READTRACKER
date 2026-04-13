@@ -4,15 +4,15 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 disabled:pointer-events-none disabled:opacity-60",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b866f] disabled:pointer-events-none disabled:opacity-60",
   {
     variants: {
       variant: {
-        default: "bg-cyan-600 text-white hover:bg-cyan-500",
+        default: "bg-[#5f7a65] text-white hover:bg-[#526b58] dark:bg-[#6a8671] dark:hover:bg-[#77957f]",
         outline:
-          "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800",
+          "border border-[#b7c8b4] bg-[#f4f8f2] text-[#2e4433] hover:bg-[#e8f0e5] dark:border-[#4a5f52] dark:bg-[#26352d] dark:text-[#d7e4d4] dark:hover:bg-[#314238]",
         ghost:
-          "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800",
+          "text-[#344a38] hover:bg-[#e8f0e5] dark:text-[#d1decf] dark:hover:bg-[#2f4036]",
         destructive:
           "bg-rose-600 text-white hover:bg-rose-500 dark:bg-rose-600 dark:hover:bg-rose-500"
       },

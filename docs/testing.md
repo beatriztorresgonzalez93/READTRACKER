@@ -19,9 +19,9 @@ Configuración: `vite.config.ts` (`test.environment`, `setupFiles`), setup en `s
 1. Levantar backend y frontend.
 2. Ver biblioteca inicial (carga de libros desde API).
 3. Crear libro desde formulario.
-4. Ver detalle de libro creado.
-5. Editar libro desde botón de card.
-6. Eliminar libro desde botón de card (confirmación + recarga).
+4. Ver detalle de libro creado (progreso, estrellas si hay valoración, reseña).
+5. Editar libro desde el menú ⋮ de la card (Editar).
+6. Eliminar libro desde el menú ⋮ (Eliminar → confirmación + recarga).
 7. Filtrar por estado y buscar por texto.
 8. Ordenar por título, autor, género y valoración.
 9. Probar reglas de progreso:

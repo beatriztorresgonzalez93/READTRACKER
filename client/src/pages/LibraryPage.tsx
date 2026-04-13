@@ -32,7 +32,7 @@ export const LibraryPage = () => {
 
   return (
     <section className="space-y-6">
-      <Card className="bg-gradient-to-r from-white to-cyan-50/50 ring-1 ring-cyan-100 dark:from-slate-900 dark:to-cyan-950/20 dark:ring-cyan-900/40">
+      <Card className="bg-gradient-to-r from-[#f8fbf6] to-[#e6efe4] ring-1 ring-[#c7d5c4] dark:from-[#233229] dark:to-[#1c2922] dark:ring-[#3d5346]">
         <CardHeader className="pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
