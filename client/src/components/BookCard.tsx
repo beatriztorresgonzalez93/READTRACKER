@@ -53,7 +53,7 @@ export const BookCard = ({ book, index = 0, isDeleting = false, onDelete }: Book
       onClick={goToDetails}
       onKeyDown={handleCardKeyDown}
       aria-label={`Ver detalle de ${book.title}`}
-      className="group relative animate-fade-in-up aspect-[2/3] w-full max-w-xs cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 dark:border-slate-800 dark:bg-slate-900"
+      className="group relative animate-fade-in-up aspect-[2/3] w-full max-w-xs cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_24px_rgba(29,78,216,0.42),0_24px_60px_-20px_rgba(30,58,138,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 dark:border-slate-800 dark:bg-slate-900 dark:hover:shadow-[0_0_28px_rgba(0,183,255,0.5),0_24px_60px_-20px_rgba(8,47,73,0.95)]"
       style={{ animationDelay: `${index * 40}ms` }}
     >
       <button

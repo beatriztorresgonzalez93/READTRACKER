@@ -117,7 +117,7 @@ export const BookDetailPage = () => {
         </Link>
       </div>
 
-      <div className="animate-fade-in-soft relative overflow-hidden rounded-3xl border border-slate-200 bg-[radial-gradient(circle_at_bottom_right,_#d6efff_0%,_#f8fafc_48%,_#f1f5f9_100%)] shadow-md dark:border-slate-800 dark:bg-[radial-gradient(1100px_560px_at_108%_112%,_rgba(34,211,238,0.26)_0%,_rgba(14,116,144,0.34)_26%,_rgba(15,23,42,0.93)_70%,_#020617_100%)]">
+      <div className="animate-fade-in-soft relative overflow-hidden rounded-3xl border border-slate-200 bg-[radial-gradient(circle_at_bottom_right,_#d6efff_0%,_#f8fafc_48%,_#f1f5f9_100%)] shadow-md transition-shadow duration-300 hover:shadow-[0_28px_70px_-18px_rgba(37,99,235,0.52)] dark:border-slate-800 dark:bg-[radial-gradient(1100px_560px_at_108%_112%,_rgba(34,211,238,0.26)_0%,_rgba(14,116,144,0.34)_26%,_rgba(15,23,42,0.93)_70%,_#020617_100%)] dark:hover:shadow-[0_0_36px_rgba(0,183,255,0.55),0_32px_80px_-20px_rgba(8,47,73,0.95)]">
         <div className="pointer-events-none absolute -right-24 -bottom-24 h-72 w-72 rounded-full bg-cyan-200/30 blur-3xl dark:bg-cyan-400/15" aria-hidden />
         <div className="pointer-events-none absolute -top-20 -left-16 h-64 w-64 rounded-full bg-cyan-100/25 blur-3xl dark:bg-indigo-900/30" aria-hidden />
 

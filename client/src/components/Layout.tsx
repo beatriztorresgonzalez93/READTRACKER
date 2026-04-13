@@ -25,7 +25,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#cffafe_0%,_#f8fafc_45%,_#f8fafc_100%)] dark:bg-[radial-gradient(circle_at_top,_#0891b2_0%,_#0f172a_45%,_#020617_100%)]">
+    <div className="min-h-screen bg-[#a8d0df] dark:bg-[radial-gradient(circle_at_top,_#0891b2_0%,_#0f172a_45%,_#020617_100%)]">
       <header className="sticky top-0 z-20 border-b border-base-300/70 bg-base-100/85 backdrop-blur dark:border-cyan-900/40 dark:bg-slate-900/85">
         <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-900 dark:text-slate-100">
