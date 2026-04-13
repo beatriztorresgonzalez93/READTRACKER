@@ -33,12 +33,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             <span className="text-xl font-bold tracking-tight">ReadTracker</span>
           </Link>
           <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-            <Link
-              to="/"
-              className="inline-flex h-8 items-center rounded-md px-3 text-xs text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
-              Biblioteca
-            </Link>
             <Button variant="outline" size="sm" onClick={toggleTheme}>
               {theme === "dark" ? "Claro" : "Oscuro"}
             </Button>

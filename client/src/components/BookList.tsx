@@ -16,7 +16,7 @@ export const BookList = ({ books, deletingId, onDelete }: BookListProps) => {
   }
 
   return (
-    <section className="grid justify-items-center gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <section className="grid items-end justify-items-center gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {books.map((book, index) => (
         <BookCard
           key={book.id}
