@@ -34,7 +34,8 @@ describe("BookForm", () => {
     await user.type(textboxes[2]!, "Fantasía");
 
     const statusSelect = within(formEl!).getByRole("combobox");
-    await user.selectOptions(statusSelect, "leido");
+    await user.click(statusSelect);
+    await user.click(screen.getByText("leido"));
     await user.click(within(formEl!).getByRole("button", { name: /guardar libro/i }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
