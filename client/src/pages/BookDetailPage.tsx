@@ -129,6 +129,14 @@ export const BookDetailPage = () => {
               {coverBlock}
             </div>
             <dl className="mt-8 w-full max-w-[320px] space-y-3 rounded-2xl border border-slate-200/80 bg-white/60 p-4 text-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/50">
+              {book.publicationYear != null && (
+                <div className="flex justify-between gap-3 border-b border-slate-200/80 pb-3 dark:border-slate-700/40">
+                  <dt className="text-slate-500 dark:text-slate-400">Publicación</dt>
+                  <dd className="text-right font-medium text-slate-800 dark:text-slate-100">
+                    {book.publicationYear}
+                  </dd>
+                </div>
+              )}
               <div className="flex justify-between gap-3 border-b border-slate-200/80 pb-3 dark:border-slate-700/40">
                 <dt className="text-slate-500 dark:text-slate-400">Añadido</dt>
                 <dd className="text-right font-medium text-slate-800 dark:text-slate-100">{formatDate(book.createdAt)}</dd>
@@ -147,6 +155,14 @@ export const BookDetailPage = () => {
               <p className="text-xl font-medium italic text-slate-600 dark:text-slate-300">{book.author}</p>
               <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                 <span className="rounded-md bg-cyan-100/80 px-2.5 py-1 font-semibold text-cyan-900 dark:bg-cyan-950/40 dark:text-cyan-200">{book.genre}</span>
+                {book.publicationYear != null && (
+                  <>
+                    <span aria-hidden className="text-slate-300 dark:text-slate-600">·</span>
+                    <span className="rounded-md bg-slate-100/90 px-2.5 py-1 font-semibold text-slate-700 dark:bg-slate-800/90 dark:text-slate-200">
+                      {book.publicationYear}
+                    </span>
+                  </>
+                )}
                 <span aria-hidden className="text-slate-300 dark:text-slate-600">·</span>
                 <span className={statusChipClass[book.status]}>{statusLabel[book.status]}</span>
               </div>

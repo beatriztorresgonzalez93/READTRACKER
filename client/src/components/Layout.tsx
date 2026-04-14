@@ -30,7 +30,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <Link to="/" className="inline-flex items-center gap-2 text-slate-900 dark:text-slate-100">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-cyan-600" aria-hidden="true" />
-            <span className="text-xl font-bold tracking-tight">ReadTracker</span>
+            <span className="rt-brand-mark text-xl">ReadTracker</span>
           </Link>
           <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
             <Button variant="outline" size="sm" onClick={toggleTheme}>

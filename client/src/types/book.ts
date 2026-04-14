@@ -6,6 +6,7 @@ export interface Book {
   title: string;
   author: string;
   genre: string;
+  publicationYear?: number;
   status: ReadingStatus;
   rating?: number;
   review?: string;
@@ -19,6 +20,7 @@ export interface CreateBookDto {
   title: string;
   author: string;
   genre: string;
+  publicationYear?: number;
   status: ReadingStatus;
   rating?: number;
   review?: string;

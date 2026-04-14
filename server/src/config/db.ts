@@ -27,4 +27,9 @@ export const initDb = async () => {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+
+  await pool.query(`
+    ALTER TABLE books
+    ADD COLUMN IF NOT EXISTS publication_year INTEGER;
+  `);
 };

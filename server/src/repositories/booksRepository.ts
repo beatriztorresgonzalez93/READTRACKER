@@ -8,6 +8,7 @@ interface BookRow {
   title: string;
   author: string;
   genre: string;
+  publication_year: number | null;
   status: Book["status"];
   rating: number | null;
   review: string | null;
@@ -22,6 +23,7 @@ const mapRow = (row: BookRow): Book => ({
   title: row.title,
   author: row.author,
   genre: row.genre,
+  publicationYear: row.publication_year ?? undefined,
   status: row.status,
   rating: row.rating ?? undefined,
   review: row.review ?? undefined,
@@ -69,14 +71,15 @@ export class BooksRepository {
   async create(data: CreateBookDto): Promise<Book> {
     const id = randomUUID();
     const result = await pool.query<BookRow>(
-      `INSERT INTO books (id, title, author, genre, status, rating, review, progress, cover_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      `INSERT INTO books (id, title, author, genre, publication_year, status, rating, review, progress, cover_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
        RETURNING *`,
       [
         id,
         data.title,
         data.author,
         data.genre,
+        data.publicationYear ?? null,
         data.status,
         data.rating ?? null,
         data.review ?? null,
@@ -101,6 +104,7 @@ export class BooksRepository {
     if (data.title !== undefined) add("title", data.title);
     if (data.author !== undefined) add("author", data.author);
     if (data.genre !== undefined) add("genre", data.genre);
+    if (data.publicationYear !== undefined) add("publication_year", data.publicationYear);
     if (data.status !== undefined) add("status", data.status);
     if (data.rating !== undefined) add("rating", data.rating);
     if (data.review !== undefined) add("review", data.review);
