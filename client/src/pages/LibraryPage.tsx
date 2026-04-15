@@ -36,8 +36,8 @@ export const LibraryPage = () => {
         <CardHeader className="pb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Panel de lectura</p>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Mi biblioteca</h1>
+              <p className="rt-kicker text-slate-500 dark:text-slate-400">Panel de lectura</p>
+              <h1 className="rt-page-title text-3xl text-slate-900 dark:text-slate-100">Mi biblioteca</h1>
             </div>
             <Link to="/books/new">
               <Button size="default">Añadir libro</Button>
@@ -78,7 +78,7 @@ export const LibraryPage = () => {
         </Alert>
       )}
 
-      {loading && <p className="text-sm text-slate-600 dark:text-slate-300">Cargando libros...</p>}
+      {loading && <p className="rt-body-copy text-slate-600 dark:text-slate-300">Cargando libros...</p>}
       {error && <Alert variant="destructive">{error}</Alert>}
       {!loading && !error && (
         <BookList books={filteredBooks} deletingId={deletingId} onDelete={handleDeleteBook} />

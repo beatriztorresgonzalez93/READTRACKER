@@ -3,6 +3,19 @@ import { Book, CreateBookDto, UpdateBookDto } from "../types/book";
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api/v1";
+const AUTH_TOKEN_KEY = "readtracker-auth-token";
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface AuthResult {
+  token: string;
+  user: AuthUser;
+}
 
 interface ApiErrorBody {
   error?: string;
@@ -20,9 +33,11 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {})
     },
     ...init
@@ -39,6 +54,12 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   return (await response.json()) as T;
 }
+
+export const authStorage = {
+  getToken: () => localStorage.getItem(AUTH_TOKEN_KEY),
+  setToken: (token: string) => localStorage.setItem(AUTH_TOKEN_KEY, token),
+  clearToken: () => localStorage.removeItem(AUTH_TOKEN_KEY)
+};
 
 export const getBooks = async (search?: string, status?: string): Promise<Book[]> => {
   const params = new URLSearchParams();
@@ -74,5 +95,26 @@ export const deleteBook = async (id: string): Promise<{ id: string }> => {
   const response = await apiFetch<ApiResponse<{ id: string }>>(`/books/${id}`, {
     method: "DELETE"
   });
+  return response.data;
+};
+
+export const registerUser = async (name: string, email: string, password: string): Promise<AuthResult> => {
+  const response = await apiFetch<ApiResponse<AuthResult>>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ name, email, password })
+  });
+  return response.data;
+};
+
+export const loginUser = async (email: string, password: string): Promise<AuthResult> => {
+  const response = await apiFetch<ApiResponse<AuthResult>>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password })
+  });
+  return response.data;
+};
+
+export const getMe = async (): Promise<AuthUser> => {
+  const response = await apiFetch<ApiResponse<AuthUser>>("/auth/me");
   return response.data;
 };

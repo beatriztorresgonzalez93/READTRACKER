@@ -1,20 +1,95 @@
-// Select base reusable (estilo shadcn) para filtros y formularios.
-import { forwardRef, SelectHTMLAttributes } from "react";
+// Select compatible con API nativa (<option /> + onChange) sobre base-ui.
+import { Select as SelectPrimitive } from "@base-ui/react/select";
+import { ChevronDownIcon, CheckIcon } from "lucide-react";
+import {
+  Children,
+  ForwardedRef,
+  ReactElement,
+  SelectHTMLAttributes,
+  forwardRef,
+  useMemo
+} from "react";
 import { cn } from "../../lib/utils";
 
-export type SelectProps = SelectHTMLAttributes<HTMLSelectElement>;
+type NativeSelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "children"> & {
+  children?: React.ReactNode;
+};
 
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(({ className, ...props }, ref) => {
-  return (
-    <select
-      ref={ref}
-      className={cn(
-        "rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm ring-1 ring-transparent transition focus:border-slate-300 focus:outline-none focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-600 dark:focus:ring-slate-600",
-        className
-      )}
-      {...props}
-    />
+type OptionLike = ReactElement<{ value?: string; children?: React.ReactNode; disabled?: boolean }>;
+
+function isOptionElement(node: unknown): node is OptionLike {
+  if (!node || typeof node !== "object") return false;
+  const element = node as { type?: unknown; props?: { value?: string } };
+  return element.type === "option" || (typeof element.props?.value === "string");
+}
+
+function SelectImpl(
+  { className, value, defaultValue, onChange, children, disabled, name }: NativeSelectProps,
+  _ref: ForwardedRef<HTMLSelectElement>
+) {
+  const options = useMemo(
+    () =>
+      Children.toArray(children)
+        .filter(isOptionElement)
+        .map((child) => ({
+          value: String(child.props.value ?? ""),
+          label: child.props.children,
+          disabled: child.props.disabled ?? false
+        })),
+    [children]
   );
-});
 
+  const selectedValue =
+    typeof value === "string" ? value : typeof defaultValue === "string" ? defaultValue : options[0]?.value ?? "";
+
+  return (
+    <SelectPrimitive.Root
+      value={selectedValue}
+      disabled={disabled}
+      onValueChange={(nextValue) => {
+        if (!onChange) return;
+        onChange({
+          target: { value: nextValue, name },
+          currentTarget: { value: nextValue, name }
+        } as unknown as React.ChangeEvent<HTMLSelectElement>);
+      }}
+    >
+      <SelectPrimitive.Trigger
+        className={cn(
+          "flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-slate-900 shadow-sm ring-1 ring-transparent transition focus-visible:border-slate-300 focus-visible:outline-none focus-visible:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:border-slate-600 dark:focus-visible:ring-slate-600",
+          className
+        )}
+      >
+        <SelectPrimitive.Value />
+        <SelectPrimitive.Icon render={<ChevronDownIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />} />
+      </SelectPrimitive.Trigger>
+
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Positioner sideOffset={4} className="z-50">
+          <SelectPrimitive.Popup className="z-50 min-w-[var(--anchor-width)] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+            <SelectPrimitive.List>
+              {options.map((option) => (
+                <SelectPrimitive.Item
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                  className="relative flex cursor-default items-center rounded-lg px-3 py-2 text-sm text-slate-700 outline-none select-none focus:bg-slate-100 dark:text-slate-200 dark:focus:bg-slate-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-40"
+                >
+                  <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
+                  <SelectPrimitive.ItemIndicator
+                    render={<span className="ml-auto inline-flex h-4 w-4 items-center justify-center" />}
+                  >
+                    <CheckIcon className="h-4 w-4 text-cyan-600 dark:text-cyan-300" />
+                  </SelectPrimitive.ItemIndicator>
+                </SelectPrimitive.Item>
+              ))}
+            </SelectPrimitive.List>
+          </SelectPrimitive.Popup>
+        </SelectPrimitive.Positioner>
+      </SelectPrimitive.Portal>
+    </SelectPrimitive.Root>
+  );
+}
+
+export const Select = forwardRef<HTMLSelectElement, NativeSelectProps>(SelectImpl);
 Select.displayName = "Select";

@@ -1,7 +1,7 @@
 // Página para editar un libro existente cargando sus datos por id.
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getBookById, updateBook } from "../api/client";
+import { ApiError, getBookById, updateBook } from "../api/client";
 import { BookForm } from "../components/BookForm";
 import { Alert } from "../components/ui/alert";
 import { Card, CardContent, CardHeader } from "../components/ui/card";
@@ -42,7 +42,11 @@ export const EditBookPage = () => {
         await updateBook(id, data);
         await reloadBooks();
         navigate(`/books/${id}`);
-      } catch {
+      } catch (err) {
+        if (err instanceof ApiError) {
+          setError(err.message);
+          return;
+        }
         setError("No se pudo actualizar el libro");
       }
     },
@@ -57,11 +61,11 @@ export const EditBookPage = () => {
     <section className="space-y-5">
       <Card className="bg-white/90 dark:bg-slate-900/80">
         <CardHeader className="pb-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Formulario</p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Editar libro</h1>
+          <p className="rt-kicker text-slate-500 dark:text-slate-400">Formulario</p>
+          <h1 className="rt-page-title mt-1 text-3xl text-slate-900 dark:text-slate-100">Editar libro</h1>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+          <p className="rt-body-copy text-slate-600 dark:text-slate-300">
             Actualiza los datos del libro y guarda los cambios.
           </p>
         </CardContent>

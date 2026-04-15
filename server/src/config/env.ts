@@ -33,5 +33,6 @@ export const env = {
   clientOrigins: parseClientOrigins(),
   /** Orígenes https://... que terminan en uno de estos sufijos pasan CORS (útil para previews Vercel). */
   corsOriginSuffixes: parseCorsOriginSuffixes(),
-  databaseUrl: process.env.DATABASE_URL ?? ""
+  databaseUrl: process.env.DATABASE_URL ?? "",
+  jwtSecret: process.env.JWT_SECRET ?? "change-this-secret-in-production"
 };

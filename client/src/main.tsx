@@ -4,14 +4,17 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
+import { AuthProvider } from './context/AuthContext.tsx'
 import { BooksProvider } from './context/BooksContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <BooksProvider>
-        <App />
-      </BooksProvider>
+      <AuthProvider>
+        <BooksProvider>
+          <App />
+        </BooksProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )

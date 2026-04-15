@@ -2,6 +2,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { getBooks } from "../api/client";
 import { Book } from "../types/book";
+import { useAuth } from "./AuthContext";
 
 interface BooksContextValue {
   books: Book[];
@@ -13,11 +14,18 @@ interface BooksContextValue {
 const BooksContext = createContext<BooksContextValue | undefined>(undefined);
 
 export const BooksProvider = ({ children }: { children: ReactNode }) => {
+  const { isAuthenticated } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const reloadBooks = useCallback(async () => {
+    if (!isAuthenticated) {
+      setBooks([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       setError(null);
@@ -28,7 +36,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     void reloadBooks();

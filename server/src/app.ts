@@ -5,10 +5,14 @@ import { initDb } from "./config/db";
 import { env } from "./config/env";
 import { BooksController } from "./controllers/booksController";
 import { CoversController } from "./controllers/coversController";
+import { AuthController } from "./controllers/authController";
 import { errorHandler } from "./middlewares/errorHandler";
 import { BooksRepository } from "./repositories/booksRepository";
+import { UsersRepository } from "./repositories/usersRepository";
+import { createAuthRouter } from "./routes/authRoutes";
 import { createBooksRouter } from "./routes/booksRoutes";
 import { createCoversRouter } from "./routes/coversRoutes";
+import { AuthService } from "./services/authService";
 import { BooksService } from "./services/booksService";
 import { CoversService } from "./services/coversService";
 
@@ -52,6 +56,9 @@ app.use(express.json());
 const booksRepository = new BooksRepository();
 const booksService = new BooksService(booksRepository);
 const booksController = new BooksController(booksService);
+const usersRepository = new UsersRepository();
+const authService = new AuthService(usersRepository);
+const authController = new AuthController(authService);
 const coversService = new CoversService();
 const coversController = new CoversController(coversService);
 
@@ -60,6 +67,7 @@ app.get("/api/v1/health", (_req, res) => {
 });
 
 app.use("/api/v1/covers", createCoversRouter(coversController));
+app.use("/api/v1/auth", createAuthRouter(authController));
 
 app.use("/api/v1/books", createBooksRouter(booksController));
 

@@ -11,6 +11,7 @@ const updateBookKeys = [
   "title",
   "author",
   "genre",
+  "publicationYear",
   "status",
   "rating",
   "review",
@@ -23,7 +24,7 @@ export const validateCreateBook = (
   res: Response,
   next: NextFunction
 ) => {
-  const { title, author, genre, status, rating, progress } = req.body;
+  const { title, author, genre, publicationYear, status, rating, progress } = req.body;
 
   if (!title || !author || !genre || !isValidStatus(status)) {
     res.status(400).json({ error: "Título, autor, género y estado son obligatorios" });
@@ -37,6 +38,14 @@ export const validateCreateBook = (
 
   if (progress !== undefined && (progress < 0 || progress > 100)) {
     res.status(400).json({ error: "El progreso debe estar entre 0 y 100" });
+    return;
+  }
+
+  if (
+    publicationYear !== undefined &&
+    (typeof publicationYear !== "number" || publicationYear < 0 || publicationYear > 3000)
+  ) {
+    res.status(400).json({ error: "El año de publicación no es válido" });
     return;
   }
 
@@ -70,7 +79,7 @@ export const validateUpdateBook = (
     return;
   }
 
-  const { status, rating, progress } = body as Record<string, unknown>;
+  const { status, rating, progress, publicationYear } = body as Record<string, unknown>;
 
   if (status !== undefined && !isValidStatus(status)) {
     res.status(400).json({ error: "El estado no es válido" });
@@ -87,6 +96,17 @@ export const validateUpdateBook = (
   if (progress !== undefined) {
     if (typeof progress !== "number" || progress < 0 || progress > 100) {
       res.status(400).json({ error: "El progreso debe estar entre 0 y 100" });
+      return;
+    }
+  }
+
+  if (publicationYear !== undefined) {
+    if (
+      typeof publicationYear !== "number" ||
+      publicationYear < 0 ||
+      publicationYear > 3000
+    ) {
+      res.status(400).json({ error: "El año de publicación no es válido" });
       return;
     }
   }
