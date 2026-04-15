@@ -1,13 +1,45 @@
 # Forms
 
-`BookForm` usa formulario controlado:
-- cada campo vive en estado React,
-- se valida antes de enviar,
-- se muestran errores simples por campo.
+## `BookForm` (crear/editar libro)
 
-Validaciones actuales:
-- requeridos: título, autor, género, estado,
-- `calificación` entre 0 y 5,
-- `progress` entre 0 y 100.
+Formulario controlado y reutilizable en:
+`client/src/components/BookForm.tsx`
 
-Esto deja una base clara para luego integrar validación más avanzada.
+### Campos
+
+- titulo
+- autor
+- genero
+- anio de publicacion (`publicationYear`)
+- url de portada
+- busqueda automatica de portada
+- estado (`pendiente`, `leyendo`, `leido`)
+- progreso (solo visible en `leyendo`)
+- resena + valoracion por estrellas (solo visible en `leido`)
+
+### Reglas por estado
+
+- `pendiente`:
+  - progreso automatico `0`
+  - sin progreso manual
+  - sin resena/valoracion
+- `leyendo`:
+  - progreso manual visible (0..100)
+  - sin resena/valoracion
+- `leido`:
+  - progreso automatico `100`
+  - muestra resena y valoracion por estrellas
+
+### Validaciones
+
+- requeridos: titulo, autor, genero, estado.
+- `publicationYear`: entero valido y en rango razonable.
+- `rating`: 0..5.
+- `progress`: 0..100 cuando estado `leyendo`.
+
+## Auth forms
+
+- `LoginPage`: email + password.
+- `RegisterPage`: name + email + password (min 6 chars).
+
+Ambas muestran feedback con mensajes de API (`ApiError`).

@@ -1,30 +1,34 @@
 # Deployment
 
-## Frontend (Vercel/Netlify)
+## Frontend (Vercel)
 
-1. Configurar root en `client/`.
-2. Comando build: `npm run build`.
-3. Publicar carpeta `dist`.
-4. Configurar variable `VITE_API_BASE_URL` con URL del backend.
-5. Para SPA con React Router, este proyecto incluye `client/vercel.json` para reescribir rutas a `index.html`.
+1. Root directory: `client/`
+2. Build command: `npm run build`
+3. Output: `dist`
+4. Variable obligatoria:
+   - `VITE_API_BASE_URL=https://readtracker-api.onrender.com/api/v1`
+5. El proyecto ya incluye `client/vercel.json` para reescritura SPA.
 
-## Backend (Render/Railway/Fly)
+## Backend (Render)
 
-1. Configurar root en `server/`.
-2. Comando build: `npm run build`.
-3. Comando start: `npm run start`.
-4. Variables:
-   - `PORT`
-   - `CLIENT_ORIGIN` (una URL del frontend) **o** `CLIENT_ORIGINS` (varias URLs separadas por coma)
-   - `CORS_ORIGIN_SUFFIXES` (opcional): para previews de Vercel, añade el sufijo estable del host, p. ej. `-tuteam-projects.vercel.app`, para no tener que actualizar la lista en cada deploy
-   - `DATABASE_URL`
-5. Este backend tambien acepta orígenes `https://*.vercel.app` para reducir fallos de CORS con dominios dinámicos de Vercel.
+1. Root directory: `server/`
+2. Build command: `npm run build`
+3. Start command: `npm run start`
+4. Variables recomendadas:
+   - `PORT=4000`
+   - `DATABASE_URL=<neon-connection-string>`
+   - `JWT_SECRET=<random-long-secret>`
+   - `CLIENT_ORIGIN=<frontend-url>` o `CLIENT_ORIGINS=<url1,url2,...>`
+   - `CORS_ORIGIN_SUFFIXES` (opcional para previews)
 
-## URLs actuales del proyecto
+## Orden recomendado de despliegue
 
-- Frontend: `https://readtracker.vercel.app`
-- Backend API base: `https://readtracker-api.onrender.com/api/v1`
+1. Desplegar backend y validar `GET /api/v1/health`.
+2. Configurar `VITE_API_BASE_URL` en frontend con backend publico.
+3. Desplegar frontend.
+4. Probar flujo completo: register -> login -> CRUD libros.
 
-## Recomendacion
+## Nota de sincronizacion de rama
 
-Primero desplegar backend y luego conectar frontend con su URL publica.
+Si Render despliega una rama distinta de la que tiene auth, `/auth/*` devolvera `Ruta no encontrada`.
+Confirma siempre la rama desplegada y el ultimo commit.

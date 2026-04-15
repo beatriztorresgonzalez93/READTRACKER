@@ -1,17 +1,22 @@
 # Hooks
 
-## Hooks usados
+## Hooks React usados
 
-- `useState`: manejar estado local (formularios, loading, errores).
-- `useEffect`: cargar datos iniciales o por cambio de parámetro.
-- `useMemo`: optimizar filtrado de libros.
-- `useCallback`: estabilizar handlers reutilizados.
+- `useState`: estado local de formularios, menus y flags UI.
+- `useEffect`: bootstrap de sesion/cargas iniciales.
+- `useMemo`: derivaciones (por ejemplo progreso acotado en detalle).
+- `useCallback`: handlers estables para context y mutaciones.
+- `useContext`: acceso a `AuthContext` y `BooksContext`.
 
-## Hook personalizado
+## Hook/abstraccion de filtros
 
-`useBookFilters` centraliza:
-- texto de búsqueda,
-- filtro de estado,
-- cálculo de lista filtrada.
+`useBookFilters`:
+- texto de busqueda,
+- filtro por estado,
+- ordenacion,
+- lista resultante memoizada.
 
-Esto evita duplicar lógica en las páginas.
+## Patrones destacados
+
+- guardas de ruta con `ProtectedRoute` + hooks de auth.
+- paginas de auth y CRUD separadas, compartiendo cliente API tipado.

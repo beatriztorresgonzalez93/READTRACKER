@@ -31,9 +31,10 @@ Cada tarjeta incluye:
 ## Estado actual resumido
 
 - CRUD funcional con backend en Express + Neon Postgres.
-- Frontend en React + TypeScript con contexto global (`BooksContext`).
-- Filtros y ordenación en biblioteca.
-- Cards con acciones directas (editar/eliminar).
+- Auth JWT funcional (`register/login/me`) con rutas privadas en frontend.
+- Modelo multiusuario aplicado (`books.user_id`).
+- Frontend en React + TypeScript con `AuthContext` y `BooksContext`.
+- Filtros, ordenacion, cards con acciones y detalle enriquecido.
 - Deploy activo en Vercel (frontend) y Render (backend), con CORS configurado.
 
 ## Recomendaciones
@@ -41,3 +42,4 @@ Cada tarjeta incluye:
 - Limitar tareas en progreso para no bloquearse.
 - Cerrar tarjetas pequenas con frecuencia.
 - Revisar prioridades al inicio de cada sesion.
+- Mantener una tarjeta fija de "alinear docs con codigo" por iteracion.

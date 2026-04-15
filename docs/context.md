@@ -1,18 +1,35 @@
 # Context
 
-`BooksContext` expone estado global para biblioteca:
+Actualmente hay dos contextos globales:
+
+## `AuthContext`
+
+Archivo: `client/src/context/AuthContext.tsx`
+
+Expone:
+- `user`
+- `loading`
+- `isAuthenticated`
+- `login(email, password)`
+- `register(name, email, password)`
+- `logout()`
+
+Comportamiento:
+- al iniciar app, intenta recuperar sesion con token guardado (`/auth/me`),
+- persiste/limpia token en `localStorage`,
+- centraliza todo el estado de autenticacion.
+
+## `BooksContext`
+
+Archivo: `client/src/context/BooksContext.tsx`
+
+Expone:
 - `books`
 - `loading`
 - `error`
-- `reloadBooks`
+- `reloadBooks()`
 
-## Objetivo
-
-Compartir datos entre páginas sin prop drilling y mantener una sola fuente de verdad.
-
-## Funcionamiento
-
-Al montar el provider:
-1. ejecuta carga inicial con `useEffect`,
-2. llama a API tipada,
-3. actualiza estado global.
+Comportamiento:
+- carga libros desde API tipada,
+- si no hay sesion, limpia estado y no consulta biblioteca,
+- evita prop drilling entre pantallas de libros.

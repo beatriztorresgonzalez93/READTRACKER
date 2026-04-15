@@ -1,16 +1,40 @@
 # Components
 
-## Componentes reutilizables
+## Componentes clave actuales
 
-- `Layout`: estructura base y navegación.
-- `SearchBar`: input de búsqueda.
-- `StatusFilter`: select por estado.
-- `BookCard`: card visual de un libro.
-- `BookList`: render de colección de libros.
-- `BookForm`: formulario controlado para crear libro.
+- `Layout`: contenedor global, branding, tema y acciones de sesion.
+- `ProtectedRoute`: guard para rutas privadas cuando no hay login.
+- `BookList`: listado de portadas/cards.
+- `BookCard`: card interactiva con menu, estado y acciones.
+- `BookForm`: formulario reutilizable para crear/editar.
+- `StarRating`: render de valoracion por estrellas.
 
-## Beneficios
+## UI base reusable (`components/ui`)
 
-- Reuso entre páginas.
-- Props tipadas y fáciles de mantener.
-- Mejor separación entre UI y lógica de datos.
+Basada en el stack de componentes shadcn con primitives de Base UI (`@base-ui/react`) y estilos Tailwind.
+
+- `button.tsx`
+- `card.tsx`
+- `input.tsx`
+- `textarea.tsx`
+- `select.tsx`
+- `alert.tsx`
+- `dialog.tsx`
+- `dropdown-menu.tsx`
+- `form-error.tsx`
+
+## Paginas montadas sobre componentes
+
+- `LibraryPage`
+- `NewBookPage`
+- `EditBookPage`
+- `BookDetailPage`
+- `LoginPage`
+- `RegisterPage`
+- `NotFoundPage`
+
+## Objetivo de diseño de componentes
+
+- reuso real entre pantallas,
+- props tipadas,
+- separacion clara entre UI, estado (context) y red (api client).

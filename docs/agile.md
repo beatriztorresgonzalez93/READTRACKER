@@ -1,6 +1,6 @@
 # Agile
 
-Agile es una forma de trabajar en ciclos cortos para entregar valor continuo y poder adaptarse a cambios. En lugar de planificar todo al detalle al inicio, se define una vision general, se prioriza y se itera.
+Agile es una forma de trabajar en ciclos cortos para entregar valor continuo y adaptarse a cambios de producto. En ReadTracker se ha aplicado con iteraciones pequenas orientadas a resultado visible (UI, auth, datos, deploy).
 
 ## Scrum
 
@@ -30,3 +30,9 @@ Es util cuando el trabajo llega de forma variable y se necesita flexibilidad dia
 
 - Scrum: proyectos con roadmap claro y necesidad de ritmo constante.
 - Kanban: mantenimiento evolutivo, incidencias frecuentes o equipo pequeno con multitarea.
+
+## Aplicacion practica en este proyecto
+
+- Se ha trabajado de forma cercana a Kanban: peticiones cortas, feedback inmediato y ajustes frecuentes.
+- Cada bloque tecnico se ha cerrado con validacion (`build/test`) antes de pasar al siguiente.
+- Las ramas se han usado para comparar estilos/versiones y reducir riesgo al integrar.

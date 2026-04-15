@@ -1,30 +1,44 @@
 # API Client
 
-Frontend usa una capa de red tipada:
-- `api/client.ts`: wrapper reusable de `fetch`.
-- `api/booksApi.ts`: funciones de dominio de libros.
+El frontend usa una unica capa tipada en:
+`client/src/api/client.ts`
 
-Funciones disponibles:
-- `getBooks()`
+## Responsabilidad
+
+- centralizar `fetch` en `apiFetch`,
+- construir URLs con `VITE_API_BASE_URL`,
+- incluir `Content-Type: application/json`,
+- adjuntar `Authorization: Bearer <token>` automaticamente si hay sesion,
+- lanzar `ApiError` tipado cuando `response.ok` es `false`.
+
+## Funciones de dominio disponibles
+
+### Auth
+- `registerUser(name, email, password)`
+- `loginUser(email, password)`
+- `getMe()`
+- `authStorage.getToken()/setToken()/clearToken()`
+
+### Books
+- `getBooks(search?, status?)`
 - `getBookById(id)`
 - `createBook(data)`
 - `updateBook(id, data)`
 - `deleteBook(id)`
 
-La URL base se construye con `VITE_API_BASE_URL`.
-Si no está definida, usa fallback local: `http://localhost:4000/api/v1`.
+## Configuracion
 
-## Configuracion de entorno
-
-Variable:
 `VITE_API_BASE_URL=http://localhost:4000/api/v1`
+
+Si no existe variable, usa fallback local:
+`http://localhost:4000/api/v1`.
 
 ## Manejo de errores
 
-Se lanza `ApiError` con mensaje y status HTTP para mostrar feedback claro en UI.
+Cuando falla una peticion se lanza:
 
-## Estados de red en UI
+```ts
+new ApiError(message, status)
+```
 
-- `loading`: se muestra estado de carga en biblioteca y detalle.
-- `success`: se renderizan libros y vistas.
-- `error`: se muestra mensaje de error (por ejemplo, cuando falla la carga de biblioteca).
+Esto permite mostrar en UI el mensaje real del backend (por ejemplo validaciones o auth).

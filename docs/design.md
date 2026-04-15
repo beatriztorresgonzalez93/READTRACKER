@@ -1,27 +1,40 @@
 # Design
 
-## Decisión de arquitectura
+## Arquitectura general
 
-Monorepo simple con dos aplicaciones:
-- `client/`: React + TypeScript.
-- `server/`: Express + TypeScript.
+Monorepo con dos apps:
+- `client/` (React + TS + Vite)
+- `server/` (Express + TS + PostgreSQL)
 
-Se evita sobreingeniería: capas claras, tipos fuertes y responsabilidades separadas.
-
-## Flujo de datos
-
-Frontend llama API REST (`/api/v1/books`) mediante cliente tipado.
-
-Flujo backend:
+Patron backend:
 `route -> controller -> service -> repository`
 
-- Route: mapea endpoint HTTP.
-- Controller: traduce req/res.
-- Service: aplica reglas de negocio.
-- Repository: gestiona datos en memoria.
+## Modelo de datos actual
 
-## Interacción frontend-backend
+- `users`
+  - `id`, `name`, `email`, `password_hash`, `created_at`
+- `books`
+  - `id`, `user_id`, `title`, `author`, `genre`, `publication_year`,
+    `status`, `rating`, `review`, `progress`, `cover_url`, timestamps
 
-- Frontend usa `fetch` tipado.
-- Backend responde JSON consistente (`{ data }` o `{ error }`).
-- Context global comparte estado de libros entre páginas.
+`books.user_id` define propiedad del recurso y aislamiento por cuenta.
+
+## Seguridad y acceso
+
+- JWT para autenticacion de API.
+- Middleware `requireAuth` protege `/books` y `/auth/me`.
+- La autorizacion de libros se hace en SQL filtrando por `user_id`.
+
+## Frontend: separacion de responsabilidades
+
+- `api/client.ts`: red y errores tipados.
+- `AuthContext`: sesion global.
+- `BooksContext`: estado de biblioteca.
+- `ProtectedRoute`: control de acceso por ruta.
+
+## Principios usados
+
+- componentes reutilizables,
+- contratos tipados compartidos por dominio,
+- respuestas JSON consistentes (`data`/`error`),
+- UI reactiva con estados claros de carga/error.
