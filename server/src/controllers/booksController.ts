@@ -15,10 +15,15 @@ export class BooksController {
   }
 
   getBooks = async (req: Request, res: Response) => {
+    const userId = res.locals.userId as string | undefined;
+    if (!userId) {
+      res.status(401).json({ error: "No autorizado" });
+      return;
+    }
     try {
       const search = this.getSingleQueryValue(req.query.search);
       const status = this.getSingleQueryValue(req.query.status);
-      const books = await this.service.getBooks(search, status);
+      const books = await this.service.getBooks(userId, search, status);
       res.status(200).json({ data: books });
     } catch (err) {
       logError("BooksController.getBooks", err);
@@ -27,6 +32,11 @@ export class BooksController {
   };
 
   getBookById = async (req: Request, res: Response) => {
+    const userId = res.locals.userId as string | undefined;
+    if (!userId) {
+      res.status(401).json({ error: "No autorizado" });
+      return;
+    }
     const id = this.getSingleParamValue(req.params.id);
     if (!id) {
       res.status(400).json({ error: "El id del libro no es válido" });
@@ -34,7 +44,7 @@ export class BooksController {
     }
 
     try {
-      const book = await this.service.getBookById(id);
+      const book = await this.service.getBookById(id, userId);
       if (!book) {
         res.status(404).json({ error: "Libro no encontrado" });
         return;
@@ -47,8 +57,13 @@ export class BooksController {
   };
 
   createBook = async (req: Request, res: Response) => {
+    const userId = res.locals.userId as string | undefined;
+    if (!userId) {
+      res.status(401).json({ error: "No autorizado" });
+      return;
+    }
     try {
-      const book = await this.service.createBook(req.body);
+      const book = await this.service.createBook(req.body, userId);
       res.status(201).json({ data: book });
     } catch (err) {
       logError("BooksController.createBook", err);
@@ -57,6 +72,11 @@ export class BooksController {
   };
 
   updateBook = async (req: Request, res: Response) => {
+    const userId = res.locals.userId as string | undefined;
+    if (!userId) {
+      res.status(401).json({ error: "No autorizado" });
+      return;
+    }
     const id = this.getSingleParamValue(req.params.id);
     if (!id) {
       res.status(400).json({ error: "El id del libro no es válido" });
@@ -64,7 +84,7 @@ export class BooksController {
     }
 
     try {
-      const updated = await this.service.updateBook(id, req.body);
+      const updated = await this.service.updateBook(id, req.body, userId);
       if (!updated) {
         res.status(404).json({ error: "Libro no encontrado" });
         return;
@@ -77,6 +97,11 @@ export class BooksController {
   };
 
   deleteBook = async (req: Request, res: Response) => {
+    const userId = res.locals.userId as string | undefined;
+    if (!userId) {
+      res.status(401).json({ error: "No autorizado" });
+      return;
+    }
     const id = this.getSingleParamValue(req.params.id);
     if (!id) {
       res.status(400).json({ error: "El id del libro no es válido" });
@@ -84,7 +109,7 @@ export class BooksController {
     }
 
     try {
-      const deleted = await this.service.deleteBook(id);
+      const deleted = await this.service.deleteBook(id, userId);
       if (!deleted) {
         res.status(404).json({ error: "Libro no encontrado" });
         return;

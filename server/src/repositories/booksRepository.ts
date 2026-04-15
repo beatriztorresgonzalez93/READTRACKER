@@ -34,11 +34,11 @@ const mapRow = (row: BookRow): Book => ({
 });
 
 export class BooksRepository {
-  async findAll(search?: string, status?: string): Promise<Book[]> {
+  async findAll(userId: string, search?: string, status?: string): Promise<Book[]> {
     let sql = "SELECT * FROM books";
-    const clauses: string[] = [];
-    const values: unknown[] = [];
-    let idx = 1;
+    const clauses: string[] = ["user_id = $1"];
+    const values: unknown[] = [userId];
+    let idx = 2;
 
     if (search) {
       clauses.push(`(title ILIKE $${idx} OR author ILIKE $${idx} OR genre ILIKE $${idx})`);
@@ -52,9 +52,7 @@ export class BooksRepository {
       idx += 1;
     }
 
-    if (clauses.length > 0) {
-      sql += ` WHERE ${clauses.join(" AND ")}`;
-    }
+    sql += ` WHERE ${clauses.join(" AND ")}`;
 
     sql += " ORDER BY created_at DESC";
 
@@ -62,20 +60,24 @@ export class BooksRepository {
     return result.rows.map(mapRow);
   }
 
-  async findById(id: string): Promise<Book | undefined> {
-    const result = await pool.query<BookRow>("SELECT * FROM books WHERE id = $1 LIMIT 1", [id]);
+  async findById(id: string, userId: string): Promise<Book | undefined> {
+    const result = await pool.query<BookRow>(
+      "SELECT * FROM books WHERE id = $1 AND user_id = $2 LIMIT 1",
+      [id, userId]
+    );
     const row = result.rows[0];
     return row ? mapRow(row) : undefined;
   }
 
-  async create(data: CreateBookDto): Promise<Book> {
+  async create(data: CreateBookDto, userId: string): Promise<Book> {
     const id = randomUUID();
     const result = await pool.query<BookRow>(
-      `INSERT INTO books (id, title, author, genre, publication_year, status, rating, review, progress, cover_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      `INSERT INTO books (id, user_id, title, author, genre, publication_year, status, rating, review, progress, cover_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        RETURNING *`,
       [
         id,
+        userId,
         data.title,
         data.author,
         data.genre,
@@ -90,7 +92,7 @@ export class BooksRepository {
     return mapRow(result.rows[0]);
   }
 
-  async update(id: string, data: UpdateBookDto): Promise<Book | undefined> {
+  async update(id: string, data: UpdateBookDto, userId: string): Promise<Book | undefined> {
     const setParts: string[] = [];
     const values: unknown[] = [];
     let idx = 1;
@@ -116,17 +118,17 @@ export class BooksRepository {
     const result = await pool.query<BookRow>(
       `UPDATE books
        SET ${setParts.join(", ")}
-       WHERE id = $${idx}
+       WHERE id = $${idx} AND user_id = $${idx + 1}
        RETURNING *`,
-      [...values, id]
+      [...values, id, userId]
     );
 
     const row = result.rows[0];
     return row ? mapRow(row) : undefined;
   }
 
-  async delete(id: string): Promise<boolean> {
-    const result = await pool.query("DELETE FROM books WHERE id = $1", [id]);
+  async delete(id: string, userId: string): Promise<boolean> {
+    const result = await pool.query("DELETE FROM books WHERE id = $1 AND user_id = $2", [id, userId]);
     return (result.rowCount ?? 0) > 0;
   }
 }

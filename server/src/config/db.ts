@@ -13,8 +13,19 @@ export const pool = new Pool({
 
 export const initDb = async () => {
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS books (
       id TEXT PRIMARY KEY,
+      user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
       title TEXT NOT NULL,
       author TEXT NOT NULL,
       genre TEXT NOT NULL,
@@ -31,5 +42,14 @@ export const initDb = async () => {
   await pool.query(`
     ALTER TABLE books
     ADD COLUMN IF NOT EXISTS publication_year INTEGER;
+  `);
+
+  await pool.query(`
+    ALTER TABLE books
+    ADD COLUMN IF NOT EXISTS user_id TEXT REFERENCES users(id) ON DELETE CASCADE;
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_books_user_id ON books(user_id);
   `);
 };

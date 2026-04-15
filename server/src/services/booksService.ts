@@ -5,23 +5,23 @@ import { CreateBookDto, UpdateBookDto } from "../types/book";
 export class BooksService {
   constructor(private readonly repository: BooksRepository) {}
 
-  async getBooks(search?: string, status?: string) {
-    return this.repository.findAll(search, status);
+  async getBooks(userId: string, search?: string, status?: string) {
+    return this.repository.findAll(userId, search, status);
   }
 
-  async getBookById(id: string) {
-    return this.repository.findById(id);
+  async getBookById(id: string, userId: string) {
+    return this.repository.findById(id, userId);
   }
 
-  async createBook(data: CreateBookDto) {
-    return this.repository.create(data);
+  async createBook(data: CreateBookDto, userId: string) {
+    return this.repository.create(data, userId);
   }
 
-  async updateBook(id: string, data: UpdateBookDto) {
-    return this.repository.update(id, data);
+  async updateBook(id: string, data: UpdateBookDto, userId: string) {
+    return this.repository.update(id, data, userId);
   }
 
-  async deleteBook(id: string) {
-    return this.repository.delete(id);
+  async deleteBook(id: string, userId: string) {
+    return this.repository.delete(id, userId);
   }
 }
