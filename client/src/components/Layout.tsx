@@ -1,6 +1,7 @@
 // Layout base con navegación y selector de tema para todas las páginas.
 import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "./ui/button";
 
@@ -51,17 +52,30 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               </Link>
             )}
             {isAuthenticated && user && (
-              <span className="hidden text-sm text-slate-700 dark:text-slate-200 sm:inline">
-                {user.name}
+              <span className="hidden font-['Fraunces',serif] text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100 sm:inline">
+                Hola, {user.name}
               </span>
             )}
             {isAuthenticated && (
-              <Button variant="ghost" size="sm" onClick={logout}>
-                Cerrar sesión
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={logout}
+                className="cursor-pointer border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-200 dark:hover:bg-rose-900/50"
+                aria-label="Cerrar sesión"
+                title="Cerrar sesión"
+              >
+                <LogOut className="h-4 w-4" />
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={toggleTheme}>
-              {theme === "dark" ? "Claro" : "Oscuro"}
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}
+              title={theme === "dark" ? "Modo claro" : "Modo oscuro"}
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
           </div>
         </nav>

@@ -75,7 +75,7 @@ export const BookCard = ({ book, index = 0, isDeleting = false, onDelete }: Book
           aria-label={`Abrir menú de ${book.title}`}
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
-          className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white transition hover:bg-black/70"
+          className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-black/55 text-white transition hover:bg-black/70"
         >
           <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
             <circle cx="12" cy="5" r="1.8" />
@@ -124,9 +124,6 @@ export const BookCard = ({ book, index = 0, isDeleting = false, onDelete }: Book
         </div>
       )}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="pointer-events-none absolute bottom-3 left-3 rounded-md bg-black/55 px-2.5 py-1 text-xs font-medium text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        Ver detalle
-      </div>
       <span className={`pointer-events-none absolute left-3 top-3 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 ${statusStyles[book.status]}`}>
         {book.status}
       </span>

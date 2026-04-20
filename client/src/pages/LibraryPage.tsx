@@ -50,7 +50,7 @@ export const LibraryPage = () => {
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar por título, autor o género..."
+              placeholder="Buscar por título, autor, editorial o género..."
             />
             <Select value={status} onChange={(event) => setStatus(event.target.value as typeof status)}>
               <option value="todos">Todos</option>

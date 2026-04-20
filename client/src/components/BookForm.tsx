@@ -5,9 +5,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { FormError } from "./ui/form-error";
 import { Input } from "./ui/input";
-import { Select } from "./ui/select";
-import { Textarea } from "./ui/textarea";
-import { CreateBookDto, ReadingStatus } from "../types/book";
+import { CreateBookDto } from "../types/book";
 
 interface BookFormProps {
   onSubmit: (data: CreateBookDto) => Promise<void>;
@@ -17,27 +15,19 @@ interface BookFormProps {
 
 type Errors = Partial<Record<keyof CreateBookDto, string>>;
 
-const getProgressByStatus = (status: ReadingStatus, currentProgress?: number): number => {
-  if (status === "leido") return 100;
-  if (status === "leyendo") return currentProgress ?? 0;
-  return 0;
-};
-
 export const BookForm = ({
   onSubmit,
   initialValues,
   submitLabel = "Guardar libro"
 }: BookFormProps) => {
-  const initialStatus = initialValues?.status ?? "pendiente";
   const [form, setForm] = useState<CreateBookDto>({
     title: initialValues?.title ?? "",
     author: initialValues?.author ?? "",
+    publisher: initialValues?.publisher ?? "",
     genre: initialValues?.genre ?? "",
     publicationYear: initialValues?.publicationYear,
-    status: initialStatus,
-    rating: initialValues?.rating,
-    review: initialValues?.review ?? "",
-    progress: getProgressByStatus(initialStatus, initialValues?.progress),
+    status: initialValues?.status ?? "pendiente",
+    progress: initialValues?.progress ?? 0,
     coverUrl: initialValues?.coverUrl ?? ""
   });
   const [errors, setErrors] = useState<Errors>({});
@@ -57,6 +47,7 @@ export const BookForm = ({
     const nextErrors: Errors = {};
     if (!form.title.trim()) nextErrors.title = "El título es requerido";
     if (!form.author.trim()) nextErrors.author = "El autor es requerido";
+    if (!form.publisher.trim()) nextErrors.publisher = "La editorial es requerida";
     if (!form.genre.trim()) nextErrors.genre = "El género es requerido";
     if (
       form.publicationYear !== undefined &&
@@ -65,16 +56,6 @@ export const BookForm = ({
         form.publicationYear > currentYear)
     ) {
       nextErrors.publicationYear = "El año de publicación no es válido";
-    }
-    if (form.rating !== undefined && (form.rating < 0 || form.rating > 5)) {
-      nextErrors.rating = "La calificación debe estar entre 0 y 5";
-    }
-    if (
-      form.status === "leyendo" &&
-      form.progress !== undefined &&
-      (form.progress < 0 || form.progress > 100)
-    ) {
-      nextErrors.progress = "El progreso debe estar entre 0 y 100";
     }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -85,17 +66,13 @@ export const BookForm = ({
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const isRead = form.status === "leido";
-      const isReading = form.status === "leyendo";
       const payload: CreateBookDto = {
         ...form,
-        progress: getProgressByStatus(form.status, form.progress),
-        rating: isRead ? form.rating : undefined,
-        review: isRead ? form.review : undefined
+        status: initialValues?.status ?? "pendiente",
+        progress: initialValues?.progress ?? 0,
+        rating: initialValues?.rating,
+        review: initialValues?.review
       };
-      if (!isRead && !isReading) {
-        payload.progress = 0;
-      }
       await onSubmit(payload);
     } finally {
       setSubmitting(false);
@@ -170,13 +147,15 @@ export const BookForm = ({
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Género</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                Editorial
+              </label>
               <Input
-                value={form.genre}
-                maxLength={60}
-                onChange={(event) => setForm((prev) => ({ ...prev, genre: event.target.value }))}
+                value={form.publisher}
+                maxLength={80}
+                onChange={(event) => setForm((prev) => ({ ...prev, publisher: event.target.value }))}
               />
-              {errors.genre && <FormError>{errors.genre}</FormError>}
+              {errors.publisher && <FormError>{errors.publisher}</FormError>}
             </div>
 
             <div>
@@ -194,6 +173,16 @@ export const BookForm = ({
                 }
               />
               {errors.publicationYear && <FormError>{errors.publicationYear}</FormError>}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Género</label>
+              <Input
+                value={form.genre}
+                maxLength={60}
+                onChange={(event) => setForm((prev) => ({ ...prev, genre: event.target.value }))}
+              />
+              {errors.genre && <FormError>{errors.genre}</FormError>}
             </div>
           </div>
 
@@ -256,105 +245,6 @@ export const BookForm = ({
           )}
         </div>
       )}
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Estado</label>
-            <Select
-              value={form.status}
-              onChange={(event) => {
-                const nextStatus = event.target.value as ReadingStatus;
-                setForm((prev) => ({
-                  ...prev,
-                  status: nextStatus,
-                  progress: getProgressByStatus(nextStatus, prev.progress),
-                  rating: nextStatus === "leido" ? prev.rating : undefined,
-                  review: nextStatus === "leido" ? prev.review : ""
-                }));
-              }}
-              className="w-full"
-            >
-              <option value="pendiente">pendiente</option>
-              <option value="leyendo">leyendo</option>
-              <option value="leido">leido</option>
-            </Select>
-            {form.status === "pendiente" && (
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                En este estado, progreso y valoración se completan automáticamente.
-              </p>
-            )}
-          </div>
-
-          {form.status === "leido" && (
-            <>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                  Reseña
-                </label>
-                <Textarea
-                  value={form.review ?? ""}
-                  onChange={(event) => setForm((prev) => ({ ...prev, review: event.target.value }))}
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                  Calificación
-                </label>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }, (_, index) => {
-                    const value = index + 1;
-                    const active = (form.rating ?? 0) >= value;
-
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            rating: prev.rating === value ? undefined : value
-                          }))
-                        }
-                        className={`text-2xl leading-none transition-transform hover:scale-110 ${
-                          active
-                            ? "text-amber-500 drop-shadow-sm dark:text-amber-400"
-                            : "text-slate-300 dark:text-slate-600"
-                        }`}
-                        aria-label={`Valorar con ${value} estrella${value > 1 ? "s" : ""}`}
-                        title={`${value} estrella${value > 1 ? "s" : ""}`}
-                      >
-                        ★
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  {form.rating ? `${form.rating} de 5 estrellas` : "Sin valorar"}
-                </p>
-                {errors.rating && <FormError>{errors.rating}</FormError>}
-              </div>
-            </>
-          )}
-
-          {form.status === "leyendo" && (
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                Progreso (%)
-              </label>
-              <Input
-                type="number"
-                value={form.progress ?? ""}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    progress: event.target.value === "" ? undefined : Number(event.target.value)
-                  }))
-                }
-              />
-              {errors.progress && <FormError>{errors.progress}</FormError>}
-            </div>
-          )}
 
       <Button type="submit" disabled={submitting}>
         {submitting ? "Guardando..." : submitLabel}

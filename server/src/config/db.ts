@@ -28,6 +28,7 @@ export const initDb = async () => {
       user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
       title TEXT NOT NULL,
       author TEXT NOT NULL,
+      publisher TEXT NOT NULL DEFAULT '',
       genre TEXT NOT NULL,
       status TEXT NOT NULL CHECK (status IN ('pendiente', 'leyendo', 'leido')),
       rating INTEGER,
@@ -42,6 +43,11 @@ export const initDb = async () => {
   await pool.query(`
     ALTER TABLE books
     ADD COLUMN IF NOT EXISTS publication_year INTEGER;
+  `);
+
+  await pool.query(`
+    ALTER TABLE books
+    ADD COLUMN IF NOT EXISTS publisher TEXT NOT NULL DEFAULT '';
   `);
 
   await pool.query(`

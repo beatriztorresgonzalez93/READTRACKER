@@ -1,6 +1,6 @@
 // Página para crear un nuevo libro usando el formulario reutilizable.
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ApiError, createBook } from "../api/client";
 import { BookForm } from "../components/BookForm";
 import { Alert } from "../components/ui/alert";
@@ -33,6 +33,9 @@ export const NewBookPage = () => {
 
   return (
     <section className="space-y-5">
+      <Link to="/" className="inline-block text-sm font-semibold text-cyan-700 underline-offset-4 hover:underline dark:text-cyan-300">
+        ← Volver a la biblioteca
+      </Link>
       <Card className="bg-white/90 dark:bg-slate-900/80">
         <CardHeader className="pb-1">
           <p className="rt-kicker text-slate-500 dark:text-slate-400">Formulario</p>

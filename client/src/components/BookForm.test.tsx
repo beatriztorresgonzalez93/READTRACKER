@@ -20,7 +20,7 @@ describe("BookForm", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("al elegir estado leído envía progreso 100 en el payload", async () => {
+  it("envía los datos base y deja estado/progreso por defecto", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn().mockResolvedValue(undefined);
     const { container } = render(<BookForm onSubmit={onSubmit} />);
@@ -28,14 +28,11 @@ describe("BookForm", () => {
     const formEl = container.querySelector("form");
     expect(formEl).toBeTruthy();
     const textboxes = within(formEl!).getAllByRole("textbox");
-    // Orden: título, autor, género, reseña, URL portada, búsqueda portada
+    // Orden: título, autor, editorial, año, género, URL portada, búsqueda portada
     await user.type(textboxes[0]!, "El nombre del viento");
     await user.type(textboxes[1]!, "Patrick Rothfuss");
-    await user.type(textboxes[2]!, "Fantasía");
-
-    const statusSelect = within(formEl!).getByRole("combobox");
-    await user.click(statusSelect);
-    await user.click(screen.getByText("leido"));
+    await user.type(textboxes[2]!, "Plaza & Janés");
+    await user.type(textboxes[3]!, "Fantasía");
     await user.click(within(formEl!).getByRole("button", { name: /guardar libro/i }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -43,9 +40,10 @@ describe("BookForm", () => {
       expect.objectContaining({
         title: "El nombre del viento",
         author: "Patrick Rothfuss",
+        publisher: "Plaza & Janés",
         genre: "Fantasía",
-        status: "leido",
-        progress: 100,
+        status: "pendiente",
+        progress: 0,
       })
     );
   });

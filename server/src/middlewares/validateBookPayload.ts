@@ -10,6 +10,7 @@ const isValidStatus = (status: unknown): status is ReadingStatus =>
 const updateBookKeys = [
   "title",
   "author",
+  "publisher",
   "genre",
   "publicationYear",
   "status",
@@ -24,10 +25,10 @@ export const validateCreateBook = (
   res: Response,
   next: NextFunction
 ) => {
-  const { title, author, genre, publicationYear, status, rating, progress } = req.body;
+  const { title, author, publisher, genre, publicationYear, status, rating, progress } = req.body;
 
-  if (!title || !author || !genre || !isValidStatus(status)) {
-    res.status(400).json({ error: "Título, autor, género y estado son obligatorios" });
+  if (!title || !author || !publisher || !genre || !isValidStatus(status)) {
+    res.status(400).json({ error: "Título, autor, editorial, género y estado son obligatorios" });
     return;
   }
 
@@ -79,7 +80,7 @@ export const validateUpdateBook = (
     return;
   }
 
-  const { status, rating, progress, publicationYear } = body as Record<string, unknown>;
+  const { status, rating, progress, publicationYear, publisher } = body as Record<string, unknown>;
 
   if (status !== undefined && !isValidStatus(status)) {
     res.status(400).json({ error: "El estado no es válido" });
@@ -109,6 +110,11 @@ export const validateUpdateBook = (
       res.status(400).json({ error: "El año de publicación no es válido" });
       return;
     }
+  }
+
+  if (publisher !== undefined && (typeof publisher !== "string" || !publisher.trim())) {
+    res.status(400).json({ error: "La editorial no es válida" });
+    return;
   }
 
   next();

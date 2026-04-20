@@ -41,6 +41,7 @@ function SelectImpl(
 
   const selectedValue =
     typeof value === "string" ? value : typeof defaultValue === "string" ? defaultValue : options[0]?.value ?? "";
+  const selectedOption = options.find((option) => option.value === selectedValue);
 
   return (
     <SelectPrimitive.Root
@@ -60,7 +61,7 @@ function SelectImpl(
           className
         )}
       >
-        <SelectPrimitive.Value />
+        <span>{selectedOption?.label ?? selectedValue}</span>
         <SelectPrimitive.Icon render={<ChevronDownIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />} />
       </SelectPrimitive.Trigger>
 

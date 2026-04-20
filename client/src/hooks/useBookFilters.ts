@@ -15,6 +15,7 @@ export const useBookFilters = (books: Book[]) => {
       const matchesSearch =
         book.title.toLowerCase().includes(normalized) ||
         book.author.toLowerCase().includes(normalized) ||
+        book.publisher.toLowerCase().includes(normalized) ||
         book.genre.toLowerCase().includes(normalized);
       const matchesStatus = status === "todos" || book.status === status;
       return matchesSearch && matchesStatus;

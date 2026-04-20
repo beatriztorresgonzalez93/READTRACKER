@@ -1,11 +1,12 @@
 // Página de detalle de un libro con acciones de volver y editar.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getBookById } from "../api/client";
-import { StarRating } from "../components/StarRating";
+import { getBookById, updateBook } from "../api/client";
+import { PencilLine } from "lucide-react";
 import { Alert } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
+import { Select } from "../components/ui/select";
 import { Book } from "../types/book";
 
 const statusChipClass: Record<Book["status"], string> = {
@@ -41,6 +42,15 @@ export const BookDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [coverBroken, setCoverBroken] = useState(false);
+  const [status, setStatus] = useState<Book["status"]>("pendiente");
+  const [rating, setRating] = useState<number | undefined>(undefined);
+  const [review, setReview] = useState("");
+  const [progressInput, setProgressInput] = useState<number>(0);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isEditingReview, setIsEditingReview] = useState(false);
+  const lastSavedRef = useRef<string>("");
+  const reviewInputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     setCoverBroken(false);
@@ -54,6 +64,19 @@ export const BookDetailPage = () => {
         setError(null);
         const data = await getBookById(id);
         setBook(data);
+        setStatus(data.status);
+        setRating(data.rating);
+        setReview(data.review ?? "");
+        setProgressInput(Math.max(0, Math.min(100, data.progress ?? 0)));
+        const initialSnapshot = JSON.stringify({
+          status: data.status,
+          rating: data.status === "leido" ? data.rating ?? undefined : undefined,
+          review: data.status === "leido" ? data.review ?? "" : "",
+          progress:
+            data.status === "pendiente" ? 0 : data.status === "leido" ? 100 : Math.max(0, Math.min(100, data.progress ?? 0))
+        });
+        lastSavedRef.current = initialSnapshot;
+        setIsEditingReview(false);
       } catch {
         setError("No se encontró el libro");
       } finally {
@@ -64,7 +87,45 @@ export const BookDetailPage = () => {
     void loadBook();
   }, [id]);
 
-  const progress = useMemo(() => Math.max(0, Math.min(100, book?.progress ?? 0)), [book?.progress]);
+  const progress = useMemo(() => {
+    if (status === "pendiente") return 0;
+    if (status === "leido") return 100;
+    return Math.max(0, Math.min(100, progressInput));
+  }, [progressInput, status]);
+
+  useEffect(() => {
+    if (!book) return;
+
+    const payload = {
+      status,
+      rating: status === "leido" ? rating : undefined,
+      review: status === "leido" ? review : undefined,
+      progress
+    };
+    const snapshot = JSON.stringify(payload);
+    if (snapshot === lastSavedRef.current) return;
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        setSaveError(null);
+        setSaveState("saving");
+        const updated = await updateBook(book.id, payload);
+        setBook(updated);
+        lastSavedRef.current = snapshot;
+        setSaveState("saved");
+      } catch {
+        setSaveError("No se pudo guardar automáticamente");
+        setSaveState("error");
+      }
+    }, 650);
+
+    return () => clearTimeout(timeoutId);
+  }, [book, progress, rating, review, status]);
+
+  useEffect(() => {
+    if (!isEditingReview) return;
+    reviewInputRef.current?.focus();
+  }, [isEditingReview]);
 
   if (loading) {
     return (
@@ -104,8 +165,6 @@ export const BookDetailPage = () => {
       </div>
     );
 
-  const hasReview = Boolean(book.review?.trim());
-
   return (
     <div className="space-y-8 font-['DM_Sans',sans-serif]">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -113,7 +172,7 @@ export const BookDetailPage = () => {
           ← Volver a la biblioteca
         </Link>
         <Link to={`/books/${book.id}/edit`}>
-          <Button size="sm">Editar libro</Button>
+          <Button size="sm">Editar</Button>
         </Link>
       </div>
 
@@ -153,6 +212,7 @@ export const BookDetailPage = () => {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-300">Ficha de lectura</p>
               <h1 className="font-['Fraunces',serif] text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl dark:text-slate-50">{book.title}</h1>
               <p className="text-xl font-medium italic text-slate-600 dark:text-slate-300">{book.author}</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{book.publisher}</p>
               <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                 <span className="rounded-md bg-cyan-100/80 px-2.5 py-1 font-semibold text-cyan-900 dark:bg-cyan-950/40 dark:text-cyan-200">{book.genre}</span>
                 {book.publicationYear != null && (
@@ -164,7 +224,7 @@ export const BookDetailPage = () => {
                   </>
                 )}
                 <span aria-hidden className="text-slate-300 dark:text-slate-600">·</span>
-                <span className={statusChipClass[book.status]}>{statusLabel[book.status]}</span>
+                <span className={statusChipClass[status]}>{statusLabel[status]}</span>
               </div>
             </header>
 
@@ -173,9 +233,27 @@ export const BookDetailPage = () => {
                 <CardContent className="space-y-2 p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Valoración</p>
                   <div className="flex flex-wrap items-center gap-3">
-                    <StarRating rating={book.rating} className="text-2xl leading-none transition-transform duration-300 hover:scale-[1.04]" />
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }, (_, index) => {
+                        const value = index + 1;
+                        const active = (rating ?? 0) >= value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setRating((prev) => (prev === value ? undefined : value))}
+                            className={`text-2xl leading-none transition-transform hover:scale-110 ${
+                              active ? "text-amber-500 drop-shadow-sm dark:text-amber-400" : "text-slate-300 dark:text-slate-600"
+                            }`}
+                            aria-label={`Valorar con ${value} estrella${value > 1 ? "s" : ""}`}
+                          >
+                            ★
+                          </button>
+                        );
+                      })}
+                    </div>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                      {book.rating != null ? `${book.rating} / 5` : "Sin puntuar"}
+                      {rating != null ? `${rating} / 5` : "Sin puntuar"}
                     </span>
                   </div>
                 </CardContent>
@@ -186,6 +264,34 @@ export const BookDetailPage = () => {
                     <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Avance</p>
                     <span className="font-['Fraunces',serif] text-2xl font-semibold tabular-nums text-cyan-700 transition-transform duration-300 hover:scale-110 dark:text-cyan-300">{progress}%</span>
                   </div>
+                  <Select
+                    value={status}
+                    onChange={(event) => {
+                      const nextStatus = event.target.value as Book["status"];
+                      setStatus(nextStatus);
+                      if (nextStatus === "pendiente") {
+                        setProgressInput(0);
+                        setRating(undefined);
+                        setReview("");
+                      } else if (nextStatus === "leido") {
+                        setProgressInput(100);
+                      }
+                    }}
+                  >
+                    <option value="pendiente">Pendiente</option>
+                    <option value="leyendo">Leyendo</option>
+                    <option value="leido">Leído</option>
+                  </Select>
+                  {status === "leyendo" && (
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={progressInput}
+                      onChange={(event) => setProgressInput(Number(event.target.value))}
+                      className="h-8 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    />
+                  )}
                   <div className="h-3 w-full overflow-hidden rounded-full bg-cyan-100 dark:bg-slate-800">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-sky-500 transition-[width,filter] duration-700 hover:brightness-110"
@@ -197,13 +303,65 @@ export const BookDetailPage = () => {
             </div>
 
             <section className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm transition-all duration-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/55 dark:hover:shadow-cyan-900/20">
-              <div className="mb-4 flex items-center gap-2">
-                <span className="text-3xl leading-none text-cyan-700/45 dark:text-cyan-300/60" aria-hidden>“</span>
-                <h2 className="font-['Fraunces',serif] text-xl font-semibold text-slate-900 dark:text-slate-100">Reseña</h2>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl leading-none text-cyan-700/45 dark:text-cyan-300/60" aria-hidden>“</span>
+                  <h2 className="font-['Fraunces',serif] text-xl font-semibold text-slate-900 dark:text-slate-100">Reseña</h2>
+                </div>
+                <span
+                  className={`text-xs font-medium ${
+                    saveState === "saving"
+                      ? "text-cyan-700 dark:text-cyan-300"
+                      : saveState === "saved"
+                        ? "text-emerald-700 dark:text-emerald-300"
+                        : saveState === "error"
+                          ? "text-rose-700 dark:text-rose-300"
+                          : "text-slate-500 dark:text-slate-400"
+                  }`}
+                >
+                  {saveState === "saving" && "Guardando..."}
+                  {saveState === "saved" && "Guardado automático"}
+                  {saveState === "error" && "Error al guardar"}
+                  {saveState === "idle" && ""}
+                </span>
               </div>
-              <p className={`min-h-[8rem] whitespace-pre-wrap text-base leading-[1.8] text-slate-700 dark:text-slate-200 ${!hasReview ? "italic text-slate-500 dark:text-slate-400" : "first-letter:mr-1 first-letter:float-left first-letter:font-['Fraunces',serif] first-letter:text-4xl first-letter:leading-[0.9] first-letter:text-cyan-700 dark:first-letter:text-cyan-300"}`}>
-                {hasReview ? book.review : "Todavía no escribiste una reseña para este libro."}
-              </p>
+              {status === "leido" ? (
+                isEditingReview ? (
+                  <textarea
+                    ref={reviewInputRef}
+                    value={review}
+                    onChange={(event) => setReview(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter" || event.shiftKey) return;
+                      event.preventDefault();
+                      setIsEditingReview(false);
+                    }}
+                    rows={6}
+                    placeholder="Escribe tu reseña..."
+                    className="flex min-h-[10rem] w-full rounded-xl border border-slate-200 bg-slate-50/80 px-2.5 py-2 text-base leading-relaxed text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/35 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder:text-slate-500"
+                  />
+                ) : (
+                  <div className="relative rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/40">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingReview(true)}
+                      aria-label="Editar reseña"
+                      title="Editar reseña"
+                      className="absolute bottom-3 right-3 inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      <PencilLine className="h-4 w-4" />
+                    </button>
+                    <p className="min-h-[8rem] whitespace-pre-wrap pr-12 text-base leading-[1.8] text-slate-700 dark:text-slate-200">
+                      {review.trim() ? review : "Pulsa el icono para escribir tu reseña."}
+                    </p>
+                  </div>
+                )
+              ) : (
+                <p className="min-h-[4rem] rounded-xl border border-dashed border-slate-300 bg-slate-50/70 px-4 py-3 italic text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+                  La reseña se habilita automáticamente cuando marques el libro como leído.
+                </p>
+              )}
+              {saveError && <p className="mt-3 text-xs text-rose-700 dark:text-rose-300">{saveError}</p>}
             </section>
           </div>
         </div>

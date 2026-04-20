@@ -5,6 +5,7 @@ export interface Book {
   id: string;
   title: string;
   author: string;
+  publisher: string;
   genre: string;
   publicationYear?: number;
   status: ReadingStatus;
@@ -19,6 +20,7 @@ export interface Book {
 export interface CreateBookDto {
   title: string;
   author: string;
+  publisher: string;
   genre: string;
   publicationYear?: number;
   status: ReadingStatus;

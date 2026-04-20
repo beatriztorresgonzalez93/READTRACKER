@@ -7,6 +7,7 @@ interface BookRow {
   id: string;
   title: string;
   author: string;
+  publisher: string;
   genre: string;
   publication_year: number | null;
   status: Book["status"];
@@ -22,6 +23,7 @@ const mapRow = (row: BookRow): Book => ({
   id: row.id,
   title: row.title,
   author: row.author,
+  publisher: row.publisher,
   genre: row.genre,
   publicationYear: row.publication_year ?? undefined,
   status: row.status,
@@ -41,7 +43,7 @@ export class BooksRepository {
     let idx = 2;
 
     if (search) {
-      clauses.push(`(title ILIKE $${idx} OR author ILIKE $${idx} OR genre ILIKE $${idx})`);
+      clauses.push(`(title ILIKE $${idx} OR author ILIKE $${idx} OR publisher ILIKE $${idx} OR genre ILIKE $${idx})`);
       values.push(`%${search}%`);
       idx += 1;
     }
@@ -72,14 +74,15 @@ export class BooksRepository {
   async create(data: CreateBookDto, userId: string): Promise<Book> {
     const id = randomUUID();
     const result = await pool.query<BookRow>(
-      `INSERT INTO books (id, user_id, title, author, genre, publication_year, status, rating, review, progress, cover_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      `INSERT INTO books (id, user_id, title, author, publisher, genre, publication_year, status, rating, review, progress, cover_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
        RETURNING *`,
       [
         id,
         userId,
         data.title,
         data.author,
+        data.publisher,
         data.genre,
         data.publicationYear ?? null,
         data.status,
@@ -105,6 +108,7 @@ export class BooksRepository {
 
     if (data.title !== undefined) add("title", data.title);
     if (data.author !== undefined) add("author", data.author);
+    if (data.publisher !== undefined) add("publisher", data.publisher);
     if (data.genre !== undefined) add("genre", data.genre);
     if (data.publicationYear !== undefined) add("publication_year", data.publicationYear);
     if (data.status !== undefined) add("status", data.status);
