@@ -1,3 +1,4 @@
+// Campo de entrada reutilizable integrado con estilos del sistema UI.
 import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
 

@@ -1,3 +1,4 @@
+// Contenedor visual reutilizable para bloques y secciones de interfaz.
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

@@ -1,3 +1,4 @@
+// Componentes reutilizables de dialogo/modal para confirmaciones y formularios.
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 

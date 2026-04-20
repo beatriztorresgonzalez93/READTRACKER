@@ -1,3 +1,4 @@
+// Componente de alerta para mostrar errores y mensajes informativos.
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 

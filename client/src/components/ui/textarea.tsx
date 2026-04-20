@@ -1,3 +1,4 @@
+// Campo multilinea reutilizable para reseñas y textos largos.
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

@@ -1,5 +1,6 @@
 "use client"
 
+// Primitivas de menu desplegable reutilizables para acciones contextuales.
 import * as React from "react"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
 
