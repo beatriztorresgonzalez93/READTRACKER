@@ -255,7 +255,7 @@ export const WishlistPage = () => {
                 Tu lista de deseos está vacía. Añade libros que quieras comprar.
               </Alert>
             ) : (
-              <section className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              <section className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 {visibleItems.map((item) => (
                   <article key={item.id} className="overflow-hidden border border-[#8f643f] bg-[#f2e6d3] text-[#4d311d]">
                     <div className="space-y-1 border-b border-[#8f643f] px-2.5 py-2">
