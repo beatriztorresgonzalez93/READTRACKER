@@ -82,4 +82,20 @@ export const initDb = async () => {
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_books_user_id ON books(user_id);
   `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS wishlist_items (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      author TEXT NOT NULL,
+      genre TEXT NOT NULL,
+      priority INTEGER NOT NULL CHECK (priority >= 1 AND priority <= 5),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_wishlist_items_user_id ON wishlist_items(user_id);
+  `);
 };

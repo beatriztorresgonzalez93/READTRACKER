@@ -1,6 +1,7 @@
 // Página de lista de deseos independiente de la biblioteca.
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Clock3, Heart, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ApiError, createWishlistItem, deleteWishlistItem, getWishlistItems } from "../api/client";
 import { Alert } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
 import {
@@ -13,28 +14,13 @@ import {
 import { Input } from "../components/ui/input";
 import { Select } from "../components/ui/select";
 import { useBooksContext } from "../context/BooksContext";
+import type { WishlistItem, WishlistPriority } from "../types/wishlist";
 import { capitalizeFirst, capitalizeWords } from "../utils/textCase";
 
 type WishlistSort = "prioridad" | "reciente" | "titulo";
-type WishlistPriority = 1 | 2 | 3 | 4 | 5;
 
-interface WishlistItem {
-  id: string;
-  title: string;
-  author: string;
-  genre: string;
-  priority: WishlistPriority;
-  createdAt: string;
-}
-
+/** Solo para migrar datos antiguos de localStorage a la API una vez. */
 const WISHLIST_STORAGE_KEY = "readtracker-wishlist-items";
-
-const createId = () => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-};
 
 const getPriorityLabel = (priority: WishlistPriority) => {
   if (priority >= 5) return "Alta";
@@ -53,22 +39,54 @@ export const WishlistPage = () => {
   const [newAuthor, setNewAuthor] = useState("");
   const [newGenre, setNewGenre] = useState("");
   const [newPriority, setNewPriority] = useState<WishlistPriority>(3);
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "auto" });
-    try {
-      const raw = localStorage.getItem(WISHLIST_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as WishlistItem[];
-      if (!Array.isArray(parsed)) return;
-      setItems(parsed);
-    } catch {
-      setItems([]);
-    }
-  }, []);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [savingWish, setSavingWish] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    window.scrollTo({ top: 0, behavior: "auto" });
+    const load = async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        let list = await getWishlistItems();
+        if (list.length === 0) {
+          const raw = localStorage.getItem(WISHLIST_STORAGE_KEY);
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw) as unknown[];
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                for (const row of parsed) {
+                  if (!row || typeof row !== "object") continue;
+                  const o = row as Record<string, unknown>;
+                  const title = typeof o.title === "string" ? o.title.trim() : "";
+                  const author = typeof o.author === "string" ? o.author.trim() : "";
+                  if (!title || !author) continue;
+                  const genre = typeof o.genre === "string" ? o.genre.trim() : undefined;
+                  const pr = o.priority;
+                  const priority =
+                    typeof pr === "number" && pr >= 1 && pr <= 5 ? (pr as WishlistPriority) : undefined;
+                  await createWishlistItem({ title, author, genre: genre || undefined, priority });
+                }
+                localStorage.removeItem(WISHLIST_STORAGE_KEY);
+                list = await getWishlistItems();
+              }
+            } catch {
+              // JSON inválido: se ignora
+            }
+          }
+        }
+        setItems(list);
+      } catch (err) {
+        setLoadError(err instanceof ApiError ? err.message : "No se pudo cargar la lista de deseos");
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void load();
+  }, []);
 
   const nowReading = useMemo(() => books.find((book) => book.status === "leyendo"), [books]);
   const readCount = useMemo(() => books.filter((book) => book.status === "leido").length, [books]);
@@ -111,28 +129,44 @@ export const WishlistPage = () => {
     });
   }, [genre, items, search, sortBy]);
 
-  const addWish = () => {
+  const addWish = async () => {
     if (!newTitle.trim() || !newAuthor.trim()) return;
     const title = capitalizeFirst(newTitle.trim());
     const author = capitalizeWords(newAuthor.trim());
-    const next: WishlistItem = {
-      id: createId(),
-      title,
-      author,
-      genre: capitalizeFirst(newGenre.trim()) || "General",
-      priority: newPriority,
-      createdAt: new Date().toISOString()
-    };
-    setItems((prev) => [next, ...prev]);
-    setNewTitle("");
-    setNewAuthor("");
-    setNewGenre("");
-    setNewPriority(3);
-    setIsAddOpen(false);
+    const genre = capitalizeFirst(newGenre.trim()) || "General";
+    setSavingWish(true);
+    setLoadError(null);
+    try {
+      const created = await createWishlistItem({
+        title,
+        author,
+        genre,
+        priority: newPriority
+      });
+      setItems((prev) => [created, ...prev]);
+      setNewTitle("");
+      setNewAuthor("");
+      setNewGenre("");
+      setNewPriority(3);
+      setIsAddOpen(false);
+    } catch (err) {
+      setLoadError(err instanceof ApiError ? err.message : "No se pudo guardar el deseo");
+    } finally {
+      setSavingWish(false);
+    }
   };
 
-  const removeWish = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+  const removeWish = async (id: string) => {
+    setDeletingId(id);
+    setLoadError(null);
+    try {
+      await deleteWishlistItem(id);
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      setLoadError(err instanceof ApiError ? err.message : "No se pudo eliminar el deseo");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -204,6 +238,11 @@ export const WishlistPage = () => {
         </aside>
 
         <div className="space-y-4">
+          {loadError && (
+            <Alert variant="destructive" className="border-amber-800/80 bg-[#3a0f0f]/90 text-amber-50">
+              {loadError}
+            </Alert>
+          )}
           <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-3">
             <div className="grid gap-2 sm:grid-cols-[1fr_170px_170px_auto]">
               <Input
@@ -250,7 +289,9 @@ export const WishlistPage = () => {
               <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Lista de deseos</p>
               <span className="text-xs text-[#8e633d] dark:text-amber-200/80">{visibleItems.length} libros por comprar</span>
             </div>
-            {visibleItems.length === 0 ? (
+            {loading ? (
+              <p className="text-sm text-amber-100/90">Cargando lista de deseos...</p>
+            ) : visibleItems.length === 0 ? (
               <Alert className="border-amber-700/60 bg-[#e9dcc4] text-[#4d311d]">
                 Tu lista de deseos está vacía. Añade libros que quieras comprar.
               </Alert>
@@ -274,7 +315,8 @@ export const WishlistPage = () => {
                         <Button
                           type="button"
                           size="sm"
-                          onClick={() => removeWish(item.id)}
+                          onClick={() => void removeWish(item.id)}
+                          disabled={deletingId === item.id}
                           className="h-6 rounded-none border border-[#8e633d] bg-[#8e633d] px-2 text-[10px] uppercase tracking-[0.08em] text-[#f8f1e5] hover:bg-[#7c5534]"
                         >
                           <Sparkles className="mr-1 h-3 w-3" />
@@ -328,9 +370,13 @@ export const WishlistPage = () => {
             <Button variant="outline" onClick={() => setIsAddOpen(false)} className="border-[#b08a63] bg-[#efe4d1] text-[#6f4b2e] hover:border-[#8e633d] hover:bg-[#e2cfb2] hover:text-[#5a3d24]">
               Cancelar
             </Button>
-            <Button onClick={addWish} className="border border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534]">
+            <Button
+              onClick={() => void addWish()}
+              disabled={savingWish}
+              className="border border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534]"
+            >
               <Trash2 className="mr-1 h-3.5 w-3.5" />
-              Guardar deseo
+              {savingWish ? "Guardando..." : "Guardar deseo"}
             </Button>
           </DialogFooter>
         </DialogContent>

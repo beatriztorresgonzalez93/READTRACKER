@@ -1,5 +1,6 @@
 // Cliente HTTP base reutilizable para llamadas a la API con manejo de errores.
 import { Book, CreateBookDto, UpdateBookDto } from "../types/book";
+import { WishlistItem } from "../types/wishlist";
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api/v1";
@@ -117,4 +118,28 @@ export const loginUser = async (email: string, password: string): Promise<AuthRe
 export const getMe = async (): Promise<AuthUser> => {
   const response = await apiFetch<ApiResponse<AuthUser>>("/auth/me");
   return response.data;
+};
+
+export const getWishlistItems = async (): Promise<WishlistItem[]> => {
+  const response = await apiFetch<ApiResponse<WishlistItem[]>>("/wishlist");
+  return response.data;
+};
+
+export const createWishlistItem = async (body: {
+  title: string;
+  author: string;
+  genre?: string;
+  priority?: number;
+}): Promise<WishlistItem> => {
+  const response = await apiFetch<ApiResponse<WishlistItem>>("/wishlist", {
+    method: "POST",
+    body: JSON.stringify(body)
+  });
+  return response.data;
+};
+
+export const deleteWishlistItem = async (id: string): Promise<void> => {
+  await apiFetch<ApiResponse<{ id: string }>>(`/wishlist/${id}`, {
+    method: "DELETE"
+  });
 };

@@ -94,14 +94,8 @@ export const LibraryPage = () => {
       )
       .slice(0, 6);
   }, [books, previewBook]);
-  const latestVisibleBooks = useMemo(
-    () =>
-      visibleBooks
-        .toSorted((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 12),
-    [visibleBooks]
-  );
-  const collectionBooks = isShowingAllCollection ? visibleBooks : latestVisibleBooks;
+  const previewVisibleBooks = useMemo(() => visibleBooks.slice(0, 12), [visibleBooks]);
+  const collectionBooks = isShowingAllCollection ? visibleBooks : previewVisibleBooks;
 
   const handleDeleteBook = async (id: string) => {
     try {
@@ -438,7 +432,7 @@ export const LibraryPage = () => {
                 <option value="titulo">Título (A-Z)</option>
                 <option value="autor">Autor (A-Z)</option>
                 <option value="genero">Género (A-Z)</option>
-                <option value="valoracion">Valoración (alta-baja)</option>
+                <option value="valoracion">Valoración</option>
               </Select>
               <Link to="/books/new">
                 <Button size="default" className="h-8 border border-[#8e633d] bg-[#8e633d] px-4 font-semibold text-[#f8f1e5] hover:bg-[#7c5534]">
