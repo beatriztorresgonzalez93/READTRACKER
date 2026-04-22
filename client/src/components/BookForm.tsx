@@ -91,18 +91,22 @@ export const BookForm = ({
   };
 
   const handleSearchCovers = async () => {
-    const query = coverSearch.trim() || form.title.trim();
-    if (!query) {
+    const titleForSearch = coverSearch.trim() || form.title.trim();
+    if (!titleForSearch) {
       setCoverError("Escribe un título para buscar portadas");
       return;
+    }
+
+    const params = new URLSearchParams({ title: titleForSearch });
+    const authorTrim = form.author.trim();
+    if (authorTrim) {
+      params.set("author", authorTrim);
     }
 
     try {
       setCoverLoading(true);
       setCoverError(null);
-      const response = await fetch(
-        `${API_BASE_URL}/covers/search?title=${encodeURIComponent(query)}`
-      );
+      const response = await fetch(`${API_BASE_URL}/covers/search?${params.toString()}`);
       const payload = (await response.json()) as { data?: string[]; error?: string };
 
       if (!response.ok) {

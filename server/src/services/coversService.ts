@@ -29,6 +29,12 @@ type GoogleBooksJson = {
 const OPEN_LIBRARY_LIMIT = 12;
 const RESULT_LIMIT = 8;
 
+/** Algunos proveedores devuelven 403 si la petición no lleva User-Agent (típico en Node). */
+const OUTBOUND_FETCH_HEADERS: HeadersInit = {
+  Accept: "application/json",
+  "User-Agent": "ReadTracker/1.0 (+https://github.com/beatriztorresgonzalez93/READTRACKER)"
+};
+
 export class CoversService {
   async searchByTitle(title: string, author?: string): Promise<string[]> {
     const openLibraryParams = new URLSearchParams({
@@ -38,7 +44,9 @@ export class CoversService {
     if (author?.trim()) {
       openLibraryParams.set("author", author.trim());
     }
-    const openLibraryResponse = await fetch(`https://openlibrary.org/search.json?${openLibraryParams.toString()}`);
+    const openLibraryResponse = await fetch(`https://openlibrary.org/search.json?${openLibraryParams.toString()}`, {
+      headers: OUTBOUND_FETCH_HEADERS
+    });
 
     if (openLibraryResponse.ok) {
       const data = (await openLibraryResponse.json()) as OpenLibrarySearchJson;
@@ -54,11 +62,18 @@ export class CoversService {
 
     const googleQuery = author?.trim() ? `intitle:${title} inauthor:${author.trim()}` : title;
     const googleBooksResponse = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(googleQuery)}&maxResults=10`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(googleQuery)}&maxResults=10`,
+      { headers: OUTBOUND_FETCH_HEADERS }
     );
 
     if (!googleBooksResponse.ok) {
-      throw new CoversSearchError("No se pudo consultar proveedores de portadas");
+      // No lanzamos error: el cliente ya muestra "no se encontraron portadas" con lista vacía.
+      console.warn(
+        "[ReadTracker] CoversService: Google Books respondió",
+        googleBooksResponse.status,
+        googleBooksResponse.statusText
+      );
+      return [];
     }
 
     const googleData = (await googleBooksResponse.json()) as GoogleBooksJson;

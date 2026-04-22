@@ -23,7 +23,7 @@ import { Book } from "../types/book";
 export const LibraryPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { books, loading, error, reloadBooks } = useBooksContext();
+  const { books, loading, error, reloadBooks, upsertBook } = useBooksContext();
   const { search, setSearch, status, setStatus, sortBy, setSortBy, filteredBooks } = useBookFilters(books);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -39,6 +39,7 @@ export const LibraryPage = () => {
   const [markPageInput, setMarkPageInput] = useState("");
   const [markPageError, setMarkPageError] = useState<string | null>(null);
   const [isSavingMarkPage, setIsSavingMarkPage] = useState(false);
+  const [isSavingRating, setIsSavingRating] = useState(false);
   const [isShowingAllCollection, setIsShowingAllCollection] = useState(false);
   const previewCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nowReading = useMemo(() => books.find((book) => book.status === "leyendo"), [books]);
@@ -97,7 +98,7 @@ export const LibraryPage = () => {
     () =>
       visibleBooks
         .toSorted((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 10),
+        .slice(0, 12),
     [visibleBooks]
   );
   const collectionBooks = isShowingAllCollection ? visibleBooks : latestVisibleBooks;
@@ -193,9 +194,24 @@ export const LibraryPage = () => {
     try {
       const updated = await updateBook(previewBook.id, { isFavorite: !previewBook.isFavorite });
       setPreviewBook(updated);
-      await reloadBooks();
+      upsertBook(updated);
     } catch {
       // no-op for now; keep silent to avoid noisy UX
+    }
+  };
+
+  const setPreviewRating = async (rating: number) => {
+    if (!previewBook || isSavingRating) return;
+    const normalized = Math.max(0, Math.min(5, rating));
+    const currentRating = previewBook.rating ?? 0;
+    const nextRating = currentRating === normalized ? 0 : normalized;
+    try {
+      setIsSavingRating(true);
+      const updated = await updateBook(previewBook.id, { rating: nextRating });
+      setPreviewBook(updated);
+      upsertBook(updated);
+    } finally {
+      setIsSavingRating(false);
     }
   };
 
@@ -252,8 +268,8 @@ export const LibraryPage = () => {
         status: nextStatus
       });
       setPreviewBook(updated);
+      upsertBook(updated);
       setIsMarkPageOpen(false);
-      await reloadBooks();
     } catch {
       setMarkPageError("No se pudo guardar la marca de página. Inténtalo de nuevo.");
     } finally {
@@ -262,8 +278,8 @@ export const LibraryPage = () => {
   };
 
   return (
-    <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
-      <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
+    <section className="relative min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
+      <div className={`grid gap-5 lg:grid-cols-[260px_1fr] ${previewBookId ? "pointer-events-none select-none" : ""}`}>
         <aside className="space-y-4">
           <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-4 text-[#4d311d]">
             <p className="mb-3 text-xs font-semibold tracking-[0.18em] text-[#7a573c]">MI BIBLIOTECA</p>
@@ -506,7 +522,7 @@ export const LibraryPage = () => {
       {previewBookId && (
         <>
           <div
-            className={`${isClosingPreview ? "animate-fade-out-soft" : "animate-fade-in-soft"} fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px]`}
+            className={`${isClosingPreview ? "animate-fade-out-soft" : "animate-fade-in-soft"} fixed left-0 top-0 z-40 h-[100dvh] w-[100vw] bg-black/45 backdrop-blur-[2px]`}
             onClick={closePreview}
             aria-hidden
           />
@@ -630,10 +646,25 @@ export const LibraryPage = () => {
                     </div>
                     <div className="border-t border-[#c4a27b]/70 pt-3">
                       <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Valoración</p>
-                      <p className="text-[#8e633d]">
-                        {"★".repeat(previewBook.rating ?? 0)}
-                        {"☆".repeat(Math.max(0, 5 - (previewBook.rating ?? 0)))}
-                      </p>
+                      <div className="flex items-center gap-0.5 text-[#8e633d]">
+                        {[1, 2, 3, 4, 5].map((value) => {
+                          const active = (previewBook.rating ?? 0) >= value;
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => void setPreviewRating(value)}
+                              disabled={isSavingRating}
+                              className={`text-lg leading-none transition ${active ? "text-[#8e633d]" : "text-[#b89a79]"} ${isSavingRating ? "cursor-wait opacity-60" : "hover:scale-110"}`}
+                              aria-label={`Valorar con ${value} estrellas`}
+                              title={`Valorar con ${value} estrellas`}
+                            >
+                              {active ? "★" : "☆"}
+                            </button>
+                          );
+                        })}
+                        {isSavingRating && <span className="ml-2 text-xs text-[#7a573c]">Guardando...</span>}
+                      </div>
                     </div>
                   </div>
                 ) : previewTab === "resena" ? (

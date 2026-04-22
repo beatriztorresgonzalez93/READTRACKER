@@ -9,6 +9,7 @@ interface BooksContextValue {
   loading: boolean;
   error: string | null;
   reloadBooks: () => Promise<void>;
+  upsertBook: (book: Book) => void;
 }
 
 const BooksContext = createContext<BooksContextValue | undefined>(undefined);
@@ -38,12 +39,16 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isAuthenticated]);
 
+  const upsertBook = useCallback((book: Book) => {
+    setBooks((prev) => prev.map((item) => (item.id === book.id ? book : item)));
+  }, []);
+
   useEffect(() => {
     void reloadBooks();
   }, [reloadBooks]);
 
   return (
-    <BooksContext.Provider value={{ books, loading, error, reloadBooks }}>
+    <BooksContext.Provider value={{ books, loading, error, reloadBooks, upsertBook }}>
       {children}
     </BooksContext.Provider>
   );
