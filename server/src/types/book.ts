@@ -7,12 +7,16 @@ export interface Book {
   author: string;
   publisher: string;
   genre: string;
+  pages?: number;
   publicationYear?: number;
   status: ReadingStatus;
   rating?: number;
   review?: string;
   progress?: number;
+  currentPage?: number;
+  lastPageMarkedAt?: string;
   coverUrl?: string;
+  isFavorite?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -22,12 +26,16 @@ export interface CreateBookDto {
   author: string;
   publisher: string;
   genre: string;
+  pages?: number;
   publicationYear?: number;
   status: ReadingStatus;
   rating?: number;
   review?: string;
   progress?: number;
+  currentPage?: number;
+  lastPageMarkedAt?: string;
   coverUrl?: string;
+  isFavorite?: boolean;
 }
 
 export interface UpdateBookDto extends Partial<CreateBookDto> {}

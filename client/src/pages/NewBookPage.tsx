@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { ApiError, createBook } from "../api/client";
 import { BookForm } from "../components/BookForm";
 import { Alert } from "../components/ui/alert";
-import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { useBooksContext } from "../context/BooksContext";
 import { CreateBookDto } from "../types/book";
 
@@ -32,21 +31,13 @@ export const NewBookPage = () => {
   );
 
   return (
-    <section className="space-y-5">
-      <Link to="/" className="inline-block text-sm font-semibold text-cyan-700 underline-offset-4 hover:underline dark:text-cyan-300">
+    <section className="space-y-6 text-[#4d311d] dark:text-[#f1dfcf]">
+      <Link to="/" className="inline-block text-sm font-semibold text-[#8e633d] underline-offset-4 hover:underline dark:text-[#d7b06f]">
         ← Volver a la biblioteca
       </Link>
-      <Card className="bg-white/90 dark:bg-slate-900/80">
-        <CardHeader className="pb-1">
-          <p className="rt-kicker text-slate-500 dark:text-slate-400">Formulario</p>
-          <h1 className="rt-page-title mt-1 text-3xl text-slate-900 dark:text-slate-100">Añadir nuevo libro</h1>
-        </CardHeader>
-        <CardContent>
-          <p className="rt-body-copy text-slate-600 dark:text-slate-300">
-            Completa los datos principales y, si quieres, busca una portada automáticamente.
-          </p>
-        </CardContent>
-      </Card>
+      <header className="border-b border-[#c4a27b]/70 pb-3">
+        <h1 className="rt-page-title text-3xl text-[#5a2f1f] dark:text-[#f3e7d5]">Añadir nuevo libro</h1>
+      </header>
       {error && <Alert variant="destructive">{error}</Alert>}
       <BookForm onSubmit={handleCreateBook} />
     </section>

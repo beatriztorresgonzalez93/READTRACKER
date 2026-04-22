@@ -1,55 +1,24 @@
 // Tarjeta visual de un libro con portada, estado, progreso y acceso a detalle.
 import { KeyboardEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "./ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "./ui/dialog";
 import { Book } from "../types/book";
 
 interface BookCardProps {
   book: Book;
   index?: number;
-  isDeleting?: boolean;
-  onDelete?: (id: string) => void | Promise<void>;
+  onOpenPreview?: (id: string) => void;
 }
 
-export const BookCard = ({ book, index = 0, isDeleting = false, onDelete }: BookCardProps) => {
+export const BookCard = ({ book, index = 0, onOpenPreview }: BookCardProps) => {
   const navigate = useNavigate();
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [coverBroken, setCoverBroken] = useState(false);
 
   useEffect(() => {
     setCoverBroken(false);
   }, [book.coverUrl, book.id]);
-  const statusStyles: Record<Book["status"], string> = {
-    pendiente:
-      "rounded-full border border-yellow-300 bg-yellow-100/95 px-3 py-1.5 text-sm font-bold text-yellow-900 shadow-md backdrop-blur-sm dark:border-yellow-500 dark:bg-yellow-900/80 dark:text-yellow-100",
-    leyendo:
-      "rounded-full border border-cyan-300 bg-cyan-100/95 px-3 py-1.5 text-sm font-bold text-cyan-900 shadow-md backdrop-blur-sm dark:border-cyan-500 dark:bg-cyan-900/80 dark:text-cyan-100",
-    leido:
-      "rounded-full border border-emerald-300 bg-emerald-100/95 px-3 py-1.5 text-sm font-bold text-emerald-900 shadow-md backdrop-blur-sm dark:border-emerald-500 dark:bg-emerald-900/80 dark:text-emerald-100"
-  };
-
   const goToDetails = () => {
-    if (menuOpen) {
-      setMenuOpen(false);
-      return;
-    }
-    if (confirmDelete) {
-      setConfirmDelete(false);
+    if (onOpenPreview) {
+      onOpenPreview(book.id);
       return;
     }
     navigate(`/books/${book.id}`);
@@ -67,90 +36,61 @@ export const BookCard = ({ book, index = 0, isDeleting = false, onDelete }: Book
       onClick={goToDetails}
       onKeyDown={handleCardKeyDown}
       aria-label={`Ver detalle de ${book.title}`}
-      className="group relative animate-fade-in-up aspect-[2/3] w-full max-w-xs cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_24px_rgba(29,78,216,0.42),0_24px_60px_-20px_rgba(30,58,138,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 dark:border-slate-800 dark:bg-slate-900 dark:hover:shadow-[0_0_28px_rgba(0,183,255,0.5),0_24px_60px_-20px_rgba(8,47,73,0.95)]"
+      className="group relative animate-fade-in-up w-full max-w-none cursor-pointer overflow-hidden rounded-sm border border-[#8f643f] bg-[#f2e6d3] text-left shadow-[0_9px_20px_-12px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_26px_-12px_rgba(0,0,0,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
       style={{ animationDelay: `${index * 40}ms` }}
     >
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenuTrigger
-          aria-label={`Abrir menú de ${book.title}`}
-          onClick={(event) => event.stopPropagation()}
-          onKeyDown={(event) => event.stopPropagation()}
-          className="absolute right-3 top-3 z-20 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-black/55 text-white transition hover:bg-black/70"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-            <circle cx="12" cy="5" r="1.8" />
-            <circle cx="12" cy="12" r="1.8" />
-            <circle cx="12" cy="19" r="1.8" />
-          </svg>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="min-w-[130px] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <DropdownMenuItem
-            className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-            onClick={() => {
-              setMenuOpen(false);
-              navigate(`/books/${book.id}/edit`);
-            }}
-          >
-            Editar
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="rounded-lg px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950/40"
-            onClick={() => {
-              setMenuOpen(false);
-              setConfirmDelete(true);
-            }}
-          >
-            Eliminar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
       {book.coverUrl && !coverBroken ? (
-        <div className="h-full w-full overflow-hidden">
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#6a3f1e]">
           <img
             src={book.coverUrl}
             alt={`Portada de ${book.title}`}
             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
             onError={() => setCoverBroken(true)}
           />
+          <div
+            className="pointer-events-none absolute inset-0 opacity-35"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at center, rgba(244,215,165,0.22) 1px, transparent 1px), radial-gradient(circle at center, rgba(244,215,165,0.14) 1px, transparent 1px)",
+              backgroundSize: "24px 24px, 24px 24px",
+              backgroundPosition: "0 0, 12px 12px"
+            }}
+          />
         </div>
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-cyan-100 to-cyan-200 text-center text-sm font-semibold text-cyan-700 dark:from-cyan-900/40 dark:to-cyan-800/40 dark:text-cyan-300">
-          Sin portada
+        <div className="relative flex aspect-[3/4] w-full items-center justify-center bg-gradient-to-b from-[#2c5f31] via-[#2a4d2f] to-[#234127] px-4 text-center text-sm font-semibold text-amber-100">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-40"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at center, rgba(244,215,165,0.32) 1px, transparent 1px), radial-gradient(circle at center, rgba(244,215,165,0.18) 1px, transparent 1px)",
+              backgroundSize: "22px 22px, 22px 22px",
+              backgroundPosition: "0 0, 11px 11px"
+            }}
+          />
+          <span className="relative z-10">{book.title}</span>
         </div>
       )}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <span className={`pointer-events-none absolute left-3 top-3 z-20 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 ${statusStyles[book.status]}`}>
-        {book.status}
-      </span>
-      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <DialogContent
-          className="rounded-xl border border-rose-200 bg-white/95 p-0 shadow-lg dark:border-rose-900/50 dark:bg-slate-900/95"
-          onClick={(event) => event.stopPropagation()}
-          showCloseButton={false}
-        >
-          <DialogHeader className="p-4 pb-2">
-            <DialogTitle className="text-sm font-medium text-rose-900 dark:text-rose-100">
-              ¿Eliminar este libro?
-            </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-              Esta acción no se puede deshacer.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mx-0 mb-0 rounded-b-xl border-rose-100 bg-rose-50/60 p-3 dark:border-rose-900/30 dark:bg-rose-950/20">
-            <Button onClick={() => setConfirmDelete(false)} disabled={isDeleting} variant="outline" size="sm">
-              Cancelar
-            </Button>
-            <Button onClick={() => void onDelete?.(book.id)} disabled={isDeleting} variant="destructive" size="sm">
-              {isDeleting ? "Eliminando..." : "Eliminar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {book.isFavorite && (
+        <span className="pointer-events-none absolute right-2 top-2 z-20 inline-flex items-center rounded-sm border border-rose-300/70 bg-black/55 px-1.5 py-1 text-rose-300">
+          <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+        </span>
+      )}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/35 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="min-h-[7.2rem] space-y-1 border-t border-[#8f643f] bg-[#f2e6d3] px-2.5 py-2.5 text-[#4d311d]">
+        <p className="line-clamp-2 min-h-[2.4rem] font-['Fraunces',serif] text-[0.95rem] leading-tight">{book.title}</p>
+        <p className="line-clamp-1 min-h-[1rem] text-xs italic opacity-85">{book.author}</p>
+        <div className="flex items-center justify-between pt-1 text-[10px] uppercase tracking-[0.12em] text-[#7a573c]">
+          <span>{book.genre}</span>
+          <span>{book.publicationYear ?? "s/f"}</span>
+        </div>
+        <div className="border-t border-[#d5be9d] pt-1 text-[11px] text-[#8e633d]">
+          {"★".repeat(book.rating ?? 0)}
+          {"☆".repeat(Math.max(0, 5 - (book.rating ?? 0)))}
+        </div>
+      </div>
     </article>
   );
 };

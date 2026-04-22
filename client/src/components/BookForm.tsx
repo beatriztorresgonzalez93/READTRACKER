@@ -2,10 +2,10 @@
 import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
 import { API_BASE_URL } from "../api/client";
 import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
 import { FormError } from "./ui/form-error";
 import { Input } from "./ui/input";
 import { CreateBookDto } from "../types/book";
+import { capitalizeFirst, capitalizeWords } from "../utils/textCase";
 
 interface BookFormProps {
   onSubmit: (data: CreateBookDto) => Promise<void>;
@@ -20,11 +20,14 @@ export const BookForm = ({
   initialValues,
   submitLabel = "Guardar libro"
 }: BookFormProps) => {
+  const inputClassName =
+    "border-[#b08a63] bg-[#f8f1e5] text-[#4d311d] placeholder:text-[#8d6d4d] dark:border-[#c4a27b]/70 dark:bg-[#2f160d]/70 dark:text-[#f1dfcf] dark:placeholder:text-[#b99872]";
   const [form, setForm] = useState<CreateBookDto>({
     title: initialValues?.title ?? "",
     author: initialValues?.author ?? "",
     publisher: initialValues?.publisher ?? "",
     genre: initialValues?.genre ?? "",
+    pages: initialValues?.pages,
     publicationYear: initialValues?.publicationYear,
     status: initialValues?.status ?? "pendiente",
     progress: initialValues?.progress ?? 0,
@@ -49,6 +52,14 @@ export const BookForm = ({
     if (!form.author.trim()) nextErrors.author = "El autor es requerido";
     if (!form.publisher.trim()) nextErrors.publisher = "La editorial es requerida";
     if (!form.genre.trim()) nextErrors.genre = "El género es requerido";
+    if (
+      form.pages !== undefined &&
+      (!Number.isInteger(form.pages) ||
+        form.pages < 1 ||
+        form.pages > 20000)
+    ) {
+      nextErrors.pages = "El número de páginas no es válido";
+    }
     if (
       form.publicationYear !== undefined &&
       (!Number.isInteger(form.publicationYear) ||
@@ -122,47 +133,74 @@ export const BookForm = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card className="bg-gradient-to-br from-white to-cyan-50/40 dark:from-slate-900 dark:to-cyan-950/20 dark:ring-1 dark:ring-cyan-900/40">
-        <CardContent className="space-y-4 p-6">
+      <div className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Título</label>
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">Título</label>
               <Input
+                className={inputClassName}
                 value={form.title}
                 maxLength={120}
-                onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, title: capitalizeFirst(event.target.value) }))
+                }
                 onKeyDown={handleCoverSearchKeyDown}
               />
               {errors.title && <FormError>{errors.title}</FormError>}
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Autor</label>
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">Autor</label>
               <Input
+                className={inputClassName}
                 value={form.author}
                 maxLength={80}
-                onChange={(event) => setForm((prev) => ({ ...prev, author: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, author: capitalizeWords(event.target.value) }))
+                }
               />
               {errors.author && <FormError>{errors.author}</FormError>}
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">
                 Editorial
               </label>
               <Input
+                className={inputClassName}
                 value={form.publisher}
                 maxLength={80}
-                onChange={(event) => setForm((prev) => ({ ...prev, publisher: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, publisher: capitalizeFirst(event.target.value) }))
+                }
               />
               {errors.publisher && <FormError>{errors.publisher}</FormError>}
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">
+                Páginas
+              </label>
+              <Input
+                className={inputClassName}
+                type="number"
+                value={form.pages ?? ""}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    pages: event.target.value === "" ? undefined : Number(event.target.value)
+                  }))
+                }
+              />
+              {errors.pages && <FormError>{errors.pages}</FormError>}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">
                 Año de publicación
               </label>
               <Input
+                className={inputClassName}
                 type="number"
                 value={form.publicationYear ?? ""}
                 onChange={(event) =>
@@ -176,40 +214,49 @@ export const BookForm = ({
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Género</label>
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">Género</label>
               <Input
+                className={inputClassName}
                 value={form.genre}
                 maxLength={60}
-                onChange={(event) => setForm((prev) => ({ ...prev, genre: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, genre: capitalizeFirst(event.target.value) }))
+                }
               />
               {errors.genre && <FormError>{errors.genre}</FormError>}
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+            <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">
               URL de portada
             </label>
             <Input
+              className={inputClassName}
               value={form.coverUrl ?? ""}
               onChange={(event) => setForm((prev) => ({ ...prev, coverUrl: event.target.value }))}
             />
           </div>
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
-        <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Buscar portada automática</p>
+      <div className="rounded-lg p-3">
+        <p className="mb-2 text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">Buscar portada automática</p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
+            className={inputClassName}
             value={coverSearch}
             onChange={(event) => setCoverSearch(event.target.value)}
             onKeyDown={handleCoverSearchKeyDown}
             placeholder="Ej: Señor de los Anillos"
           />
-          <Button type="button" onClick={() => void handleSearchCovers()} className="sm:min-w-[110px]">
+          <Button
+            type="button"
+            onClick={() => void handleSearchCovers()}
+            className="sm:min-w-[110px] border border-[#9a744d] bg-[#dcc3a3] text-[#5f3f24] hover:bg-[#cfb08a] dark:border-[#8e633d] dark:bg-[#6f4b2e] dark:text-[#f3e7d5] dark:hover:bg-[#8a5e37]"
+          >
             Buscar
           </Button>
         </div>
-        {coverLoading && <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">Buscando portadas...</p>}
+        {coverLoading && <p className="mt-2 text-xs text-[#7a573c] dark:text-[#caa374]">Buscando portadas...</p>}
         {coverError && <FormError className="mt-2">{coverError}</FormError>}
 
         {coverResults.length > 0 && (
@@ -219,7 +266,7 @@ export const BookForm = ({
                 key={url}
                 type="button"
                 onClick={() => setForm((prev) => ({ ...prev, coverUrl: url }))}
-                className="overflow-hidden rounded border border-slate-200 dark:border-slate-700"
+                className="overflow-hidden rounded"
               >
                 <img src={url} alt="Portada sugerida" className="h-24 w-full object-cover" />
               </button>
@@ -230,7 +277,7 @@ export const BookForm = ({
 
       {form.coverUrl && (
         <div>
-          <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-200">Vista previa</p>
+          <p className="mb-1 text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">Vista previa</p>
           {!previewCoverBroken ? (
             <img
               src={form.coverUrl}
@@ -239,18 +286,17 @@ export const BookForm = ({
               onError={() => setPreviewCoverBroken(true)}
             />
           ) : (
-            <div className="flex h-44 w-32 items-center justify-center rounded bg-gradient-to-b from-cyan-100 to-cyan-200 text-center text-xs font-semibold text-cyan-700 dark:from-cyan-900/40 dark:to-cyan-800/40 dark:text-cyan-300">
+            <div className="flex h-44 w-32 items-center justify-center rounded bg-gradient-to-b from-[#d9c7ad] to-[#c9aa84] text-center text-xs font-semibold text-[#6f4b2e]">
               Sin portada
             </div>
           )}
         </div>
       )}
 
-      <Button type="submit" disabled={submitting}>
-        {submitting ? "Guardando..." : submitLabel}
-      </Button>
-        </CardContent>
-      </Card>
+        <Button type="submit" disabled={submitting} className="border border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534]">
+          {submitting ? "Guardando..." : submitLabel}
+        </Button>
+      </div>
     </form>
   );
 };

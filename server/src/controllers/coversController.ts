@@ -8,13 +8,15 @@ export class CoversController {
 
   searchCovers = async (req: Request, res: Response) => {
     const title = typeof req.query.title === "string" ? req.query.title.trim() : "";
+    const author =
+      typeof req.query.author === "string" && req.query.author.trim() ? req.query.author.trim() : undefined;
     if (!title) {
       res.status(400).json({ error: "El parámetro title es obligatorio" });
       return;
     }
 
     try {
-      const covers = await this.service.searchByTitle(title);
+      const covers = await this.service.searchByTitle(title, author);
       res.status(200).json({ data: covers });
     } catch (err) {
       logError("CoversController.searchCovers", err);

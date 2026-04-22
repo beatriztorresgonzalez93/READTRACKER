@@ -6,6 +6,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { isApiError, useAuth } from "../context/AuthContext";
+import { capitalizeWords } from "../utils/textCase";
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ export const RegisterPage = () => {
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Nombre</label>
-              <Input value={name} onChange={(event) => setName(event.target.value)} required />
+              <Input value={name} onChange={(event) => setName(capitalizeWords(event.target.value))} required />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Email</label>

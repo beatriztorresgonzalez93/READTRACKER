@@ -10,6 +10,10 @@ type Theme = "light" | "dark";
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
+  const isLibraryView = location.pathname === "/";
+  const isReviewsView = location.pathname === "/reviews";
+  const isWishlistView = location.pathname === "/wishlist";
+  const isBookFormView = location.pathname === "/books/new" || /^\/books\/[^/]+\/edit$/.test(location.pathname);
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
@@ -29,30 +33,63 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#a8d0df] dark:bg-[radial-gradient(circle_at_top,_#0891b2_0%,_#0f172a_45%,_#020617_100%)]">
-      <header className="sticky top-0 z-20 border-b border-base-300/70 bg-base-100/85 backdrop-blur dark:border-cyan-900/40 dark:bg-slate-900/85">
-        <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <Link to="/" className="inline-flex items-center gap-2 text-slate-900 dark:text-slate-100">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-cyan-600" aria-hidden="true" />
-            <span className="rt-brand-mark text-xl">ReadTracker</span>
+    <div
+      className={
+        isLibraryView || isReviewsView || isWishlistView || isBookFormView
+          ? "min-h-screen bg-[linear-gradient(180deg,#e3c6ab_0%,#ead2bc_44%,#f1dfcf_100%)] dark:bg-[linear-gradient(180deg,#3a170c_0%,#4a1f0f_42%,#54230f_100%)]"
+          : "min-h-screen bg-[#d9e5df] dark:bg-[#1f2a26]"
+      }
+    >
+      <header className="sticky top-0 z-20 border-y border-[#d5bca2]/85 bg-[#c8a98a]/90 text-[#fff7ef] shadow-[inset_0_1px_0_rgba(255,243,220,0.26)] backdrop-blur dark:border-[#9f6d3b]/80 dark:bg-[#2a120a]/95 dark:text-amber-100">
+        <nav className="mx-auto grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 sm:px-6">
+          <Link to="/" className="inline-flex justify-self-start flex-col text-amber-100">
+            <span className="font-['Fraunces',serif] text-[2.15rem] leading-none tracking-[0.02em] text-[#f6ead8] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]">
+              Script<span className="italic text-[#e6bf74]">orium</span>
+            </span>
+            <span className="mt-1 text-[0.66rem] font-semibold tracking-[0.32em] text-[#c89c33]">
+              ✦ BIBLIOTECA PERSONAL ✦
+            </span>
           </Link>
-          <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+          <div className="hidden justify-center md:flex">
+            <div className="flex items-center gap-1 text-[0.73rem] font-semibold tracking-[0.08em] text-amber-100/85">
+              <Link
+                to="/"
+                className={`px-3 py-1 ${isLibraryView ? "rounded-sm border border-amber-400/75 bg-amber-950/25 dark:border-amber-500/75 dark:bg-amber-900/30" : ""}`}
+              >
+                Colección
+              </Link>
+              <Link
+                to="/reviews"
+                className={`px-3 py-1 ${isReviewsView ? "rounded-sm border border-amber-400/75 bg-amber-950/25 dark:border-amber-500/75 dark:bg-amber-900/30" : ""}`}
+              >
+                Reseñas
+              </Link>
+              <Link
+                to="/wishlist"
+                className={`px-3 py-1 ${isWishlistView ? "rounded-sm border border-amber-400/75 bg-amber-950/25 dark:border-amber-500/75 dark:bg-amber-900/30" : ""}`}
+              >
+                Lista de deseos
+              </Link>
+              <span className="px-3 py-1 opacity-80">Estadísticas</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-self-end justify-end gap-2.5 text-sm font-medium">
             {!isAuthenticated && location.pathname !== "/login" && (
               <Link to="/login">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-amber-600 bg-amber-900/20 font-semibold text-amber-100 hover:bg-amber-900/35">
                   Entrar
                 </Button>
               </Link>
             )}
             {!isAuthenticated && location.pathname !== "/register" && (
               <Link to="/register">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="font-semibold text-amber-100 hover:bg-amber-900/25">
                   Crear cuenta
                 </Button>
               </Link>
             )}
             {isAuthenticated && user && (
-              <span className="hidden font-['Fraunces',serif] text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100 sm:inline">
+              <span className="hidden font-['Fraunces',serif] text-lg font-semibold tracking-tight text-amber-100 sm:inline">
                 Hola, {user.name}
               </span>
             )}
@@ -61,7 +98,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
                 variant="ghost"
                 size="icon-sm"
                 onClick={logout}
-                className="cursor-pointer border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-200 dark:hover:bg-rose-900/50"
+                className="cursor-pointer border border-rose-300/70 bg-rose-950/30 text-rose-100 hover:bg-rose-900/50"
                 aria-label="Cerrar sesión"
                 title="Cerrar sesión"
               >
@@ -72,6 +109,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               variant="outline"
               size="icon-sm"
               onClick={toggleTheme}
+              className="border-amber-600 bg-amber-900/20 text-amber-100 hover:bg-amber-900/35"
               aria-label={theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}
               title={theme === "dark" ? "Modo claro" : "Modo oscuro"}
             >
@@ -80,7 +118,15 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           </div>
         </nav>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+      <main
+        className={
+          isLibraryView || isReviewsView || isWishlistView
+            ? "w-full min-h-[calc(100vh-72px)] px-0 py-5 sm:py-6"
+            : "mx-auto max-w-6xl px-4 py-10 sm:px-6"
+        }
+      >
+        {children}
+      </main>
     </div>
   );
 };

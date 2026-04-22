@@ -62,25 +62,25 @@ function SelectImpl(
         )}
       >
         <span>{selectedOption?.label ?? selectedValue}</span>
-        <SelectPrimitive.Icon render={<ChevronDownIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />} />
+        <SelectPrimitive.Icon render={<ChevronDownIcon className="h-4 w-4 opacity-80" />} />
       </SelectPrimitive.Trigger>
 
       <SelectPrimitive.Portal>
         <SelectPrimitive.Positioner sideOffset={4} className="z-50">
-          <SelectPrimitive.Popup className="z-50 min-w-[var(--anchor-width)] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+          <SelectPrimitive.Popup className="z-50 min-w-[var(--anchor-width)] overflow-hidden rounded-xl border border-[#8e633d] bg-[#f8f1e5] p-1 shadow-lg dark:border-[#8e633d] dark:bg-[#f8f1e5]">
             <SelectPrimitive.List>
               {options.map((option) => (
                 <SelectPrimitive.Item
                   key={option.value}
                   value={option.value}
                   disabled={option.disabled}
-                  className="relative flex cursor-default items-center rounded-lg px-3 py-2 text-sm text-slate-700 outline-none select-none focus:bg-slate-100 dark:text-slate-200 dark:focus:bg-slate-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-40"
+                  className="relative flex cursor-default items-center rounded-lg px-3 py-2 text-sm text-[#4d311d] outline-none select-none focus:bg-[#ead9bd] dark:text-[#4d311d] dark:focus:bg-[#ead9bd] data-[disabled]:pointer-events-none data-[disabled]:opacity-40"
                 >
                   <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
                   <SelectPrimitive.ItemIndicator
                     render={<span className="ml-auto inline-flex h-4 w-4 items-center justify-center" />}
                   >
-                    <CheckIcon className="h-4 w-4 text-cyan-600 dark:text-cyan-300" />
+                    <CheckIcon className="h-4 w-4 text-[#8e633d]" />
                   </SelectPrimitive.ItemIndicator>
                 </SelectPrimitive.Item>
               ))}

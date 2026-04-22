@@ -9,12 +9,16 @@ interface BookRow {
   author: string;
   publisher: string;
   genre: string;
+  pages: number | null;
   publication_year: number | null;
   status: Book["status"];
   rating: number | null;
   review: string | null;
   progress: number | null;
+  current_page: number | null;
+  last_page_marked_at: Date | null;
   cover_url: string | null;
+  is_favorite: boolean;
   created_at: Date;
   updated_at: Date;
 }
@@ -25,12 +29,16 @@ const mapRow = (row: BookRow): Book => ({
   author: row.author,
   publisher: row.publisher,
   genre: row.genre,
+  pages: row.pages ?? undefined,
   publicationYear: row.publication_year ?? undefined,
   status: row.status,
   rating: row.rating ?? undefined,
   review: row.review ?? undefined,
   progress: row.progress ?? undefined,
+  currentPage: row.current_page ?? undefined,
+  lastPageMarkedAt: row.last_page_marked_at?.toISOString(),
   coverUrl: row.cover_url ?? undefined,
+  isFavorite: row.is_favorite,
   createdAt: row.created_at.toISOString(),
   updatedAt: row.updated_at.toISOString()
 });
@@ -74,8 +82,8 @@ export class BooksRepository {
   async create(data: CreateBookDto, userId: string): Promise<Book> {
     const id = randomUUID();
     const result = await pool.query<BookRow>(
-      `INSERT INTO books (id, user_id, title, author, publisher, genre, publication_year, status, rating, review, progress, cover_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      `INSERT INTO books (id, user_id, title, author, publisher, genre, pages, publication_year, status, rating, review, progress, current_page, last_page_marked_at, cover_url, is_favorite)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
        RETURNING *`,
       [
         id,
@@ -84,12 +92,16 @@ export class BooksRepository {
         data.author,
         data.publisher,
         data.genre,
+        data.pages ?? null,
         data.publicationYear ?? null,
         data.status,
         data.rating ?? null,
         data.review ?? null,
         data.progress ?? null,
-        data.coverUrl ?? null
+        data.currentPage ?? null,
+        data.lastPageMarkedAt ? new Date(data.lastPageMarkedAt) : null,
+        data.coverUrl ?? null,
+        data.isFavorite ?? false
       ]
     );
     return mapRow(result.rows[0]);
@@ -110,12 +122,16 @@ export class BooksRepository {
     if (data.author !== undefined) add("author", data.author);
     if (data.publisher !== undefined) add("publisher", data.publisher);
     if (data.genre !== undefined) add("genre", data.genre);
+    if (data.pages !== undefined) add("pages", data.pages);
     if (data.publicationYear !== undefined) add("publication_year", data.publicationYear);
     if (data.status !== undefined) add("status", data.status);
     if (data.rating !== undefined) add("rating", data.rating);
     if (data.review !== undefined) add("review", data.review);
     if (data.progress !== undefined) add("progress", data.progress);
+    if (data.currentPage !== undefined) add("current_page", data.currentPage);
+    if (data.lastPageMarkedAt !== undefined) add("last_page_marked_at", data.lastPageMarkedAt ? new Date(data.lastPageMarkedAt) : null);
     if (data.coverUrl !== undefined) add("cover_url", data.coverUrl);
+    if (data.isFavorite !== undefined) add("is_favorite", data.isFavorite);
 
     add("updated_at", new Date());
 

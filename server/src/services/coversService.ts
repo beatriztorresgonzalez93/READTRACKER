@@ -30,10 +30,15 @@ const OPEN_LIBRARY_LIMIT = 12;
 const RESULT_LIMIT = 8;
 
 export class CoversService {
-  async searchByTitle(title: string): Promise<string[]> {
-    const openLibraryResponse = await fetch(
-      `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=${OPEN_LIBRARY_LIMIT}`
-    );
+  async searchByTitle(title: string, author?: string): Promise<string[]> {
+    const openLibraryParams = new URLSearchParams({
+      title,
+      limit: String(OPEN_LIBRARY_LIMIT)
+    });
+    if (author?.trim()) {
+      openLibraryParams.set("author", author.trim());
+    }
+    const openLibraryResponse = await fetch(`https://openlibrary.org/search.json?${openLibraryParams.toString()}`);
 
     if (openLibraryResponse.ok) {
       const data = (await openLibraryResponse.json()) as OpenLibrarySearchJson;
@@ -47,8 +52,9 @@ export class CoversService {
       }
     }
 
+    const googleQuery = author?.trim() ? `intitle:${title} inauthor:${author.trim()}` : title;
     const googleBooksResponse = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(title)}&maxResults=10`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(googleQuery)}&maxResults=10`
     );
 
     if (!googleBooksResponse.ok) {

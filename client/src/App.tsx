@@ -9,6 +9,8 @@ import { LoginPage } from "./pages/LoginPage";
 import { NewBookPage } from "./pages/NewBookPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ReviewsPage } from "./pages/ReviewsPage";
+import { WishlistPage } from "./pages/WishlistPage";
 
 function App() {
   return (
@@ -21,6 +23,22 @@ function App() {
           element={
             <ProtectedRoute>
               <LibraryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reviews"
+          element={
+            <ProtectedRoute>
+              <ReviewsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <WishlistPage />
             </ProtectedRoute>
           }
         />

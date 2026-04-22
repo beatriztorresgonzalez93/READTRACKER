@@ -12,12 +12,16 @@ const updateBookKeys = [
   "author",
   "publisher",
   "genre",
+  "pages",
   "publicationYear",
   "status",
   "rating",
   "review",
   "progress",
-  "coverUrl"
+  "currentPage",
+  "lastPageMarkedAt",
+  "coverUrl",
+  "isFavorite"
 ] as const;
 
 export const validateCreateBook = (
@@ -25,7 +29,7 @@ export const validateCreateBook = (
   res: Response,
   next: NextFunction
 ) => {
-  const { title, author, publisher, genre, publicationYear, status, rating, progress } = req.body;
+  const { title, author, publisher, genre, pages, publicationYear, status, rating, progress, currentPage, lastPageMarkedAt, isFavorite } = req.body;
 
   if (!title || !author || !publisher || !genre || !isValidStatus(status)) {
     res.status(400).json({ error: "Título, autor, editorial, género y estado son obligatorios" });
@@ -42,11 +46,31 @@ export const validateCreateBook = (
     return;
   }
 
+  if (currentPage !== undefined && (typeof currentPage !== "number" || currentPage < 0 || currentPage > 20000)) {
+    res.status(400).json({ error: "La página actual no es válida" });
+    return;
+  }
+
+  if (lastPageMarkedAt !== undefined && Number.isNaN(new Date(String(lastPageMarkedAt)).getTime())) {
+    res.status(400).json({ error: "La fecha de marcado no es válida" });
+    return;
+  }
+
+  if (isFavorite !== undefined && typeof isFavorite !== "boolean") {
+    res.status(400).json({ error: "El campo favorito no es válido" });
+    return;
+  }
+
   if (
     publicationYear !== undefined &&
     (typeof publicationYear !== "number" || publicationYear < 0 || publicationYear > 3000)
   ) {
     res.status(400).json({ error: "El año de publicación no es válido" });
+    return;
+  }
+
+  if (pages !== undefined && (typeof pages !== "number" || pages < 1 || pages > 20000)) {
+    res.status(400).json({ error: "El número de páginas no es válido" });
     return;
   }
 
@@ -80,7 +104,7 @@ export const validateUpdateBook = (
     return;
   }
 
-  const { status, rating, progress, publicationYear, publisher } = body as Record<string, unknown>;
+  const { status, rating, progress, publicationYear, pages, currentPage, lastPageMarkedAt, publisher, isFavorite } = body as Record<string, unknown>;
 
   if (status !== undefined && !isValidStatus(status)) {
     res.status(400).json({ error: "El estado no es válido" });
@@ -112,8 +136,32 @@ export const validateUpdateBook = (
     }
   }
 
+  if (pages !== undefined) {
+    if (typeof pages !== "number" || pages < 1 || pages > 20000) {
+      res.status(400).json({ error: "El número de páginas no es válido" });
+      return;
+    }
+  }
+
+  if (currentPage !== undefined) {
+    if (typeof currentPage !== "number" || currentPage < 0 || currentPage > 20000) {
+      res.status(400).json({ error: "La página actual no es válida" });
+      return;
+    }
+  }
+
+  if (lastPageMarkedAt !== undefined && Number.isNaN(new Date(String(lastPageMarkedAt)).getTime())) {
+    res.status(400).json({ error: "La fecha de marcado no es válida" });
+    return;
+  }
+
   if (publisher !== undefined && (typeof publisher !== "string" || !publisher.trim())) {
     res.status(400).json({ error: "La editorial no es válida" });
+    return;
+  }
+
+  if (isFavorite !== undefined && typeof isFavorite !== "boolean") {
+    res.status(400).json({ error: "El campo favorito no es válido" });
     return;
   }
 
