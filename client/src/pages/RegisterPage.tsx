@@ -35,28 +35,44 @@ export const RegisterPage = () => {
     }
   };
 
+  const inputClassName =
+    "border-[#b08a63] bg-[#f8f1e5] text-[#4d311d] placeholder:text-[#8d6d4d] dark:border-[#c4a27b]/70 dark:bg-[#2f160d]/70 dark:text-[#f1dfcf] dark:placeholder:text-[#b99872]";
+
   return (
-    <section className="mx-auto w-full max-w-md space-y-4">
-      <Card className="bg-white/90 dark:bg-slate-900/80">
+    <section className="min-h-full px-4 py-6 text-[#4d311d] dark:text-[#f1dfcf]">
+      <div className="mx-auto w-full max-w-md space-y-4">
+        <Card className="border border-amber-700/60 bg-[#e9dcc4] text-[#4d311d] dark:border-amber-700/60 dark:bg-[#2f160d]/80 dark:text-[#f1dfcf]">
         <CardHeader className="pb-2">
-          <p className="rt-kicker text-slate-500 dark:text-slate-400">Cuenta nueva</p>
-          <h1 className="rt-page-title text-3xl text-slate-900 dark:text-slate-100">Crear cuenta</h1>
+          <p className="rt-kicker text-[#7a573c] dark:text-[#caa374]">Cuenta nueva</p>
+          <h1 className="rt-page-title text-3xl text-[#5a2f1f] dark:text-amber-100">Crear cuenta</h1>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Nombre</label>
-              <Input value={name} onChange={(event) => setName(capitalizeWords(event.target.value))} required />
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">Nombre</label>
+              <Input
+                className={inputClassName}
+                value={name}
+                onChange={(event) => setName(capitalizeWords(event.target.value))}
+                required
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Email</label>
-              <Input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">Email</label>
+              <Input
+                className={inputClassName}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                type="email"
+                required
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+              <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">
                 Contraseña
               </label>
               <Input
+                className={inputClassName}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 type="password"
@@ -65,18 +81,23 @@ export const RegisterPage = () => {
               />
             </div>
             {error && <Alert variant="destructive">{error}</Alert>}
-            <Button type="submit" className="w-full" disabled={submitting}>
+            <Button
+              type="submit"
+              className="w-full border border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534]"
+              disabled={submitting}
+            >
               {submitting ? "Creando cuenta..." : "Crear cuenta"}
             </Button>
           </form>
-          <p className="rt-body-copy mt-4 text-slate-600 dark:text-slate-300">
+          <p className="rt-body-copy mt-4 text-[#7a573c] dark:text-[#caa374]">
             ¿Ya tienes cuenta?{" "}
-            <Link to="/login" className="font-semibold text-cyan-700 hover:underline dark:text-cyan-300">
+            <Link to="/login" className="font-semibold text-[#8e633d] hover:underline dark:text-amber-300">
               Inicia sesión
             </Link>
           </p>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </section>
   );
 };

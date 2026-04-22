@@ -13,6 +13,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const isLibraryView = location.pathname === "/";
   const isReviewsView = location.pathname === "/reviews";
   const isWishlistView = location.pathname === "/wishlist";
+  const isAuthView = location.pathname === "/login" || location.pathname === "/register";
   const isBookFormView = location.pathname === "/books/new" || /^\/books\/[^/]+\/edit$/.test(location.pathname);
   const [theme, setTheme] = useState<Theme>("dark");
 
@@ -35,7 +36,9 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <div
       className={
-        isLibraryView || isReviewsView || isWishlistView || isBookFormView
+        isAuthView
+          ? "min-h-screen bg-[#f2e6d3] dark:bg-[#2b130b]"
+          : isLibraryView || isReviewsView || isWishlistView || isBookFormView
           ? "min-h-screen bg-[linear-gradient(180deg,#e3c6ab_0%,#ead2bc_44%,#f1dfcf_100%)] dark:bg-[linear-gradient(180deg,#3a170c_0%,#4a1f0f_42%,#54230f_100%)]"
           : "min-h-screen bg-[#d9e5df] dark:bg-[#1f2a26]"
       }
@@ -120,7 +123,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       </header>
       <main
         className={
-          isLibraryView || isReviewsView || isWishlistView
+          isLibraryView || isReviewsView || isWishlistView || isAuthView
             ? "w-full min-h-[calc(100vh-72px)] px-0 py-5 sm:py-6"
             : "mx-auto max-w-6xl px-4 py-10 sm:px-6"
         }
