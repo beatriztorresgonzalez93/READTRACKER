@@ -321,6 +321,7 @@ export const LibraryPage = () => {
 
   const openMarkPageDialog = () => {
     if (!previewBook) return;
+    if (previewBook.status !== "leyendo") return;
     setMarkPageError(null);
     setMarkPageInput(String(previewBook.currentPage ?? 0));
     setIsMarkPageOpen(true);
@@ -419,6 +420,10 @@ export const LibraryPage = () => {
 
   const saveMarkedPage = async () => {
     if (!previewBook) return;
+    if (previewBook.status !== "leyendo") {
+      setMarkPageError("Solo puedes marcar página cuando el libro está en estado Leyendo.");
+      return;
+    }
     const parsed = Number(markPageInput);
     const maxPages = previewBook.pages ?? 20000;
     if (!Number.isInteger(parsed) || parsed < 0 || parsed > maxPages) {
@@ -1067,7 +1072,7 @@ export const LibraryPage = () => {
                 variant="outline"
                 className="h-10 w-full rounded-none border-[#b08a63] bg-[#efe4d1] text-[#8e633d] hover:border-[#8e633d] hover:bg-[#dcbf98] hover:text-[#6f4b2e]"
                 onClick={openMarkPageDialog}
-                disabled={!previewBook}
+                disabled={!previewBook || previewBook.status !== "leyendo"}
               >
                 <Bookmark className="mr-1 h-3.5 w-3.5 text-rose-500" />
                 Marcar página

@@ -1,13 +1,59 @@
 // Hook reutilizable que centraliza búsqueda y filtro por estado en la biblioteca.
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Book, ReadingStatus } from "../types/book";
 
 export type BookSort = "recientes" | "titulo" | "autor" | "genero" | "valoracion";
+const BOOK_FILTERS_STORAGE_KEY = "readtracker-library-filters";
+
+type StoredBookFilters = {
+  search?: string;
+  status?: ReadingStatus | "todos";
+  sortBy?: BookSort;
+};
+
+const isStatusValue = (value: unknown): value is ReadingStatus | "todos" =>
+  value === "todos" || value === "pendiente" || value === "leyendo" || value === "leido";
+
+const isSortValue = (value: unknown): value is BookSort =>
+  value === "recientes" || value === "titulo" || value === "autor" || value === "genero" || value === "valoracion";
+
+const readStoredFilters = (): StoredBookFilters => {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(BOOK_FILTERS_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as StoredBookFilters;
+    return {
+      search: typeof parsed.search === "string" ? parsed.search : "",
+      status: isStatusValue(parsed.status) ? parsed.status : "todos",
+      sortBy: isSortValue(parsed.sortBy) ? parsed.sortBy : "recientes"
+    };
+  } catch {
+    return {};
+  }
+};
 
 export const useBookFilters = (books: Book[]) => {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<ReadingStatus | "todos">("todos");
-  const [sortBy, setSortBy] = useState<BookSort>("recientes");
+  const stored = readStoredFilters();
+  const [search, setSearch] = useState(stored.search ?? "");
+  const [status, setStatus] = useState<ReadingStatus | "todos">(stored.status ?? "todos");
+  const [sortBy, setSortBy] = useState<BookSort>(stored.sortBy ?? "recientes");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        BOOK_FILTERS_STORAGE_KEY,
+        JSON.stringify({
+          search,
+          status,
+          sortBy
+        })
+      );
+    } catch {
+      // Si localStorage falla (modo privado, cuota, etc.), no rompemos la página.
+    }
+  }, [search, status, sortBy]);
 
   const filteredBooks = useMemo(() => {
     const normalized = search.toLowerCase();
