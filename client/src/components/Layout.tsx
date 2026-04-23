@@ -11,6 +11,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const isLibraryView = location.pathname === "/";
   const isReviewsView = location.pathname === "/reviews";
   const isWishlistView = location.pathname === "/wishlist";
+  const isStatsView = location.pathname === "/stats";
   const isAuthView = location.pathname === "/login" || location.pathname === "/register";
   const isBookFormView = location.pathname === "/books/new" || /^\/books\/[^/]+\/edit$/.test(location.pathname);
   useEffect(() => {
@@ -23,13 +24,13 @@ export const Layout = ({ children }: { children: ReactNode }) => {
     <div
       className={
         isAuthView
-          ? "min-h-screen bg-[#f2e6d3] dark:bg-[#2b130b]"
-          : isLibraryView || isReviewsView || isWishlistView || isBookFormView
-          ? "min-h-screen bg-[linear-gradient(180deg,#ead2bc_0%,#edd7c4_45%,#f1dfcf_100%)] dark:bg-[linear-gradient(180deg,#5c3926_0%,#66432f_45%,#70503a_100%)]"
-          : "min-h-screen bg-[#d9e5df] dark:bg-[#1f2a26]"
+          ? "min-h-screen bg-[#2b130b]"
+          : isLibraryView || isReviewsView || isWishlistView || isStatsView || isBookFormView
+          ? "min-h-screen bg-[#6a422d]"
+          : "min-h-screen bg-[#2b130b]"
       }
     >
-      <header className="sticky top-0 z-20 border-y border-[#d7b06f] bg-[#c8a98a]/90 text-[#fff7ef] shadow-[inset_0_1px_0_rgba(255,243,220,0.26)] backdrop-blur dark:border-[#d7b06f] dark:bg-[#1a0b06]/96 dark:text-amber-100">
+      <header className="sticky top-0 z-20 border-y border-[#d7b06f] bg-[#1a0b06]/96 text-amber-100 shadow-[inset_0_1px_0_rgba(255,243,220,0.26)] backdrop-blur">
         <nav className="mx-auto grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 sm:px-6">
           <Link to="/" className="inline-flex justify-self-start flex-col text-amber-100">
             <span className="font-['Fraunces',serif] text-[2.15rem] leading-none tracking-[0.02em] text-[#f6ead8] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]">
@@ -43,23 +44,28 @@ export const Layout = ({ children }: { children: ReactNode }) => {
             <div className="flex items-center gap-1 text-[0.73rem] font-semibold tracking-[0.08em] text-amber-100/85">
               <Link
                 to="/"
-                className={`px-3 py-1 ${isLibraryView ? "rounded-sm border border-amber-400/75 bg-amber-950/25 dark:border-amber-500/75 dark:bg-amber-900/30" : ""}`}
+                className={`px-3 py-1 ${isLibraryView ? "rounded-sm border border-amber-500/75 bg-amber-900/30" : ""}`}
               >
                 Colección
               </Link>
               <Link
                 to="/reviews"
-                className={`px-3 py-1 ${isReviewsView ? "rounded-sm border border-amber-400/75 bg-amber-950/25 dark:border-amber-500/75 dark:bg-amber-900/30" : ""}`}
+                className={`px-3 py-1 ${isReviewsView ? "rounded-sm border border-amber-500/75 bg-amber-900/30" : ""}`}
               >
                 Reseñas
               </Link>
               <Link
                 to="/wishlist"
-                className={`px-3 py-1 ${isWishlistView ? "rounded-sm border border-amber-400/75 bg-amber-950/25 dark:border-amber-500/75 dark:bg-amber-900/30" : ""}`}
+                className={`px-3 py-1 ${isWishlistView ? "rounded-sm border border-amber-500/75 bg-amber-900/30" : ""}`}
               >
                 Lista de deseos
               </Link>
-              <span className="px-3 py-1 opacity-80">Estadísticas</span>
+              <Link
+                to="/stats"
+                className={`px-3 py-1 ${isStatsView ? "rounded-sm border border-amber-500/75 bg-amber-900/30" : ""}`}
+              >
+                Estadísticas
+              </Link>
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-self-end justify-end gap-2.5 text-sm font-medium">
@@ -99,7 +105,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       </header>
       <main
         className={
-          isLibraryView || isReviewsView || isWishlistView || isAuthView
+          isLibraryView || isReviewsView || isWishlistView || isStatsView || isAuthView
             ? "w-full min-h-[calc(100vh-72px)] px-0 py-5 sm:py-6"
             : "mx-auto max-w-6xl px-4 py-10 sm:px-6"
         }

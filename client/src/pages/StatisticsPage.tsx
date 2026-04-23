@@ -1,0 +1,527 @@
+import { useMemo } from "react";
+import { BookOpen, Bookmark, CalendarDays, Clock3, Flame, Heart, Star, Trophy } from "lucide-react";
+import { useBooksContext } from "../context/BooksContext";
+import { Book } from "../types/book";
+
+const monthLabels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+const parseDate = (value?: string) => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const getReadDate = (book: Book) => parseDate(book.readAt) ?? parseDate(book.updatedAt) ?? parseDate(book.createdAt);
+
+const formatCompactNumber = (value: number) => {
+  if (value >= 1000) {
+    const compact = value / 1000;
+    return `${Number.isInteger(compact) ? compact.toFixed(0) : compact.toFixed(1)}k`;
+  }
+  return `${value}`;
+};
+
+const activityColorByCount = (count: number) => {
+  if (count <= 0) return "#efe3cd";
+  if (count === 1) return "#e3cfa0";
+  if (count === 2) return "#d6b56c";
+  if (count === 3) return "#bf9339";
+  return "#8f6430";
+};
+
+const toRoman = (value: number) => {
+  const map: Array<[number, string]> = [
+    [10, "X"],
+    [9, "IX"],
+    [5, "V"],
+    [4, "IV"],
+    [1, "I"]
+  ];
+  let num = value;
+  let result = "";
+  map.forEach(([amount, symbol]) => {
+    while (num >= amount) {
+      result += symbol;
+      num -= amount;
+    }
+  });
+  return result || "I";
+};
+
+export const StatisticsPage = () => {
+  const { books, loading, error } = useBooksContext();
+
+  const allBooksCount = books.length;
+  const readBooks = useMemo(() => books.filter((book) => book.status === "leido"), [books]);
+  const now = new Date();
+  const currentYear = now.getFullYear();
+
+  const booksReadThisYear = useMemo(() => {
+    return readBooks.filter((book) => getReadDate(book)?.getFullYear() === currentYear).length;
+  }, [currentYear, readBooks]);
+
+  const averageRating = useMemo(() => {
+    const rated = readBooks.filter((book) => typeof book.rating === "number" && (book.rating ?? 0) > 0);
+    if (rated.length === 0) return "0.0";
+    const total = rated.reduce((sum, book) => sum + (book.rating ?? 0), 0);
+    return (total / rated.length).toFixed(1);
+  }, [readBooks]);
+
+  const totalReadPages = useMemo(
+    () => readBooks.reduce((sum, book) => sum + (typeof book.pages === "number" ? book.pages : 0), 0),
+    [readBooks]
+  );
+  const nowReadingBooks = useMemo(
+    () =>
+      books
+        .filter((book) => book.status === "leyendo")
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+    [books]
+  );
+
+  const booksByYear = useMemo(() => {
+    const map = new Map<number, number>();
+    readBooks.forEach((book) => {
+      const year = getReadDate(book)?.getFullYear();
+      if (!year) return;
+      map.set(year, (map.get(year) ?? 0) + 1);
+    });
+    return Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
+  }, [readBooks]);
+
+  const topGenres = useMemo(() => {
+    const map = new Map<string, number>();
+    books.forEach((book) => {
+      const genre = book.genre.trim();
+      if (!genre) return;
+      map.set(genre, (map.get(genre) ?? 0) + 1);
+    });
+    const total = Array.from(map.values()).reduce((sum, amount) => sum + amount, 0);
+    const sorted = Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es"))
+      .slice(0, 8)
+      .map(([genre, count]) => ({
+        genre,
+        count,
+        percentage: total > 0 ? Math.round((count / total) * 100) : 0
+      }));
+    return sorted;
+  }, [books]);
+  const shelfStats = useMemo(
+    () => ({
+      todos: books.length,
+      leidos: readBooks.length,
+      leyendo: nowReadingBooks.length,
+      pendientes: books.filter((book) => book.status === "pendiente").length,
+      favoritos: books.filter((book) => book.isFavorite).length
+    }),
+    [books, nowReadingBooks.length, readBooks.length]
+  );
+  const collectionGenres = useMemo(() => {
+    const map = new Map<string, number>();
+    books.forEach((book) => {
+      const genre = book.genre.trim();
+      if (!genre) return;
+      map.set(genre, (map.get(genre) ?? 0) + 1);
+    });
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es"));
+  }, [books]);
+
+  const selectedYear = useMemo(() => {
+    if (booksByYear.length === 0) return currentYear;
+    return booksByYear[booksByYear.length - 1][0];
+  }, [booksByYear, currentYear]);
+
+  const monthlyReadActivity = useMemo(() => {
+    const counts = Array.from({ length: 12 }, () => 0);
+    const booksByMonth: string[][] = Array.from({ length: 12 }, () => []);
+    readBooks.forEach((book) => {
+      const date = getReadDate(book);
+      if (!date || date.getFullYear() !== selectedYear) return;
+      const month = date.getMonth();
+      counts[month] += 1;
+      booksByMonth[month].push(book.title);
+    });
+    return { counts, booksByMonth };
+  }, [readBooks, selectedYear]);
+
+  const bestRatedBooks = useMemo(() => {
+    return readBooks
+      .filter((book) => typeof book.rating === "number" && (book.rating ?? 0) > 0)
+      .sort((a, b) => {
+        const ratingDiff = (b.rating ?? 0) - (a.rating ?? 0);
+        if (ratingDiff !== 0) return ratingDiff;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      })
+      .slice(0, 5);
+  }, [readBooks]);
+
+  const rhythmStats = useMemo(() => {
+    if (readBooks.length === 0) {
+      return {
+        pagesPerDay: 0,
+        daysPerBook: 0,
+        bestMonth: "-",
+        longestStreakDays: 0,
+        yearlyProjection: 0
+      };
+    }
+
+    const readDates = readBooks
+      .map((book) => getReadDate(book))
+      .filter((date): date is Date => date !== null)
+      .sort((a, b) => a.getTime() - b.getTime());
+    const firstDate = readDates[0] ?? now;
+    const elapsedDays = Math.max(1, Math.ceil((now.getTime() - firstDate.getTime()) / 86400000) + 1);
+
+    const pagesPerDay = totalReadPages > 0 ? totalReadPages / elapsedDays : 0;
+    const daysPerBook = elapsedDays / readBooks.length;
+
+    const monthMap = new Map<number, number>();
+    readDates.forEach((date) => {
+      const key = date.getFullYear() * 100 + date.getMonth();
+      monthMap.set(key, (monthMap.get(key) ?? 0) + 1);
+    });
+    let bestMonth = "-";
+    let bestMonthCount = 0;
+    monthMap.forEach((count, key) => {
+      if (count <= bestMonthCount) return;
+      bestMonthCount = count;
+      const month = key % 100;
+      bestMonth = monthLabels[month] ?? "-";
+    });
+
+    const uniqueDaySet = new Set(readDates.map((date) => date.toISOString().slice(0, 10)));
+    const uniqueDays = Array.from(uniqueDaySet).sort();
+    let longestStreakDays = uniqueDays.length > 0 ? 1 : 0;
+    let currentStreak = longestStreakDays;
+    for (let i = 1; i < uniqueDays.length; i += 1) {
+      const prev = new Date(uniqueDays[i - 1]).getTime();
+      const current = new Date(uniqueDays[i]).getTime();
+      const deltaDays = Math.round((current - prev) / 86400000);
+      currentStreak = deltaDays === 1 ? currentStreak + 1 : 1;
+      longestStreakDays = Math.max(longestStreakDays, currentStreak);
+    }
+
+    const yearlyProjection = Math.round((readBooks.length / elapsedDays) * 365);
+
+    return {
+      pagesPerDay,
+      daysPerBook,
+      bestMonth,
+      longestStreakDays,
+      yearlyProjection
+    };
+  }, [now, readBooks, totalReadPages]);
+
+  return (
+    <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
+      <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
+        <aside className="space-y-3">
+          <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
+            <div className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
+              📚 Mi biblioteca
+            </div>
+            <div className="grid grid-cols-2 gap-3 p-4 text-center">
+              <div>
+                <p className="font-['Fraunces',serif] text-3xl">{allBooksCount}</p>
+                <p className="text-[11px] uppercase tracking-[0.12em]">Libros</p>
+              </div>
+              <div>
+                <p className="font-['Fraunces',serif] text-3xl">{readBooks.length}</p>
+                <p className="text-[11px] uppercase tracking-[0.12em]">Leídos</p>
+              </div>
+              <div>
+                <p className="font-['Fraunces',serif] text-3xl">{averageRating}</p>
+                <p className="text-[11px] uppercase tracking-[0.12em]">Valoración</p>
+              </div>
+              <div>
+                <p className="font-['Fraunces',serif] text-3xl">{booksReadThisYear}</p>
+                <p className="text-[11px] uppercase tracking-[0.12em]">Este año</p>
+              </div>
+            </div>
+          </article>
+
+          <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
+            <div className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
+              📖 Leyendo ahora
+            </div>
+            <div className="divide-y divide-[#dcc8a7]">
+              {nowReadingBooks.length === 0 ? (
+                <p className="px-4 py-3 text-sm text-[#7a573c]">Sin lecturas activas.</p>
+              ) : (
+                nowReadingBooks.slice(0, 2).map((book) => (
+                  <div key={book.id} className="px-4 py-2.5">
+                    <p className="truncate font-['Fraunces',serif] text-base leading-tight">{book.title}</p>
+                    <p className="truncate text-xs italic text-[#7a573c]">{book.author}</p>
+                    <p className="mt-1 text-xs text-[#7a573c]">Avance: {book.progress ?? 0}%</p>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#d9c7ad]">
+                      <div
+                        className="h-full rounded-full bg-[#8e633d]"
+                        style={{ width: `${Math.max(0, Math.min(100, book.progress ?? 0))}%` }}
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </article>
+
+          <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
+            <div className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
+              🗂️ Estantes
+            </div>
+            <ul className="divide-y divide-[#dcc8a7] text-[1.02rem]">
+              <li className="flex items-center justify-between px-4 py-2.5">
+                <span className="inline-flex items-center gap-2"><BookOpen className="h-4 w-4 text-[#8e633d]" />Todos</span>
+                <span className="font-semibold text-[#6f4b2e]">{shelfStats.todos}</span>
+              </li>
+              <li className="flex items-center justify-between px-4 py-2.5">
+                <span className="inline-flex items-center gap-2"><BookOpen className="h-4 w-4 text-[#8e633d]" />Pendientes</span>
+                <span className="font-semibold text-[#6f4b2e]">{shelfStats.pendientes}</span>
+              </li>
+              <li className="flex items-center justify-between px-4 py-2.5">
+                <span className="inline-flex items-center gap-2"><Bookmark className="h-4 w-4 text-[#8e633d]" />Leídos</span>
+                <span className="font-semibold text-[#6f4b2e]">{shelfStats.leidos}</span>
+              </li>
+              <li className="flex items-center justify-between px-4 py-2.5">
+                <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-[#8e633d]" />En progreso</span>
+                <span className="font-semibold text-[#6f4b2e]">{shelfStats.leyendo}</span>
+              </li>
+              <li className="flex items-center justify-between px-4 py-2.5">
+                <span className="inline-flex items-center gap-2"><Heart className="h-4 w-4 text-[#8e633d]" />Favoritos</span>
+                <span className="font-semibold text-[#6f4b2e]">{shelfStats.favoritos}</span>
+              </li>
+            </ul>
+          </article>
+
+          <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
+            <div className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
+              🏷️ Géneros
+            </div>
+            <ul className="divide-y divide-[#dcc8a7] text-[1.02rem]">
+              <li className="flex items-center justify-between px-4 py-2.5">
+                <span className="line-clamp-1">Todos</span>
+                <span className="font-semibold text-[#6f4b2e]">{books.length}</span>
+              </li>
+              {collectionGenres.map(([genre, count]) => (
+                <li key={genre} className="flex items-center justify-between px-4 py-2.5">
+                  <span className="truncate">{genre}</span>
+                  <span className="font-semibold text-[#6f4b2e]">{count}</span>
+                </li>
+              ))}
+              {collectionGenres.length === 0 && <li className="px-4 py-3 text-[#7a573c]">Sin géneros todavía.</li>}
+            </ul>
+          </article>
+        </aside>
+
+        <div>
+          <div className="mb-4 flex items-center justify-between border-b border-[#d7b06f]/70 pb-3 text-[#f0dfc5]">
+            <p className="font-['Fraunces',serif] text-xl">✦ Estadísticas de lectura</p>
+            <span className="text-xs uppercase tracking-[0.1em] text-amber-100/70">Resumen actualizado</span>
+          </div>
+
+          {loading && <p className="rounded-md border border-amber-700/60 bg-[#4b2516] px-4 py-3 text-amber-100">Cargando estadísticas...</p>}
+          {!loading && error && (
+            <p className="rounded-md border border-rose-500/50 bg-rose-950/35 px-4 py-3 text-rose-100">{error}</p>
+          )}
+
+          {!loading && !error && (
+            <div className="space-y-4">
+              <article className="overflow-hidden rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
+                <div className="border-b border-[#c89c33] bg-[#5b2a17] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8cf9f]">
+                  📚 Resumen general
+                </div>
+                <div className="grid grid-cols-2 divide-x divide-y divide-[#c4a27b]/50 sm:grid-cols-4 sm:divide-y-0">
+                  <div className="p-4 text-center">
+                    <p className="font-['Fraunces',serif] text-4xl leading-none">{allBooksCount}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#7a573c]">En colección</p>
+                  </div>
+                  <div className="p-4 text-center">
+                    <p className="font-['Fraunces',serif] text-4xl leading-none">{booksReadThisYear}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#7a573c]">Este año</p>
+                  </div>
+                  <div className="p-4 text-center">
+                    <p className="font-['Fraunces',serif] text-4xl leading-none">{averageRating}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#7a573c]">Valoración media</p>
+                  </div>
+                  <div className="p-4 text-center">
+                    <p className="font-['Fraunces',serif] text-4xl leading-none">{formatCompactNumber(totalReadPages)}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#7a573c]">Páginas leídas</p>
+                  </div>
+                </div>
+              </article>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <article className="overflow-hidden rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
+                  <div className="border-b border-[#c89c33] bg-[#5b2a17] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8cf9f]">
+                    🗓️ Libros por año
+                  </div>
+                  <div className="p-4">
+                    {booksByYear.length === 0 ? (
+                      <p className="text-sm text-[#7a573c]">Aún no hay libros leídos para mostrar.</p>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-3 text-center sm:grid-cols-5">
+                        {booksByYear.map(([year, count]) => (
+                          <div key={year} className="border-b border-[#c4a27b]/70 pb-1">
+                            <p className="font-['Fraunces',serif] text-xl leading-none">{count}</p>
+                            <p className="mt-1 text-[11px] text-[#7a573c]">{year}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </article>
+
+                <article className="overflow-hidden rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
+                  <div className="border-b border-[#c89c33] bg-[#5b2a17] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8cf9f]">
+                    🎯 Géneros favoritos
+                  </div>
+                  <div className="space-y-2 p-4">
+                    {topGenres.length === 0 && <p className="text-sm text-[#7a573c]">Aún no hay géneros suficientes.</p>}
+                    {topGenres.map((item, index) => (
+                      <div key={item.genre} className="grid grid-cols-[minmax(90px,1fr)_minmax(140px,3fr)_40px] items-center gap-2 text-sm">
+                        <span className="truncate">{item.genre}</span>
+                        <div className="h-2 overflow-hidden rounded-full bg-[#d9c7ad]">
+                          <div
+                            className={`h-full rounded-full ${index === 1 ? "bg-[#213a83]" : index === 2 ? "bg-[#2b7f71]" : index === 3 ? "bg-[#7a5a2d]" : index === 4 ? "bg-[#59318f]" : "bg-[#8e633d]"}`}
+                            style={{ width: `${item.percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-right text-xs text-[#7a573c]">{item.percentage}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </article>
+              </div>
+
+              <article className="overflow-visible rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
+                <div className="border-b border-[#c89c33] bg-[#5b2a17] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8cf9f]">
+                  🧩 Actividad de lectura {selectedYear}
+                </div>
+                <div className="px-4 pb-4 pt-10">
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-12">
+                    {monthlyReadActivity.counts.map((count, index) => {
+                      return (
+                      <div key={monthLabels[index]} className="group relative text-center">
+                        <div className="mb-1 h-14 rounded-sm border border-[#c4a27b]/55" style={{ backgroundColor: activityColorByCount(count) }} />
+                          <p className="text-[10px] uppercase text-[#7a573c]">{monthLabels[index]}</p>
+                        {monthlyReadActivity.booksByMonth[index].length > 0 && (
+                          <div className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-20 hidden w-52 -translate-x-1/2 rounded-md border border-[#c69253] bg-[#f8f1e5] p-2 text-left shadow-lg group-hover:block">
+                            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#7a573c]">
+                              {monthLabels[index]} {selectedYear}
+                            </p>
+                            <ul className="space-y-0.5">
+                              {monthlyReadActivity.booksByMonth[index].slice(0, 6).map((title) => (
+                                <li key={title} className="truncate text-xs text-[#4d311d]">- {title}</li>
+                              ))}
+                            </ul>
+                            {monthlyReadActivity.booksByMonth[index].length > 6 && (
+                              <p className="mt-1 text-[10px] italic text-[#7a573c]">
+                                +{monthlyReadActivity.booksByMonth[index].length - 6} más
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 text-[10px] text-[#7a573c]">
+                    {[
+                      { label: "0 libros", color: activityColorByCount(0) },
+                      { label: "1 libro", color: activityColorByCount(1) },
+                      { label: "2 libros", color: activityColorByCount(2) },
+                      { label: "3 libros", color: activityColorByCount(3) },
+                      { label: "4+ libros", color: activityColorByCount(4) }
+                    ].map((item) => (
+                      <span
+                        key={item.label}
+                        className="inline-flex items-center gap-1"
+                      >
+                        <span
+                        className="inline-block h-3 w-3 rounded-[2px] border border-[#c4a27b]/60"
+                        style={{ backgroundColor: item.color }}
+                      />
+                        <span>{item.label}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </article>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <article className="overflow-hidden rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
+                  <div className="border-b border-[#c89c33] bg-[#5b2a17] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8cf9f]">
+                    ⭐ Mejores valorados
+                  </div>
+                  <div className="p-2">
+                    {bestRatedBooks.length === 0 ? (
+                      <p className="px-2 py-3 text-sm text-[#7a573c]">Todavía no hay valoraciones para esta sección.</p>
+                    ) : (
+                      bestRatedBooks.map((book, index) => (
+                        <div key={book.id} className="grid grid-cols-[30px_1fr_auto] items-center gap-3 border-b border-[#c4a27b]/45 px-2 py-2 last:border-b-0">
+                          <span className="font-['Fraunces',serif] text-xl text-[#7a573c]">{toRoman(index + 1)}</span>
+                          <div className="min-w-0">
+                            <p className="truncate font-['Fraunces',serif] text-lg leading-none">{book.title}</p>
+                            <p className="truncate text-xs italic text-[#7a573c]">{book.author}</p>
+                          </div>
+                          <p className="text-sm text-[#c89c33]">
+                            {"★".repeat(book.rating ?? 0)}
+                            {"☆".repeat(Math.max(0, 5 - (book.rating ?? 0)))}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </article>
+
+                <article className="overflow-hidden rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
+                  <div className="border-b border-[#c89c33] bg-[#5b2a17] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8cf9f]">
+                    ⏱️ Ritmo de lectura
+                  </div>
+                  <div className="space-y-3 p-4 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-[#8e633d]" />
+                        Páginas por día (media)
+                      </span>
+                      <strong>{rhythmStats.pagesPerDay.toFixed(1)}</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-2">
+                        <CalendarDays className="h-4 w-4 text-[#8e633d]" />
+                        Días por libro (media)
+                      </span>
+                      <strong>{rhythmStats.daysPerBook.toFixed(1)}</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-[#8e633d]" />
+                        Mejor mes del año
+                      </span>
+                      <strong>{rhythmStats.bestMonth}</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-2">
+                        <Flame className="h-4 w-4 text-[#8e633d]" />
+                        Racha más larga
+                      </span>
+                      <strong>{rhythmStats.longestStreakDays} días</strong>
+                    </div>
+                    <div className="pt-2 text-center text-xs italic text-[#7a573c]">
+                      <span className="inline-flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-current text-[#c89c33]" />A este ritmo leerás ~{rhythmStats.yearlyProjection} libros en {currentYear}.
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};

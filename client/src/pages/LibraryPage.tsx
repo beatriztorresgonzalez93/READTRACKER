@@ -100,7 +100,13 @@ export const LibraryPage = () => {
     return cells;
   };
   const previewCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const nowReading = useMemo(() => books.find((book) => book.status === "leyendo"), [books]);
+  const nowReadingBooks = useMemo(
+    () =>
+      books
+        .filter((book) => book.status === "leyendo")
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+    [books]
+  );
   const readCount = useMemo(() => books.filter((book) => book.status === "leido").length, [books]);
   const averageRating = useMemo(() => {
     const rated = books.filter(
@@ -491,10 +497,9 @@ export const LibraryPage = () => {
     <section className="relative min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
       <div className={`grid gap-5 lg:grid-cols-[260px_1fr] ${previewBookId ? "pointer-events-none select-none" : ""}`}>
         <aside className="space-y-4">
-          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-4 text-[#4d311d]">
-            <p className="mb-3 text-xs font-semibold tracking-[0.18em] text-[#7a573c]">MI BIBLIOTECA</p>
-            <div className="mb-3 border-t border-[#c4a27b]/70" />
-            <div className="grid grid-cols-2 gap-3 text-center">
+          <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
+            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
+            <div className="grid grid-cols-2 gap-3 p-4 text-center">
               <div>
                 <p className="font-['Fraunces',serif] text-3xl">{books.length}</p>
                 <p className="text-[11px] uppercase tracking-[0.12em]">Libros</p>
@@ -514,32 +519,36 @@ export const LibraryPage = () => {
             </div>
           </div>
 
-          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-4 text-[#4d311d]">
-            <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-[#7a573c]">LEYENDO AHORA</p>
-            <div className="mb-3 border-t border-[#c4a27b]/70" />
-            {nowReading ? (
-              <div className="space-y-1">
-                <p className="text-xs italic text-[#7a573c]">Lectura actual</p>
-                <p className="font-['Fraunces',serif] text-lg leading-tight">{nowReading.title}</p>
-                <p className="text-sm">{nowReading.author}</p>
-                <p className="text-xs">Avance: {nowReading.progress ?? 0}%</p>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[#d9c7ad]">
-                  <div
-                    className="h-full rounded-full bg-[#8e633d]"
-                    style={{ width: `${Math.max(0, Math.min(100, nowReading.progress ?? 0))}%` }}
-                  />
-                </div>
+          <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
+            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
+            {nowReadingBooks.length > 0 ? (
+              <div className="divide-y divide-[#dcc8a7]">
+                {nowReadingBooks.slice(0, 3).map((book) => (
+                  <div key={book.id} className="space-y-1 px-4 py-2.5">
+                    <p className="font-['Fraunces',serif] text-base leading-tight">{book.title}</p>
+                    <p className="text-sm">{book.author}</p>
+                    <p className="text-xs">Avance: {book.progress ?? 0}%</p>
+                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[#d9c7ad]">
+                      <div
+                        className="h-full rounded-full bg-[#8e633d]"
+                        style={{ width: `${Math.max(0, Math.min(100, book.progress ?? 0))}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                {nowReadingBooks.length > 3 && (
+                  <p className="px-4 py-2 text-xs italic text-[#7a573c]">+{nowReadingBooks.length - 3} más en lectura.</p>
+                )}
               </div>
             ) : (
-              <p className="text-sm">No hay lectura activa ahora mismo.</p>
+              <p className="px-4 py-3 text-sm">No hay lectura activa ahora mismo.</p>
             )}
           </div>
 
-          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-4 text-[#4d311d]">
-            <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-[#7a573c]">ESTANTES</p>
-            <div className="mb-3 border-t border-[#c4a27b]/70" />
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center justify-between">
+          <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
+            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
+            <ul className="divide-y divide-[#dcc8a7] text-sm">
+              <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
                   onClick={() => setActiveShelf((current) => (current === "todos" ? null : "todos"))}
@@ -547,9 +556,9 @@ export const LibraryPage = () => {
                 >
                   <BookOpen className="h-3.5 w-3.5" />Todos
                 </button>
-                <span>{books.length}</span>
+                <span className="font-semibold text-[#6f4b2e]">{books.length}</span>
               </li>
-              <li className="flex items-center justify-between">
+              <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
                   onClick={() => setActiveShelf((current) => (current === "pendiente" ? null : "pendiente"))}
@@ -557,9 +566,9 @@ export const LibraryPage = () => {
                 >
                   <BookOpen className="h-3.5 w-3.5" />Pendientes
                 </button>
-                <span>{books.filter((b) => b.status === "pendiente").length}</span>
+                <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.status === "pendiente").length}</span>
               </li>
-              <li className="flex items-center justify-between">
+              <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
                   onClick={() => setActiveShelf((current) => (current === "leido" ? null : "leido"))}
@@ -567,9 +576,9 @@ export const LibraryPage = () => {
                 >
                   <Bookmark className="h-3.5 w-3.5" />Leídos
                 </button>
-                <span>{readCount}</span>
+                <span className="font-semibold text-[#6f4b2e]">{readCount}</span>
               </li>
-              <li className="flex items-center justify-between">
+              <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
                   onClick={() => setActiveShelf((current) => (current === "leyendo" ? null : "leyendo"))}
@@ -577,9 +586,9 @@ export const LibraryPage = () => {
                 >
                   <Clock3 className="h-3.5 w-3.5" />En progreso
                 </button>
-                <span>{books.filter((b) => b.status === "leyendo").length}</span>
+                <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.status === "leyendo").length}</span>
               </li>
-              <li className="flex items-center justify-between">
+              <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
                   onClick={() => setActiveShelf((current) => (current === "favoritos" ? null : "favoritos"))}
@@ -587,18 +596,17 @@ export const LibraryPage = () => {
                 >
                   <Heart className="h-3.5 w-3.5" />Favoritos
                 </button>
-                <span>{books.filter((b) => b.isFavorite).length}</span>
+                <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.isFavorite).length}</span>
               </li>
             </ul>
           </div>
-          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-4 text-[#4d311d]">
-            <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-[#7a573c]">GÉNEROS</p>
-            <div className="mb-3 border-t border-[#c4a27b]/70" />
+          <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
+            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
             {genres.length === 0 ? (
-              <p className="text-sm">Sin géneros todavía.</p>
+              <p className="px-4 py-3 text-sm">Sin géneros todavía.</p>
             ) : (
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center justify-between">
+              <ul className="divide-y divide-[#dcc8a7] text-sm">
+                <li className="flex items-center justify-between px-4 py-2.5">
                   <button
                     type="button"
                     onClick={() => setActiveGenre(null)}
@@ -606,10 +614,10 @@ export const LibraryPage = () => {
                   >
                     Todos
                   </button>
-                  <span>{books.length}</span>
+                  <span className="font-semibold text-[#6f4b2e]">{books.length}</span>
                 </li>
                 {genres.map(([genre, count]) => (
-                  <li key={genre} className="flex items-center justify-between">
+                  <li key={genre} className="flex items-center justify-between px-4 py-2.5">
                     <button
                       type="button"
                       onClick={() => setActiveGenre((current) => (current === genre ? null : genre))}
@@ -619,7 +627,7 @@ export const LibraryPage = () => {
                     >
                       {genre}
                     </button>
-                    <span>{count}</span>
+                    <span className="font-semibold text-[#6f4b2e]">{count}</span>
                   </li>
                 ))}
               </ul>

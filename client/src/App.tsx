@@ -10,6 +10,7 @@ import { NewBookPage } from "./pages/NewBookPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ReviewsPage } from "./pages/ReviewsPage";
+import { StatisticsPage } from "./pages/StatisticsPage";
 import { WishlistPage } from "./pages/WishlistPage";
 
 function App() {
@@ -39,6 +40,14 @@ function App() {
           element={
             <ProtectedRoute>
               <WishlistPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stats"
+          element={
+            <ProtectedRoute>
+              <StatisticsPage />
             </ProtectedRoute>
           }
         />
