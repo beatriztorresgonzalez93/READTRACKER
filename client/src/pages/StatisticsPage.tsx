@@ -220,7 +220,7 @@ export const StatisticsPage = () => {
       <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
         <aside className="space-y-3">
           <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <div className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
+            <div className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
               📚 Mi biblioteca
             </div>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
@@ -244,7 +244,7 @@ export const StatisticsPage = () => {
           </article>
 
           <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <div className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
+            <div className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
               📖 Leyendo ahora
             </div>
             <div className="divide-y divide-[#dcc8a7]">
@@ -269,7 +269,7 @@ export const StatisticsPage = () => {
           </article>
 
           <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <div className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
+            <div className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
               🗂️ Estantes
             </div>
             <ul className="divide-y divide-[#dcc8a7] text-[1.02rem]">
@@ -297,7 +297,7 @@ export const StatisticsPage = () => {
           </article>
 
           <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <div className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
+            <div className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
               🏷️ Géneros
             </div>
             <ul className="divide-y divide-[#dcc8a7] text-[1.02rem]">

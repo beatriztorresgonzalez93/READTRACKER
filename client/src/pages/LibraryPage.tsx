@@ -498,7 +498,7 @@ export const LibraryPage = () => {
       <div className={`grid gap-5 lg:grid-cols-[260px_1fr] ${previewBookId ? "pointer-events-none select-none" : ""}`}>
         <aside className="space-y-4">
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
               <div>
                 <p className="font-['Fraunces',serif] text-3xl">{books.length}</p>
@@ -520,7 +520,7 @@ export const LibraryPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
             {nowReadingBooks.length > 0 ? (
               <div className="divide-y divide-[#dcc8a7]">
                 {nowReadingBooks.slice(0, 3).map((book) => (
@@ -546,7 +546,7 @@ export const LibraryPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
             <ul className="divide-y divide-[#dcc8a7] text-sm">
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
@@ -601,7 +601,7 @@ export const LibraryPage = () => {
             </ul>
           </div>
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
             {genres.length === 0 ? (
               <p className="px-4 py-3 text-sm">Sin géneros todavía.</p>
             ) : (

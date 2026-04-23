@@ -1,6 +1,7 @@
 // Página de reseñas con búsqueda, filtro por estrellas y orden.
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Bookmark, Clock3, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Alert } from "../components/ui/alert";
 import { Input } from "../components/ui/input";
 import { Select } from "../components/ui/select";
@@ -11,6 +12,7 @@ type ReviewSort = "reciente" | "valoracion" | "titulo";
 
 export const ReviewsPage = () => {
   const { books, loading, error } = useBooksContext();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("todas");
   const [sortBy, setSortBy] = useState<ReviewSort>("reciente");
@@ -87,7 +89,7 @@ export const ReviewsPage = () => {
       <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
         <aside className="space-y-4">
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
               <div>
                 <p className="font-['Fraunces',serif] text-3xl">{books.length}</p>
@@ -109,7 +111,7 @@ export const ReviewsPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
             {nowReadingBooks.length > 0 ? (
               <div className="divide-y divide-[#dcc8a7]">
                 {nowReadingBooks.slice(0, 2).map((book) => (
@@ -132,7 +134,7 @@ export const ReviewsPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
             <ul className="divide-y divide-[#dcc8a7] text-sm">
               <li className="flex items-center justify-between px-4 py-2.5">
                 <span className="inline-flex items-center gap-2"><BookOpen className="h-3.5 w-3.5" />Todos</span>
@@ -158,7 +160,7 @@ export const ReviewsPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06] px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
             <ul className="divide-y divide-[#dcc8a7] text-sm">
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
@@ -240,7 +242,8 @@ export const ReviewsPage = () => {
                 {reviewBooks.map((book) => (
                   <article
                     key={book.id}
-                    className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-0 text-[#4d311d] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#c89c33] hover:shadow-[0_10px_24px_-18px_rgba(90,47,31,0.75)]"
+                    className="cursor-pointer rounded-md border border-amber-700/60 bg-[#e9dcc4] p-0 text-[#4d311d] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#c89c33] hover:shadow-[0_10px_24px_-18px_rgba(90,47,31,0.75)]"
+                    onClick={() => navigate(`/?preview=${encodeURIComponent(book.id)}`)}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2 px-4 pb-2 pt-4">
                       <div>
