@@ -1,7 +1,7 @@
 // Página de lista de deseos independiente de la biblioteca.
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Clock3, Heart, Plus, Sparkles, Trash2 } from "lucide-react";
-import { ApiError, createWishlistItem, deleteWishlistItem, getWishlistItems } from "../api/client";
+import { ApiError, createWishlistItem, getWishlistItems, purchaseWishlistItem, updateWishlistItem } from "../api/client";
 import { Alert } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
 import {
@@ -31,14 +31,16 @@ const getPriorityLabel = (priority: WishlistPriority) => {
 export const WishlistPage = () => {
   const { books } = useBooksContext();
   const [search, setSearch] = useState("");
-  const [genre, setGenre] = useState("todos");
+  const [store, setStore] = useState("todos");
   const [sortBy, setSortBy] = useState<WishlistSort>("prioridad");
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newAuthor, setNewAuthor] = useState("");
-  const [newGenre, setNewGenre] = useState("");
+  const [newPrice, setNewPrice] = useState("");
+  const [newStore, setNewStore] = useState("");
   const [newPriority, setNewPriority] = useState<WishlistPriority>(3);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [savingWish, setSavingWish] = useState(false);
@@ -63,11 +65,12 @@ export const WishlistPage = () => {
                   const title = typeof o.title === "string" ? o.title.trim() : "";
                   const author = typeof o.author === "string" ? o.author.trim() : "";
                   if (!title || !author) continue;
-                  const genre = typeof o.genre === "string" ? o.genre.trim() : undefined;
+                  const price = typeof o.price === "string" ? o.price.trim() : undefined;
+                  const store = typeof o.store === "string" ? o.store.trim() : undefined;
                   const pr = o.priority;
                   const priority =
                     typeof pr === "number" && pr >= 1 && pr <= 5 ? (pr as WishlistPriority) : undefined;
-                  await createWishlistItem({ title, author, genre: genre || undefined, priority });
+                  await createWishlistItem({ title, author, price: price || undefined, store: store || undefined, priority });
                 }
                 localStorage.removeItem(WISHLIST_STORAGE_KEY);
                 list = await getWishlistItems();
@@ -99,10 +102,10 @@ export const WishlistPage = () => {
     return (total / rated.length).toFixed(1);
   }, [books]);
 
-  const genres = useMemo(() => {
+  const stores = useMemo(() => {
     const counts = new Map<string, number>();
     items.forEach((item) => {
-      const normalized = item.genre.trim();
+      const normalized = item.store.trim();
       if (!normalized) return;
       counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
     });
@@ -116,10 +119,11 @@ export const WishlistPage = () => {
         !normalized ||
         item.title.toLowerCase().includes(normalized) ||
         item.author.toLowerCase().includes(normalized) ||
-        item.genre.toLowerCase().includes(normalized);
-      const matchesGenre =
-        genre === "todos" || item.genre.localeCompare(genre, "es", { sensitivity: "base" }) === 0;
-      return matchesSearch && matchesGenre;
+        item.price.toLowerCase().includes(normalized) ||
+        item.store.toLowerCase().includes(normalized);
+      const matchesStore =
+        store === "todos" || item.store.localeCompare(store, "es", { sensitivity: "base" }) === 0;
+      return matchesSearch && matchesStore;
     });
 
     return filtered.toSorted((a, b) => {
@@ -127,43 +131,79 @@ export const WishlistPage = () => {
       if (sortBy === "reciente") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return b.priority - a.priority || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  }, [genre, items, search, sortBy]);
+  }, [store, items, search, sortBy]);
 
-  const addWish = async () => {
+  const openCreateDialog = () => {
+    setEditingId(null);
+    setNewTitle("");
+    setNewAuthor("");
+    setNewPrice("");
+    setNewStore("");
+    setNewPriority(3);
+    setIsAddOpen(true);
+  };
+
+  const openEditDialog = (item: WishlistItem) => {
+    setEditingId(item.id);
+    setNewTitle(item.title);
+    setNewAuthor(item.author);
+    setNewPrice(item.price ?? "");
+    setNewStore(item.store ?? "");
+    setNewPriority(item.priority);
+    setIsAddOpen(true);
+  };
+
+  const saveWish = async () => {
     if (!newTitle.trim() || !newAuthor.trim()) return;
     const title = capitalizeFirst(newTitle.trim());
     const author = capitalizeWords(newAuthor.trim());
-    const genre = capitalizeFirst(newGenre.trim()) || "General";
+    const price = newPrice.trim() || "Sin precio";
+    const store = capitalizeWords(newStore.trim()) || "Sin tienda";
+
     setSavingWish(true);
     setLoadError(null);
     try {
-      const created = await createWishlistItem({
-        title,
-        author,
-        genre,
-        priority: newPriority
-      });
-      setItems((prev) => [created, ...prev]);
+      if (editingId) {
+        const updated = await updateWishlistItem(editingId, {
+          title,
+          author,
+          price,
+          store,
+          priority: newPriority
+        });
+        setItems((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+      } else {
+        const created = await createWishlistItem({
+          title,
+          author,
+          price,
+          store,
+          priority: newPriority
+        });
+        setItems((prev) => [created, ...prev]);
+      }
+      setEditingId(null);
       setNewTitle("");
       setNewAuthor("");
-      setNewGenre("");
+      setNewPrice("");
+      setNewStore("");
       setNewPriority(3);
       setIsAddOpen(false);
     } catch (err) {
-      setLoadError(err instanceof ApiError ? err.message : "No se pudo guardar el deseo");
+      setLoadError(err instanceof ApiError ? err.message : editingId ? "No se pudo actualizar el deseo" : "No se pudo guardar el deseo");
     } finally {
       setSavingWish(false);
     }
   };
 
-  const removeWish = async (id: string) => {
+  const markWishAsPurchased = async (id: string) => {
     setDeletingId(id);
     setLoadError(null);
     try {
-      await deleteWishlistItem(id);
+      await purchaseWishlistItem(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      setLoadError(err instanceof ApiError ? err.message : "No se pudo eliminar el deseo");
+      setLoadError(err instanceof ApiError ? err.message : "No se pudo marcar el deseo como comprado");
     } finally {
       setDeletingId(null);
     }
@@ -253,12 +293,12 @@ export const WishlistPage = () => {
                 className="border-[#b08a63] bg-[#f8f1e5] text-[#4d311d] placeholder:text-[#8d6d4d]"
               />
               <Select
-                value={genre}
-                onChange={(event) => setGenre(event.target.value)}
+                value={store}
+                onChange={(event) => setStore(event.target.value)}
                 className="!border-[#8e633d] !bg-[#8e633d] !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
               >
-                <option value="todos">Todos los géneros</option>
-                {genres.map(([name]) => (
+                <option value="todos">Todas las tiendas</option>
+                {stores.map(([name]) => (
                   <option key={name} value={name}>
                     {name}
                   </option>
@@ -276,7 +316,7 @@ export const WishlistPage = () => {
               <Button
                 size="default"
                 className="h-8 border border-[#8e633d] bg-[#8e633d] px-4 font-semibold text-[#f8f1e5] hover:bg-[#7c5534]"
-                onClick={() => setIsAddOpen(true)}
+                onClick={openCreateDialog}
               >
                 <Plus className="mr-1 h-3.5 w-3.5" />
                 Añadir deseo
@@ -298,7 +338,19 @@ export const WishlistPage = () => {
             ) : (
               <section className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 {visibleItems.map((item) => (
-                  <article key={item.id} className="overflow-hidden border border-[#8f643f] bg-[#f2e6d3] text-[#4d311d]">
+                  <article
+                    key={item.id}
+                    className="cursor-pointer overflow-hidden border border-[#8f643f] bg-[#f2e6d3] text-[#4d311d] transition hover:shadow-[0_0_0_1px_#b6852f]"
+                    onClick={() => openEditDialog(item)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        openEditDialog(item);
+                      }
+                    }}
+                  >
                     <div className="space-y-1 border-b border-[#8f643f] px-2.5 py-2">
                       <span className="inline-flex border border-[#c89c33]/70 bg-[#2d130b]/60 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.09em] text-[#d7b06f]">
                         {getPriorityLabel(item.priority)}
@@ -308,15 +360,20 @@ export const WishlistPage = () => {
                     </div>
                     <div className="space-y-1 px-2.5 py-2">
                       <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.1em] text-[#7a573c]">
-                        <span className="line-clamp-1">{item.genre}</span>
-                        <span>{new Date(item.createdAt).getFullYear()}</span>
+                        <span className="line-clamp-1">{item.store || "Sin tienda"}</span>
+                        <span>{item.price || "Sin precio"}</span>
                       </div>
                       <div className="pt-1">
                         <Button
                           type="button"
                           size="sm"
-                          onClick={() => void removeWish(item.id)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void markWishAsPurchased(item.id);
+                          }}
                           disabled={deletingId === item.id}
+                          onMouseDown={(event) => event.stopPropagation()}
+                          onKeyDown={(event) => event.stopPropagation()}
                           className="h-6 rounded-none border border-[#8e633d] bg-[#8e633d] px-2 text-[10px] uppercase tracking-[0.08em] text-[#f8f1e5] hover:bg-[#7c5534]"
                         >
                           <Sparkles className="mr-1 h-3 w-3" />
@@ -332,10 +389,18 @@ export const WishlistPage = () => {
         </div>
       </div>
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+      <Dialog
+        open={isAddOpen}
+        onOpenChange={(open) => {
+          setIsAddOpen(open);
+          if (!open) setEditingId(null);
+        }}
+      >
         <DialogContent className="border border-[#8f643f] bg-[#f2e6d3] text-[#4d311d] shadow-xl">
           <DialogHeader>
-            <DialogTitle className="font-['Fraunces',serif] text-2xl text-[#5a2f1f]">Añadir deseo</DialogTitle>
+            <DialogTitle className="font-['Fraunces',serif] text-2xl text-[#5a2f1f]">
+              {editingId ? "Editar deseo" : "Añadir deseo"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <Input
@@ -351,9 +416,15 @@ export const WishlistPage = () => {
               className="border-[#b08a63] bg-[#f8f1e5] text-[#4d311d]"
             />
             <Input
-              value={newGenre}
-              onChange={(event) => setNewGenre(capitalizeFirst(event.target.value))}
-              placeholder="Género"
+              value={newPrice}
+              onChange={(event) => setNewPrice(event.target.value)}
+              placeholder="Precio (ej: 19,90 EUR)"
+              className="border-[#b08a63] bg-[#f8f1e5] text-[#4d311d]"
+            />
+            <Input
+              value={newStore}
+              onChange={(event) => setNewStore(capitalizeWords(event.target.value))}
+              placeholder="Tienda (ej: Casa del Libro, Amazon...)"
               className="border-[#b08a63] bg-[#f8f1e5] text-[#4d311d]"
             />
             <Select
@@ -371,12 +442,12 @@ export const WishlistPage = () => {
               Cancelar
             </Button>
             <Button
-              onClick={() => void addWish()}
+              onClick={() => void saveWish()}
               disabled={savingWish}
               className="border border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534]"
             >
               <Trash2 className="mr-1 h-3.5 w-3.5" />
-              {savingWish ? "Guardando..." : "Guardar deseo"}
+              {savingWish ? "Guardando..." : editingId ? "Guardar cambios" : "Guardar deseo"}
             </Button>
           </DialogFooter>
         </DialogContent>

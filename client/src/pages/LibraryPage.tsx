@@ -1,8 +1,8 @@
 // Página principal con listado, búsqueda y filtros de la biblioteca.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Bookmark, Clock3, Heart, PencilLine, X } from "lucide-react";
-import { deleteBook, getBookById, updateBook } from "../api/client";
+import { BookOpen, Bookmark, CalendarDays, ChevronLeft, ChevronRight, Clock3, Heart, PencilLine, X } from "lucide-react";
+import { ApiError, deleteBook, getBookById, getWishlistAcquisitions, updateBook } from "../api/client";
 import { BookList } from "../components/BookList";
 import { Alert } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
@@ -16,9 +16,12 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Select } from "../components/ui/select";
+import { Textarea } from "../components/ui/textarea";
 import { useBooksContext } from "../context/BooksContext";
 import { useBookFilters } from "../hooks/useBookFilters";
-import { Book } from "../types/book";
+import { Book, ReadingStatus } from "../types/book";
+import { WishlistAcquisition } from "../types/wishlist";
+import { capitalizeFirst } from "../utils/textCase";
 
 export const LibraryPage = () => {
   const location = useLocation();
@@ -36,11 +39,64 @@ export const LibraryPage = () => {
   const [isClosingPreview, setIsClosingPreview] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isMarkPageOpen, setIsMarkPageOpen] = useState(false);
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const [markPageInput, setMarkPageInput] = useState("");
   const [markPageError, setMarkPageError] = useState<string | null>(null);
+  const [reviewDraft, setReviewDraft] = useState("");
+  const [ratingDraft, setRatingDraft] = useState(0);
+  const [readAtDraft, setReadAtDraft] = useState("");
+  const [timesReadDraft, setTimesReadDraft] = useState("1ª vez");
+  const [favoriteQuoteDraft, setFavoriteQuoteDraft] = useState("");
+  const [reviewTagsDraft, setReviewTagsDraft] = useState<string[]>([]);
+  const [reviewTagInput, setReviewTagInput] = useState("");
+  const [recommendDraft, setRecommendDraft] = useState<"si" | "depende" | "no">("si");
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const [isSavingMarkPage, setIsSavingMarkPage] = useState(false);
-  const [isSavingRating, setIsSavingRating] = useState(false);
+  const [isSavingStatus, setIsSavingStatus] = useState(false);
+  const [isSavingReview, setIsSavingReview] = useState(false);
   const [isShowingAllCollection, setIsShowingAllCollection] = useState(false);
+  const [recentAcquisitions, setRecentAcquisitions] = useState<WishlistAcquisition[]>([]);
+  const [acquisitionsError, setAcquisitionsError] = useState<string | null>(null);
+  const [isReadAtPickerOpen, setIsReadAtPickerOpen] = useState(false);
+  const [readAtViewMonth, setReadAtViewMonth] = useState<Date>(new Date());
+  const readAtPickerRef = useRef<HTMLDivElement | null>(null);
+  const acquisitionsTrackRef = useRef<HTMLDivElement | null>(null);
+  const formatReadAtLabel = (value?: string) => {
+    if (!value) return "—";
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+    }
+    return value;
+  };
+  const monthNameLabel = (date: Date) =>
+    date.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+  const parseIsoDate = (value: string): Date | null => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+    const [y, m, d] = value.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    if (Number.isNaN(date.getTime())) return null;
+    if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return null;
+    return date;
+  };
+  const toIsoDate = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+  const buildCalendarCells = (monthDate: Date): Array<Date | null> => {
+    const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+    const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+    const startOffset = (monthStart.getDay() + 6) % 7; // lunes como primer día
+    const cells: Array<Date | null> = [];
+    for (let i = 0; i < startOffset; i += 1) cells.push(null);
+    for (let d = 1; d <= monthEnd.getDate(); d += 1) {
+      cells.push(new Date(monthDate.getFullYear(), monthDate.getMonth(), d));
+    }
+    while (cells.length < 42) cells.push(null);
+    return cells;
+  };
   const previewCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nowReading = useMemo(() => books.find((book) => book.status === "leyendo"), [books]);
   const readCount = useMemo(() => books.filter((book) => book.status === "leido").length, [books]);
@@ -86,13 +142,29 @@ export const LibraryPage = () => {
   }, [activeGenre, shelfFilteredBooks]);
   const similarBooks = useMemo(() => {
     if (!previewBook) return [];
+    const previewTags = (previewBook.reviewTags ?? [])
+      .map((tag) => tag.trim().toLocaleLowerCase("es"))
+      .filter(Boolean);
+    const previewTagSet = new Set(previewTags);
+
     return books
-      .filter(
-        (book) =>
-          book.id !== previewBook.id &&
-          book.genre.localeCompare(previewBook.genre, "es", { sensitivity: "base" }) === 0
-      )
-      .slice(0, 6);
+      .filter((book) => book.id !== previewBook.id)
+      .map((book) => {
+        const sameGenre = book.genre.localeCompare(previewBook.genre, "es", { sensitivity: "base" }) === 0;
+        const sharedTagsCount = (book.reviewTags ?? []).reduce((acc, tag) => {
+          const normalized = tag.trim().toLocaleLowerCase("es");
+          return normalized && previewTagSet.has(normalized) ? acc + 1 : acc;
+        }, 0);
+        return { book, sameGenre, sharedTagsCount };
+      })
+      .filter((item) => item.sameGenre || item.sharedTagsCount > 0)
+      .sort((a, b) => {
+        if (b.sharedTagsCount !== a.sharedTagsCount) return b.sharedTagsCount - a.sharedTagsCount;
+        if (a.sameGenre !== b.sameGenre) return Number(b.sameGenre) - Number(a.sameGenre);
+        return new Date(b.book.updatedAt).getTime() - new Date(a.book.updatedAt).getTime();
+      })
+      .slice(0, 6)
+      .map((item) => item.book);
   }, [books, previewBook]);
   const previewVisibleBooks = useMemo(() => visibleBooks.slice(0, 12), [visibleBooks]);
   const collectionBooks = isShowingAllCollection ? visibleBooks : previewVisibleBooks;
@@ -141,6 +213,31 @@ export const LibraryPage = () => {
         clearTimeout(previewCloseTimeoutRef.current);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    if (!isReadAtPickerOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (!readAtPickerRef.current?.contains(event.target as Node)) {
+        setIsReadAtPickerOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", onPointerDown);
+    return () => window.removeEventListener("mousedown", onPointerDown);
+  }, [isReadAtPickerOpen]);
+
+  useEffect(() => {
+    const loadAcquisitions = async () => {
+      try {
+        setAcquisitionsError(null);
+        const data = await getWishlistAcquisitions();
+        setRecentAcquisitions(data);
+      } catch (err) {
+        setRecentAcquisitions([]);
+        setAcquisitionsError(err instanceof ApiError ? err.message : "No se pudieron cargar las adquisiciones");
+      }
+    };
+    void loadAcquisitions();
   }, []);
 
   useEffect(() => {
@@ -194,18 +291,31 @@ export const LibraryPage = () => {
     }
   };
 
-  const setPreviewRating = async (rating: number) => {
-    if (!previewBook || isSavingRating) return;
-    const normalized = Math.max(0, Math.min(5, rating));
-    const currentRating = previewBook.rating ?? 0;
-    const nextRating = currentRating === normalized ? 0 : normalized;
+  const setPreviewStatus = async (nextStatus: ReadingStatus) => {
+    if (!previewBook || isSavingStatus) return;
+    if (previewBook.status === nextStatus) return;
+    const payload: Partial<Book> & { status: ReadingStatus } = { status: nextStatus };
+    if (nextStatus === "leido") {
+      payload.progress = 100;
+      if (typeof previewBook.pages === "number" && previewBook.pages > 0) {
+        payload.currentPage = previewBook.pages;
+        payload.lastPageMarkedAt = new Date().toISOString();
+      }
+    } else if (nextStatus === "pendiente") {
+      payload.progress = 0;
+      payload.currentPage = 0;
+      payload.lastPageMarkedAt = undefined;
+    } else if ((previewBook.progress ?? 0) <= 0) {
+      payload.progress = 1;
+    }
+
     try {
-      setIsSavingRating(true);
-      const updated = await updateBook(previewBook.id, { rating: nextRating });
+      setIsSavingStatus(true);
+      const updated = await updateBook(previewBook.id, payload);
       setPreviewBook(updated);
       upsertBook(updated);
     } finally {
-      setIsSavingRating(false);
+      setIsSavingStatus(false);
     }
   };
 
@@ -214,6 +324,81 @@ export const LibraryPage = () => {
     setMarkPageError(null);
     setMarkPageInput(String(previewBook.currentPage ?? 0));
     setIsMarkPageOpen(true);
+  };
+
+  const openReviewDialog = () => {
+    if (!previewBook) return;
+    setReviewError(null);
+    setReviewDraft(previewBook.review ?? "");
+    setRatingDraft(previewBook.rating ?? 0);
+    setReadAtDraft(previewBook.readAt ?? "");
+    setTimesReadDraft(previewBook.timesRead ?? "1ª vez");
+    setFavoriteQuoteDraft(previewBook.favoriteQuote ?? "");
+    setReviewTagsDraft(previewBook.reviewTags ?? []);
+    setReviewTagInput("");
+    setRecommendDraft(previewBook.wouldRecommend ?? "si");
+    setReadAtViewMonth(parseIsoDate(previewBook.readAt ?? "") ?? new Date());
+    setIsReadAtPickerOpen(false);
+    setIsReviewDialogOpen(true);
+  };
+
+  const saveReview = async () => {
+    if (!previewBook) return;
+    setIsSavingReview(true);
+    setReviewError(null);
+    try {
+      const updated = await updateBook(previewBook.id, {
+        review: reviewDraft.trim(),
+        rating: ratingDraft,
+        readAt: readAtDraft.trim(),
+        timesRead: timesReadDraft.trim(),
+        favoriteQuote: favoriteQuoteDraft.trim(),
+        reviewTags: reviewTagsDraft,
+        wouldRecommend: recommendDraft
+      });
+      setPreviewBook(updated);
+      upsertBook(updated);
+      setIsReviewDialogOpen(false);
+    } catch {
+      setReviewError("No se pudo guardar la reseña. Inténtalo de nuevo.");
+    } finally {
+      setIsSavingReview(false);
+    }
+  };
+
+  const addReviewTag = () => {
+    const nextTag = reviewTagInput.trim();
+    if (!nextTag) return;
+    if (nextTag.length > 40) {
+      setReviewError("Cada etiqueta debe tener como máximo 40 caracteres.");
+      return;
+    }
+
+    setReviewTagsDraft((current) => {
+      const alreadyExists = current.some((item) => item.localeCompare(nextTag, "es", { sensitivity: "base" }) === 0);
+      if (alreadyExists) return current;
+      return [...current, nextTag];
+    });
+    setReviewTagInput("");
+    setReviewError(null);
+  };
+
+  const removeReviewTag = (tag: string) => {
+    setReviewTagsDraft((current) => current.filter((item) => item !== tag));
+  };
+
+  const scrollAcquisitions = (direction: "left" | "right") => {
+    const container = acquisitionsTrackRef.current;
+    if (!container) return;
+    const firstCard = container.querySelector("article");
+    const styles = window.getComputedStyle(container);
+    const gap = Number.parseFloat(styles.columnGap || styles.gap || "0") || 0;
+    const cardWidth = firstCard instanceof HTMLElement ? firstCard.offsetWidth : Math.max(260, Math.round(container.clientWidth / 4));
+    const amount = Math.max(1, cardWidth + gap);
+    container.scrollBy({
+      left: direction === "right" ? amount : -amount,
+      behavior: "smooth"
+    });
   };
 
   const recentMarkHistory = useMemo(() => {
@@ -451,7 +636,7 @@ export const LibraryPage = () => {
             </Alert>
           )}
 
-          <div className="border-t border-amber-700/60 pt-4">
+          <div className="border-t border-[#d7b06f] pt-4">
             <div className="mb-4 flex items-center justify-between gap-2">
               <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Colección</p>
               <button
@@ -488,7 +673,7 @@ export const LibraryPage = () => {
               />
             )}
           </div>
-          <div className="border-t border-amber-700/60 pt-4">
+          <div className="border-t border-[#d7b06f] pt-4">
             <div className="mb-4 flex items-center justify-between gap-2">
               <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Últimas reseñas</p>
               <Link to="/reviews" className="text-xs text-[#8e633d] transition hover:underline dark:text-amber-200/80">
@@ -508,6 +693,63 @@ export const LibraryPage = () => {
                     <p className="mt-2 border-t border-[#c4a27b]/70 pt-2 line-clamp-3 text-sm leading-relaxed">"{book.review}"</p>
                   </article>
                 ))}
+              </div>
+            )}
+          </div>
+          <div className="border-t border-[#d7b06f] pt-4">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Últimas adquisiciones</p>
+              <Link to="/wishlist" className="text-xs text-[#8e633d] transition hover:underline dark:text-amber-200/80">
+                Ver lista de deseos →
+              </Link>
+            </div>
+            {acquisitionsError ? (
+              <Alert variant="destructive">{acquisitionsError}</Alert>
+            ) : recentAcquisitions.length === 0 ? (
+              <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-4 text-sm text-[#4d311d]">
+                Todavía no tienes adquisiciones recientes.
+              </div>
+            ) : (
+              <div className="relative px-0 sm:px-8">
+                <button
+                  type="button"
+                  onClick={() => scrollAcquisitions("left")}
+                  className="absolute left-1 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[#8e633d] bg-[#e9dcc4] text-[#6f4b2e] shadow sm:inline-flex"
+                  aria-label="Desplazar adquisiciones a la izquierda"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div
+                  ref={acquisitionsTrackRef}
+                  className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  {recentAcquisitions.map((item) => (
+                    <article
+                      key={item.id}
+                      className="w-[88%] flex-none snap-start rounded-md border border-amber-700/60 bg-[#e9dcc4] p-4 text-[#4d311d] sm:w-[calc((100%-2.25rem)/4)]"
+                    >
+                      <p className="font-['Fraunces',serif] text-xl">{item.title}</p>
+                      <p className="text-xs italic text-[#7a573c]">{item.author}</p>
+                      <p className="mt-2 text-sm">
+                        <span className="font-semibold">Tienda:</span> {item.store || "Sin tienda"}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-semibold">Precio:</span> {item.price || "Sin precio"}
+                      </p>
+                      <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">
+                        Comprado el {new Date(item.purchasedAt).toLocaleDateString("es-ES")}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => scrollAcquisitions("right")}
+                  className="absolute right-1 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-[#8e633d] bg-[#e9dcc4] text-[#6f4b2e] shadow sm:inline-flex"
+                  aria-label="Desplazar adquisiciones a la derecha"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             )}
           </div>
@@ -610,15 +852,25 @@ export const LibraryPage = () => {
                 previewTab === "info" ? (
                   <div className="space-y-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="inline-flex rounded-sm border border-[#b68e66] bg-[#e9dcc4] px-2 py-1 text-xs font-semibold uppercase tracking-wide">
-                        {previewBook.status}
-                      </p>
+                      <div className="min-w-[180px]">
+                        <Select
+                          value={previewBook.status}
+                          onChange={(event) => void setPreviewStatus(event.target.value as ReadingStatus)}
+                          disabled={isSavingStatus}
+                          className="h-8 rounded-sm !border-[#8e633d] !bg-[#8e633d] !text-[#f8f1e5] text-xs font-semibold uppercase tracking-wide hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
+                        >
+                          <option value="pendiente">Pendiente</option>
+                          <option value="leyendo">Leyendo</option>
+                          <option value="leido">Leído</option>
+                        </Select>
+                      </div>
                       {previewBook.isFavorite && (
                         <p className="inline-flex items-center rounded-sm border border-amber-500/60 bg-amber-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800">
                           <Heart className="mr-1 h-3.5 w-3.5 fill-rose-500 text-rose-500" />
                           Favorito
                         </p>
                       )}
+                      {isSavingStatus && <span className="text-xs text-[#7a573c]">Guardando estado...</span>}
                     </div>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
@@ -639,26 +891,10 @@ export const LibraryPage = () => {
                       </div>
                     </div>
                     <div className="border-t border-[#c4a27b]/70 pt-3">
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Valoración</p>
-                      <div className="flex items-center gap-0.5 text-[#8e633d]">
-                        {[1, 2, 3, 4, 5].map((value) => {
-                          const active = (previewBook.rating ?? 0) >= value;
-                          return (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() => void setPreviewRating(value)}
-                              disabled={isSavingRating}
-                              className={`text-lg leading-none transition ${active ? "text-[#8e633d]" : "text-[#b89a79]"} ${isSavingRating ? "cursor-wait opacity-60" : "hover:scale-110"}`}
-                              aria-label={`Valorar con ${value} estrellas`}
-                              title={`Valorar con ${value} estrellas`}
-                            >
-                              {active ? "★" : "☆"}
-                            </button>
-                          );
-                        })}
-                        {isSavingRating && <span className="ml-2 text-xs text-[#7a573c]">Guardando...</span>}
-                      </div>
+                      <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Sinopsis</p>
+                      <p className="rounded-md border border-[#c4a27b]/70 bg-[#efe4d1] p-3 text-sm leading-relaxed text-[#5a3b24]">
+                        {previewBook.synopsis?.trim() || "Todavía no has añadido una sinopsis para este libro."}
+                      </p>
                     </div>
                   </div>
                 ) : previewTab === "resena" ? (
@@ -667,12 +903,64 @@ export const LibraryPage = () => {
                     <p className="rounded-md border border-[#c4a27b]/70 bg-[#efe4d1] p-3 text-sm leading-relaxed">
                       {previewBook.review?.trim() || "Todavía no has escrito una reseña para este libro."}
                     </p>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Leído en</p>
+                        <p>{formatReadAtLabel(previewBook.readAt)}</p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Veces leído</p>
+                        <p>{previewBook.timesRead?.trim() || "—"}</p>
+                      </div>
+                    </div>
+                    <div className="border-t border-[#c4a27b]/70 pt-3">
+                      <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Frase o cita favorita</p>
+                      <p className="rounded-md border border-[#c4a27b]/70 bg-[#efe4d1] p-3 text-sm italic leading-relaxed text-[#5a3b24]">
+                        {previewBook.favoriteQuote?.trim() || "Todavía no has guardado una cita favorita."}
+                      </p>
+                    </div>
+                    <div className="border-t border-[#c4a27b]/70 pt-3">
+                      <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Etiquetas temáticas</p>
+                      {previewBook.reviewTags && previewBook.reviewTags.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {previewBook.reviewTags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-sm border border-[#d0b188] bg-[#f5ecde] px-2 py-1 text-xs font-semibold text-[#8e633d]"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm">—</p>
+                      )}
+                    </div>
+                    <div className="border-t border-[#c4a27b]/70 pt-3">
+                      <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Valoración</p>
+                      <p className="text-base text-[#8e633d]">
+                        {"★".repeat(previewBook.rating ?? 0)}
+                        {"☆".repeat(Math.max(0, 5 - (previewBook.rating ?? 0)))}
+                      </p>
+                    </div>
+                    <div className="border-t border-[#c4a27b]/70 pt-3">
+                      <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Recomendación</p>
+                      <p className="text-sm">
+                        {previewBook.wouldRecommend === "si"
+                          ? "👍 Sí, lo recomendaría"
+                          : previewBook.wouldRecommend === "depende"
+                            ? "🤔 Depende del lector"
+                            : previewBook.wouldRecommend === "no"
+                              ? "👎 No especialmente"
+                              : "—"}
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Similares</p>
                     <p className="text-sm italic text-[#8e633d]">
-                      Libros que podrían interesarte basados en este título
+                      Libros que podrían interesarte por género o etiquetas en común
                     </p>
                     {similarBooks.length === 0 ? (
                       <p className="rounded-md border border-[#c4a27b]/70 bg-[#efe4d1] p-3 text-sm leading-relaxed">
@@ -725,7 +1013,23 @@ export const LibraryPage = () => {
                             <span className="block line-clamp-1 font-['Fraunces',serif] text-[1.04rem] text-[#5a2f1f]">
                               {book.title}
                             </span>
-                            <span className="block line-clamp-1 text-xs italic text-[#8e633d]">Sugerido</span>
+                            <span className="block line-clamp-1 text-xs italic text-[#8e633d]">
+                              {(() => {
+                                const sameGenre =
+                                  book.genre.localeCompare(previewBook.genre, "es", { sensitivity: "base" }) === 0;
+                                const previewTagSet = new Set(
+                                  (previewBook.reviewTags ?? [])
+                                    .map((tag) => tag.trim().toLocaleLowerCase("es"))
+                                    .filter(Boolean)
+                                );
+                                const hasSharedTags = (book.reviewTags ?? []).some((tag) =>
+                                  previewTagSet.has(tag.trim().toLocaleLowerCase("es"))
+                                );
+                                if (sameGenre && hasSharedTags) return "Género y etiquetas";
+                                if (hasSharedTags) return "Etiquetas en común";
+                                return "Mismo género";
+                              })()}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -737,15 +1041,27 @@ export const LibraryPage = () => {
               )}
             </div>
             <footer className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-3 border-t border-[#8f643f] bg-[#e9dcc4] p-3">
-              <Link to={previewBook ? `/books/${previewBook.id}/edit` : "#"}>
+              {previewTab === "resena" ? (
                 <Button
                   size="sm"
+                  onClick={openReviewDialog}
+                  disabled={!previewBook}
                   className="h-10 w-full rounded-none border border-[#8e633d] bg-[#8e633d] px-3 text-[#f8f1e5] hover:bg-[#7c5534]"
                 >
                   <PencilLine className="mr-2 h-3.5 w-3.5" />
-                  Editar información
+                  Reseñar
                 </Button>
-              </Link>
+              ) : (
+                <Link to={previewBook ? `/books/${previewBook.id}/edit` : "#"}>
+                  <Button
+                    size="sm"
+                    className="h-10 w-full rounded-none border border-[#8e633d] bg-[#8e633d] px-3 text-[#f8f1e5] hover:bg-[#7c5534]"
+                  >
+                    <PencilLine className="mr-2 h-3.5 w-3.5" />
+                    Editar información
+                  </Button>
+                </Link>
+              )}
               <Button
                 size="sm"
                 variant="outline"
@@ -902,6 +1218,271 @@ export const LibraryPage = () => {
                   disabled={isSavingMarkPage}
                 >
                   Cancelar
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog
+            open={isReviewDialogOpen}
+            onOpenChange={(open) => {
+              setIsReviewDialogOpen(open);
+              if (!open) {
+                setReviewError(null);
+              }
+            }}
+          >
+            <DialogContent className="w-[99vw] max-w-[1200px] border-2 border-[#b6852f] bg-[#efe4d1] p-0 text-[#5a3b24] shadow-[0_24px_70px_rgba(0,0,0,0.5)]">
+              <DialogHeader className="border-b border-[#b6852f] bg-[#6a320f] px-6 pb-3 pt-4 text-[#f3e7d5]">
+                <DialogTitle className="font-['Fraunces',serif] text-3xl leading-none">
+                  ✍️ Escribir reseña y valoración
+                </DialogTitle>
+                <DialogDescription className="pt-2 text-sm text-[#e8cfaa]">
+                  {previewBook?.title} · {previewBook?.author}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-5 px-6 py-5">
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8e633d]">
+                    Valoración global
+                  </p>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((value) => {
+                      const active = ratingDraft >= value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setRatingDraft((current) => (current === value ? 0 : value))}
+                          className={`text-3xl leading-none transition ${active ? "text-[#b6852f]" : "text-[#cebfa8]"} hover:scale-110`}
+                          aria-label={`Puntuar con ${value} estrellas`}
+                          title={`Puntuar con ${value} estrellas`}
+                        >
+                          {active ? "★" : "☆"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8e633d]">Leído en</p>
+                    <div className="relative" ref={readAtPickerRef}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const parsed = parseIsoDate(readAtDraft);
+                          setReadAtViewMonth(parsed ?? new Date());
+                          setIsReadAtPickerOpen((open) => !open);
+                        }}
+                        className="flex h-10 w-full items-center justify-between rounded-lg border border-[#b68e66] bg-[#f5ecde] px-3 text-left text-sm text-[#5a3b24]"
+                      >
+                        <span>{readAtDraft ? formatReadAtLabel(readAtDraft) : "Seleccionar fecha..."}</span>
+                        <CalendarDays className="h-4 w-4 text-[#8e633d]" />
+                      </button>
+                      {isReadAtPickerOpen && (
+                        <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-[300px] rounded-md border border-[#b68e66] bg-[#f5ecde] p-3 shadow-lg">
+                          <div className="mb-2 flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setReadAtViewMonth(
+                                  (current) => new Date(current.getFullYear(), current.getMonth() - 1, 1)
+                                )
+                              }
+                              className="rounded-sm border border-[#caa67a] bg-[#efe4d1] p-1 text-[#8e633d] hover:bg-[#e7d6bc]"
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </button>
+                            <p className="text-sm font-semibold capitalize text-[#6a320f]">{monthNameLabel(readAtViewMonth)}</p>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setReadAtViewMonth(
+                                  (current) => new Date(current.getFullYear(), current.getMonth() + 1, 1)
+                                )
+                              }
+                              className="rounded-sm border border-[#caa67a] bg-[#efe4d1] p-1 text-[#8e633d] hover:bg-[#e7d6bc]"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <div className="mb-1 grid grid-cols-7 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8e633d]">
+                            {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
+                              <span key={d}>{d}</span>
+                            ))}
+                          </div>
+                          <div className="grid grid-cols-7 gap-1">
+                            {buildCalendarCells(readAtViewMonth).map((date, idx) => {
+                              const isSelected = date ? toIsoDate(date) === readAtDraft : false;
+                              return (
+                                <button
+                                  key={`${idx}-${date ? toIsoDate(date) : "blank"}`}
+                                  type="button"
+                                  disabled={!date}
+                                  onClick={() => {
+                                    if (!date) return;
+                                    setReadAtDraft(toIsoDate(date));
+                                    setIsReadAtPickerOpen(false);
+                                  }}
+                                  className={`h-8 rounded-sm text-sm ${
+                                    !date
+                                      ? "cursor-default opacity-0"
+                                      : isSelected
+                                        ? "border border-[#b6852f] bg-[#b6852f] text-[#f5ecde]"
+                                        : "border border-[#d0b188] bg-[#efe4d1] text-[#6a320f] hover:bg-[#e7d6bc]"
+                                  }`}
+                                >
+                                  {date?.getDate() ?? ""}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <div className="mt-2 flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => setReadAtDraft("")}
+                              className="text-xs text-[#8e633d] underline"
+                            >
+                              Limpiar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const today = new Date();
+                                setReadAtDraft(toIsoDate(today));
+                                setReadAtViewMonth(today);
+                                setIsReadAtPickerOpen(false);
+                              }}
+                              className="text-xs text-[#8e633d] underline"
+                            >
+                              Hoy
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8e633d]">Veces leído</p>
+                    <Select
+                      value={timesReadDraft}
+                      onChange={(event) => setTimesReadDraft(event.target.value)}
+                      className="!border-[#8e633d] !bg-[#8e633d] !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
+                    >
+                      <option value="1ª vez">1ª vez</option>
+                      <option value="2 veces">2 veces</option>
+                      <option value="3 veces">3 veces</option>
+                      <option value="4+ veces">4+ veces</option>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.16em] text-[#8e633d]">
+                    <span>Reseña personal</span>
+                    <span>{reviewDraft.length}/2000</span>
+                  </p>
+                  <Textarea
+                    value={reviewDraft}
+                    onChange={(event) => setReviewDraft(capitalizeFirst(event.target.value))}
+                    maxLength={2000}
+                    className="min-h-[220px] resize-y border-[#b68e66] bg-[#f5ecde] text-[#5a3b24] placeholder:text-[#8e633d]/80"
+                    placeholder="¿Qué te pareció el libro? Escribe con libertad..."
+                  />
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8e633d]">
+                    Frase o cita favorita
+                  </p>
+                  <Textarea
+                    value={favoriteQuoteDraft}
+                    onChange={(event) => setFavoriteQuoteDraft(capitalizeFirst(event.target.value))}
+                    maxLength={600}
+                    className="min-h-[90px] resize-y border-[#b68e66] bg-[#f5ecde] text-[#5a3b24] placeholder:text-[#8e633d]/80"
+                    placeholder="Una frase del libro que te haya marcado..."
+                  />
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8e633d]">Etiquetas temáticas</p>
+                  <div className="mb-2">
+                    <Input
+                      value={reviewTagInput}
+                      onChange={(event) => {
+                        setReviewTagInput(capitalizeFirst(event.target.value));
+                        if (reviewError) setReviewError(null);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          addReviewTag();
+                        }
+                      }}
+                      maxLength={40}
+                      className="h-10 border-[#b68e66] bg-[#f5ecde] text-[#5a3b24] placeholder:text-[#8e633d]/80"
+                      placeholder="Escribe una etiqueta y pulsa Enter para añadirla..."
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {reviewTagsDraft.map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => removeReviewTag(tag)}
+                        className="inline-flex items-center gap-1 rounded-sm border border-[#d0b188] bg-[#f5ecde] px-2 py-1 text-xs font-semibold text-[#8e633d]"
+                        title={`Quitar etiqueta ${tag}`}
+                        aria-label={`Quitar etiqueta ${tag}`}
+                      >
+                        <span>{tag}</span>
+                        <span className="text-[11px] leading-none">✕</span>
+                      </button>
+                    ))}
+                    {reviewTagsDraft.length === 0 && <p className="text-xs text-[#8e633d]">Sin etiquetas todavía.</p>}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8e633d]">¿Lo recomendarías?</p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    <button
+                      type="button"
+                      onClick={() => setRecommendDraft("si")}
+                      className={`rounded-sm border px-3 py-2 text-xs font-semibold text-center ${recommendDraft === "si" ? "border-[#b6852f] bg-[#f0dfbf] text-[#6a320f]" : "border-[#d0b188] bg-[#f5ecde] text-[#8e633d]"}`}
+                    >
+                      👍 Sí, lo recomiendo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRecommendDraft("depende")}
+                      className={`rounded-sm border px-3 py-2 text-xs font-semibold text-center ${recommendDraft === "depende" ? "border-[#b6852f] bg-[#f0dfbf] text-[#6a320f]" : "border-[#d0b188] bg-[#f5ecde] text-[#8e633d]"}`}
+                    >
+                      🤔 Depende del lector
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRecommendDraft("no")}
+                      className={`rounded-sm border px-3 py-2 text-xs font-semibold text-center ${recommendDraft === "no" ? "border-[#b6852f] bg-[#f0dfbf] text-[#6a320f]" : "border-[#d0b188] bg-[#f5ecde] text-[#8e633d]"}`}
+                    >
+                      👎 No especialmente
+                    </button>
+                  </div>
+                </div>
+                {reviewError && <p className="text-sm text-rose-700">{reviewError}</p>}
+              </div>
+              <DialogFooter className="!mx-0 !mb-0 flex flex-row items-center justify-between gap-3 border-t border-[#c4a27b]/70 bg-[#eadcc4] px-6 py-4">
+                <Button
+                  onClick={() => setIsReviewDialogOpen(false)}
+                  variant="outline"
+                  size="sm"
+                  className="h-10 min-w-[140px] border-[#b08a63] bg-[#efe4d1] text-[#6f4b2e] hover:border-[#8e633d] hover:bg-[#e2cfb2] hover:text-[#5a3d24]"
+                  disabled={isSavingReview}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() => void saveReview()}
+                  size="sm"
+                  className="h-10 min-w-[180px] border border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534]"
+                  disabled={isSavingReview || !previewBook}
+                >
+                  {isSavingReview ? "Guardando..." : "✦ Publicar reseña"}
                 </Button>
               </DialogFooter>
             </DialogContent>

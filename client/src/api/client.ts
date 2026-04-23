@@ -1,6 +1,6 @@
 // Cliente HTTP base reutilizable para llamadas a la API con manejo de errores.
 import { Book, CreateBookDto, UpdateBookDto } from "../types/book";
-import { WishlistItem } from "../types/wishlist";
+import { WishlistAcquisition, WishlistItem } from "../types/wishlist";
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api/v1";
@@ -125,10 +125,16 @@ export const getWishlistItems = async (): Promise<WishlistItem[]> => {
   return response.data;
 };
 
+export const getWishlistAcquisitions = async (): Promise<WishlistAcquisition[]> => {
+  const response = await apiFetch<ApiResponse<WishlistAcquisition[]>>("/wishlist/acquisitions");
+  return response.data;
+};
+
 export const createWishlistItem = async (body: {
   title: string;
   author: string;
-  genre?: string;
+  price?: string;
+  store?: string;
   priority?: number;
 }): Promise<WishlistItem> => {
   const response = await apiFetch<ApiResponse<WishlistItem>>("/wishlist", {
@@ -138,8 +144,32 @@ export const createWishlistItem = async (body: {
   return response.data;
 };
 
+export const updateWishlistItem = async (
+  id: string,
+  body: {
+    title: string;
+    author: string;
+    price?: string;
+    store?: string;
+    priority?: number;
+  }
+): Promise<WishlistItem> => {
+  const response = await apiFetch<ApiResponse<WishlistItem>>(`/wishlist/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body)
+  });
+  return response.data;
+};
+
 export const deleteWishlistItem = async (id: string): Promise<void> => {
   await apiFetch<ApiResponse<{ id: string }>>(`/wishlist/${id}`, {
     method: "DELETE"
   });
+};
+
+export const purchaseWishlistItem = async (id: string): Promise<WishlistAcquisition> => {
+  const response = await apiFetch<ApiResponse<WishlistAcquisition>>(`/wishlist/${id}/purchase`, {
+    method: "POST"
+  });
+  return response.data;
 };

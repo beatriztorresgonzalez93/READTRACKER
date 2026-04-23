@@ -5,7 +5,7 @@ import { WishlistPriority } from "../types/wishlist";
 const validPriorities = new Set<WishlistPriority>([1, 2, 3, 4, 5]);
 
 export const validateCreateWishlistItem = (req: Request, res: Response, next: NextFunction) => {
-  const { title, author, genre, priority } = req.body;
+  const { title, author, price, store, priority } = req.body;
 
   if (!title || typeof title !== "string" || !title.trim()) {
     res.status(400).json({ error: "El título es obligatorio" });
@@ -15,8 +15,12 @@ export const validateCreateWishlistItem = (req: Request, res: Response, next: Ne
     res.status(400).json({ error: "El autor es obligatorio" });
     return;
   }
-  if (genre !== undefined && genre !== null && typeof genre !== "string") {
-    res.status(400).json({ error: "El género no es válido" });
+  if (price !== undefined && price !== null && typeof price !== "string") {
+    res.status(400).json({ error: "El precio no es válido" });
+    return;
+  }
+  if (store !== undefined && store !== null && typeof store !== "string") {
+    res.status(400).json({ error: "La tienda no es válida" });
     return;
   }
   if (priority !== undefined && priority !== null) {

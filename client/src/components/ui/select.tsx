@@ -57,7 +57,7 @@ function SelectImpl(
     >
       <SelectPrimitive.Trigger
         className={cn(
-          "flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-slate-900 shadow-sm ring-1 ring-transparent transition focus-visible:border-slate-300 focus-visible:outline-none focus-visible:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:border-slate-600 dark:focus-visible:ring-slate-600",
+          "flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-slate-900 shadow-sm ring-1 ring-transparent transition focus-visible:border-[#8e633d] focus-visible:outline-none focus-visible:ring-[#8e633d]/40 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:border-[#8e633d] dark:focus-visible:ring-[#8e633d]/40",
           className
         )}
       >

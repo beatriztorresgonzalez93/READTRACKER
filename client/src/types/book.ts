@@ -12,6 +12,12 @@ export interface Book {
   status: ReadingStatus;
   rating?: number;
   review?: string;
+  synopsis?: string;
+  reviewTags?: string[];
+  readAt?: string;
+  timesRead?: string;
+  favoriteQuote?: string;
+  wouldRecommend?: "si" | "depende" | "no";
   progress?: number;
   currentPage?: number;
   lastPageMarkedAt?: string;
@@ -31,6 +37,12 @@ export interface CreateBookDto {
   status: ReadingStatus;
   rating?: number;
   review?: string;
+  synopsis?: string;
+  reviewTags?: string[];
+  readAt?: string;
+  timesRead?: string;
+  favoriteQuote?: string;
+  wouldRecommend?: "si" | "depende" | "no";
   progress?: number;
   currentPage?: number;
   lastPageMarkedAt?: string;

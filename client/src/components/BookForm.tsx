@@ -4,6 +4,7 @@ import { API_BASE_URL } from "../api/client";
 import { Button } from "./ui/button";
 import { FormError } from "./ui/form-error";
 import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 import { CreateBookDto } from "../types/book";
 import { capitalizeFirst, capitalizeWords } from "../utils/textCase";
 
@@ -30,6 +31,7 @@ export const BookForm = ({
     pages: initialValues?.pages,
     publicationYear: initialValues?.publicationYear,
     status: initialValues?.status ?? "pendiente",
+    synopsis: initialValues?.synopsis ?? "",
     progress: initialValues?.progress ?? 0,
     coverUrl: initialValues?.coverUrl ?? ""
   });
@@ -82,7 +84,8 @@ export const BookForm = ({
         status: initialValues?.status ?? "pendiente",
         progress: initialValues?.progress ?? 0,
         rating: initialValues?.rating,
-        review: initialValues?.review
+        review: initialValues?.review,
+        synopsis: form.synopsis?.trim() || undefined
       };
       await onSubmit(payload);
     } finally {
@@ -239,6 +242,21 @@ export const BookForm = ({
               className={inputClassName}
               value={form.coverUrl ?? ""}
               onChange={(event) => setForm((prev) => ({ ...prev, coverUrl: event.target.value }))}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#6f4b2e] dark:text-[#e0ccb4]">
+              Sinopsis
+            </label>
+            <Textarea
+              className={`${inputClassName} min-h-28 resize-y`}
+              value={form.synopsis ?? ""}
+              maxLength={2000}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, synopsis: capitalizeFirst(event.target.value) }))
+              }
+              placeholder="Resumen breve del libro..."
             />
           </div>
 

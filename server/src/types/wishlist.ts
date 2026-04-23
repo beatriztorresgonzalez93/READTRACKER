@@ -5,14 +5,25 @@ export interface WishlistItem {
   id: string;
   title: string;
   author: string;
-  genre: string;
+  price: string;
+  store: string;
   priority: WishlistPriority;
   createdAt: string;
+}
+
+export interface WishlistAcquisition {
+  id: string;
+  title: string;
+  author: string;
+  price: string;
+  store: string;
+  purchasedAt: string;
 }
 
 export interface CreateWishlistItemDto {
   title: string;
   author: string;
-  genre?: string;
+  price?: string;
+  store?: string;
   priority?: WishlistPriority;
 }

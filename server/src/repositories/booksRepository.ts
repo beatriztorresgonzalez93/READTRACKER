@@ -14,6 +14,12 @@ interface BookRow {
   status: Book["status"];
   rating: number | null;
   review: string | null;
+  review_tags: string[] | null;
+  synopsis: string | null;
+  read_at: string | null;
+  times_read: string | null;
+  favorite_quote: string | null;
+  would_recommend: "si" | "depende" | "no" | null;
   progress: number | null;
   current_page: number | null;
   last_page_marked_at: Date | null;
@@ -34,6 +40,12 @@ const mapRow = (row: BookRow): Book => ({
   status: row.status,
   rating: row.rating ?? undefined,
   review: row.review ?? undefined,
+  reviewTags: row.review_tags ?? undefined,
+  synopsis: row.synopsis ?? undefined,
+  readAt: row.read_at ?? undefined,
+  timesRead: row.times_read ?? undefined,
+  favoriteQuote: row.favorite_quote ?? undefined,
+  wouldRecommend: row.would_recommend ?? undefined,
   progress: row.progress ?? undefined,
   currentPage: row.current_page ?? undefined,
   lastPageMarkedAt: row.last_page_marked_at?.toISOString(),
@@ -82,8 +94,8 @@ export class BooksRepository {
   async create(data: CreateBookDto, userId: string): Promise<Book> {
     const id = randomUUID();
     const result = await pool.query<BookRow>(
-      `INSERT INTO books (id, user_id, title, author, publisher, genre, pages, publication_year, status, rating, review, progress, current_page, last_page_marked_at, cover_url, is_favorite)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+      `INSERT INTO books (id, user_id, title, author, publisher, genre, pages, publication_year, status, rating, review, review_tags, synopsis, read_at, times_read, favorite_quote, would_recommend, progress, current_page, last_page_marked_at, cover_url, is_favorite)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
        RETURNING *`,
       [
         id,
@@ -97,6 +109,12 @@ export class BooksRepository {
         data.status,
         data.rating ?? null,
         data.review ?? null,
+        data.reviewTags ?? [],
+        data.synopsis ?? null,
+        data.readAt ?? null,
+        data.timesRead ?? null,
+        data.favoriteQuote ?? null,
+        data.wouldRecommend ?? null,
         data.progress ?? null,
         data.currentPage ?? null,
         data.lastPageMarkedAt ? new Date(data.lastPageMarkedAt) : null,
@@ -127,6 +145,12 @@ export class BooksRepository {
     if (data.status !== undefined) add("status", data.status);
     if (data.rating !== undefined) add("rating", data.rating);
     if (data.review !== undefined) add("review", data.review);
+    if (data.reviewTags !== undefined) add("review_tags", data.reviewTags);
+    if (data.synopsis !== undefined) add("synopsis", data.synopsis);
+    if (data.readAt !== undefined) add("read_at", data.readAt);
+    if (data.timesRead !== undefined) add("times_read", data.timesRead);
+    if (data.favoriteQuote !== undefined) add("favorite_quote", data.favoriteQuote);
+    if (data.wouldRecommend !== undefined) add("would_recommend", data.wouldRecommend);
     if (data.progress !== undefined) add("progress", data.progress);
     if (data.currentPage !== undefined) add("current_page", data.currentPage);
     if (data.lastPageMarkedAt !== undefined) add("last_page_marked_at", data.lastPageMarkedAt ? new Date(data.lastPageMarkedAt) : null);

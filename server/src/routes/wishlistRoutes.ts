@@ -9,7 +9,10 @@ export const createWishlistRouter = (controller: WishlistController) => {
   router.use(requireAuth);
 
   router.get("/", controller.list);
+  router.get("/acquisitions", controller.listAcquisitions);
   router.post("/", validateCreateWishlistItem, controller.create);
+  router.put("/:id", validateCreateWishlistItem, controller.update);
+  router.post("/:id/purchase", controller.purchase);
   router.delete("/:id", controller.remove);
 
   return router;

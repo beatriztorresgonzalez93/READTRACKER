@@ -17,6 +17,12 @@ const updateBookKeys = [
   "status",
   "rating",
   "review",
+  "reviewTags",
+  "synopsis",
+  "readAt",
+  "timesRead",
+  "favoriteQuote",
+  "wouldRecommend",
   "progress",
   "currentPage",
   "lastPageMarkedAt",
@@ -29,7 +35,7 @@ export const validateCreateBook = (
   res: Response,
   next: NextFunction
 ) => {
-  const { title, author, publisher, genre, pages, publicationYear, status, rating, progress, currentPage, lastPageMarkedAt, isFavorite } = req.body;
+  const { title, author, publisher, genre, pages, publicationYear, status, rating, progress, currentPage, lastPageMarkedAt, reviewTags, synopsis, readAt, timesRead, favoriteQuote, wouldRecommend, isFavorite } = req.body;
 
   if (!title || !author || !publisher || !genre || !isValidStatus(status)) {
     res.status(400).json({ error: "Título, autor, editorial, género y estado son obligatorios" });
@@ -58,6 +64,38 @@ export const validateCreateBook = (
 
   if (isFavorite !== undefined && typeof isFavorite !== "boolean") {
     res.status(400).json({ error: "El campo favorito no es válido" });
+    return;
+  }
+
+  if (synopsis !== undefined && typeof synopsis !== "string") {
+    res.status(400).json({ error: "La sinopsis no es válida" });
+    return;
+  }
+
+  if (reviewTags !== undefined) {
+    if (!Array.isArray(reviewTags) || reviewTags.some((tag) => typeof tag !== "string" || !tag.trim() || tag.length > 40)) {
+      res.status(400).json({ error: "Las etiquetas de reseña no son válidas" });
+      return;
+    }
+  }
+
+  if (readAt !== undefined && typeof readAt !== "string") {
+    res.status(400).json({ error: "El campo 'leído en' no es válido" });
+    return;
+  }
+
+  if (timesRead !== undefined && typeof timesRead !== "string") {
+    res.status(400).json({ error: "El campo 'veces leído' no es válido" });
+    return;
+  }
+
+  if (favoriteQuote !== undefined && typeof favoriteQuote !== "string") {
+    res.status(400).json({ error: "La cita favorita no es válida" });
+    return;
+  }
+
+  if (wouldRecommend !== undefined && !["si", "depende", "no"].includes(String(wouldRecommend))) {
+    res.status(400).json({ error: "La recomendación no es válida" });
     return;
   }
 
@@ -104,7 +142,7 @@ export const validateUpdateBook = (
     return;
   }
 
-  const { status, rating, progress, publicationYear, pages, currentPage, lastPageMarkedAt, publisher, isFavorite } = body as Record<string, unknown>;
+  const { status, rating, progress, publicationYear, pages, currentPage, lastPageMarkedAt, publisher, reviewTags, synopsis, readAt, timesRead, favoriteQuote, wouldRecommend, isFavorite } = body as Record<string, unknown>;
 
   if (status !== undefined && !isValidStatus(status)) {
     res.status(400).json({ error: "El estado no es válido" });
@@ -157,6 +195,38 @@ export const validateUpdateBook = (
 
   if (publisher !== undefined && (typeof publisher !== "string" || !publisher.trim())) {
     res.status(400).json({ error: "La editorial no es válida" });
+    return;
+  }
+
+  if (synopsis !== undefined && typeof synopsis !== "string") {
+    res.status(400).json({ error: "La sinopsis no es válida" });
+    return;
+  }
+
+  if (reviewTags !== undefined) {
+    if (!Array.isArray(reviewTags) || reviewTags.some((tag) => typeof tag !== "string" || !tag.trim() || tag.length > 40)) {
+      res.status(400).json({ error: "Las etiquetas de reseña no son válidas" });
+      return;
+    }
+  }
+
+  if (readAt !== undefined && typeof readAt !== "string") {
+    res.status(400).json({ error: "El campo 'leído en' no es válido" });
+    return;
+  }
+
+  if (timesRead !== undefined && typeof timesRead !== "string") {
+    res.status(400).json({ error: "El campo 'veces leído' no es válido" });
+    return;
+  }
+
+  if (favoriteQuote !== undefined && typeof favoriteQuote !== "string") {
+    res.status(400).json({ error: "La cita favorita no es válida" });
+    return;
+  }
+
+  if (wouldRecommend !== undefined && !["si", "depende", "no"].includes(String(wouldRecommend))) {
+    res.status(400).json({ error: "La recomendación no es válida" });
     return;
   }
 
