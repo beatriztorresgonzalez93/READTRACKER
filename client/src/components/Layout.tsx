@@ -8,12 +8,14 @@ import { Button } from "./ui/button";
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
-  const isLibraryView = location.pathname === "/";
-  const isReviewsView = location.pathname === "/reviews";
-  const isWishlistView = location.pathname === "/wishlist";
-  const isStatsView = location.pathname === "/stats";
-  const isAuthView = location.pathname === "/login" || location.pathname === "/register";
-  const isBookFormView = location.pathname === "/books/new" || /^\/books\/[^/]+\/edit$/.test(location.pathname);
+  const modalState = location.state as { backgroundLocation?: { pathname?: string } } | null;
+  const activePathname = modalState?.backgroundLocation?.pathname ?? location.pathname;
+  const isLibraryView = activePathname === "/";
+  const isReviewsView = activePathname === "/reviews";
+  const isWishlistView = activePathname === "/wishlist";
+  const isStatsView = activePathname === "/stats";
+  const isAuthView = activePathname === "/login" || activePathname === "/register";
+  const isBookFormView = activePathname === "/books/new" || /^\/books\/[^/]+\/edit$/.test(activePathname);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", "night");
     document.documentElement.classList.add("dark");

@@ -27,6 +27,7 @@ export const LibraryPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { books, loading, error, reloadBooks, upsertBook } = useBooksContext();
+  const isPreviewOnly = (location.state as { previewOnly?: boolean } | null)?.previewOnly === true;
   const { search, setSearch, status, setStatus, sortBy, setSortBy, filteredBooks } = useBookFilters(books);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -285,6 +286,11 @@ export const LibraryPage = () => {
     previewCloseTimeoutRef.current = setTimeout(() => {
       setPreviewBookId(null);
       setIsClosingPreview(false);
+      if (isPreviewOnly) {
+        navigate(-1);
+        previewCloseTimeoutRef.current = null;
+        return;
+      }
       const params = new URLSearchParams(location.search);
       if (params.has("preview")) {
         params.delete("preview");
@@ -494,7 +500,8 @@ export const LibraryPage = () => {
   };
 
   return (
-    <section className="relative min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
+    <section className={isPreviewOnly ? "relative z-[45]" : "relative min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6"}>
+      {!isPreviewOnly && (
       <div className={`grid gap-5 lg:grid-cols-[260px_1fr] ${previewBookId ? "pointer-events-none select-none" : ""}`}>
         <aside className="space-y-4">
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
@@ -794,6 +801,7 @@ export const LibraryPage = () => {
           </div>
         </div>
       </div>
+      )}
       {previewBookId && (
         <>
           <div

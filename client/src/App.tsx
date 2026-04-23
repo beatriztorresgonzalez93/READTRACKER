@@ -1,5 +1,5 @@
 // Define el enrutado principal de la app dentro del layout global.
-import { Route, Routes } from "react-router-dom";
+import { Location as RouterLocation, Route, Routes, useLocation } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { BookDetailPage } from "./pages/BookDetailPage";
@@ -14,9 +14,12 @@ import { StatisticsPage } from "./pages/StatisticsPage";
 import { WishlistPage } from "./pages/WishlistPage";
 
 function App() {
+  const location = useLocation();
+  const state = location.state as { backgroundLocation?: RouterLocation } | null;
+
   return (
     <Layout>
-      <Routes>
+      <Routes location={state?.backgroundLocation ?? location}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
@@ -77,6 +80,18 @@ function App() {
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      {state?.backgroundLocation && (
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <LibraryPage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      )}
     </Layout>
   );
 }

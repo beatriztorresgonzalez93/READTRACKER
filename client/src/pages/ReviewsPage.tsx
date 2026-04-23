@@ -1,7 +1,7 @@
 // Página de reseñas con búsqueda, filtro por estrellas y orden.
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Bookmark, Clock3, Heart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Alert } from "../components/ui/alert";
 import { Input } from "../components/ui/input";
 import { Select } from "../components/ui/select";
@@ -13,6 +13,7 @@ type ReviewSort = "reciente" | "valoracion" | "titulo";
 export const ReviewsPage = () => {
   const { books, loading, error } = useBooksContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const [search, setSearch] = useState("");
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("todas");
   const [sortBy, setSortBy] = useState<ReviewSort>("reciente");
@@ -243,7 +244,11 @@ export const ReviewsPage = () => {
                   <article
                     key={book.id}
                     className="cursor-pointer rounded-md border border-amber-700/60 bg-[#e9dcc4] p-0 text-[#4d311d] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-[#c89c33] hover:shadow-[0_10px_24px_-18px_rgba(90,47,31,0.75)]"
-                    onClick={() => navigate(`/?preview=${encodeURIComponent(book.id)}`)}
+                    onClick={() =>
+                      navigate(`/?preview=${encodeURIComponent(book.id)}`, {
+                        state: { backgroundLocation: location, previewOnly: true }
+                      })
+                    }
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2 px-4 pb-2 pt-4">
                       <div>
