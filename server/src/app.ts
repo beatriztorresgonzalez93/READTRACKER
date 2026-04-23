@@ -8,6 +8,7 @@ import { CoversController } from "./controllers/coversController";
 import { AuthController } from "./controllers/authController";
 import { WishlistController } from "./controllers/wishlistController";
 import { errorHandler } from "./middlewares/errorHandler";
+import { requireAuth } from "./middlewares/requireAuth";
 import { BooksRepository } from "./repositories/booksRepository";
 import { UsersRepository } from "./repositories/usersRepository";
 import { WishlistRepository } from "./repositories/wishlistRepository";
@@ -78,6 +79,7 @@ app.use("/api/v1/auth", createAuthRouter(authController));
 
 app.use("/api/v1/books", createBooksRouter(booksController));
 app.use("/api/v1/wishlist", createWishlistRouter(wishlistController));
+app.get("/api/v1/acquisitions", requireAuth, wishlistController.listAcquisitions);
 
 app.use((_req, res) => {
   res.status(404).json({ error: "Ruta no encontrada" });
