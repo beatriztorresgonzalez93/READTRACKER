@@ -1,11 +1,9 @@
 // Layout base con navegación y selector de tema para todas las páginas.
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LogOut, Moon, Sun } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "./ui/button";
-
-type Theme = "light" | "dark";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -15,23 +13,11 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const isWishlistView = location.pathname === "/wishlist";
   const isAuthView = location.pathname === "/login" || location.pathname === "/register";
   const isBookFormView = location.pathname === "/books/new" || /^\/books\/[^/]+\/edit$/.test(location.pathname);
-  const [theme, setTheme] = useState<Theme>("dark");
-
   useEffect(() => {
-    const saved = localStorage.getItem("readtracker-theme");
-    const initial: Theme = saved === "light" ? "light" : "dark";
-    setTheme(initial);
-    document.documentElement.setAttribute("data-theme", initial === "dark" ? "night" : "light");
-    document.documentElement.classList.toggle("dark", initial === "dark");
+    document.documentElement.setAttribute("data-theme", "night");
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("readtracker-theme", "dark");
   }, []);
-
-  const toggleTheme = () => {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    localStorage.setItem("readtracker-theme", next);
-    document.documentElement.setAttribute("data-theme", next === "dark" ? "night" : "light");
-    document.documentElement.classList.toggle("dark", next === "dark");
-  };
 
   return (
     <div
@@ -39,11 +25,11 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         isAuthView
           ? "min-h-screen bg-[#f2e6d3] dark:bg-[#2b130b]"
           : isLibraryView || isReviewsView || isWishlistView || isBookFormView
-          ? "min-h-screen bg-[linear-gradient(180deg,#e3c6ab_0%,#ead2bc_44%,#f1dfcf_100%)] dark:bg-[linear-gradient(180deg,#3a170c_0%,#4a1f0f_42%,#54230f_100%)]"
+          ? "min-h-screen bg-[linear-gradient(180deg,#ead2bc_0%,#edd7c4_45%,#f1dfcf_100%)] dark:bg-[linear-gradient(180deg,#5c3926_0%,#66432f_45%,#70503a_100%)]"
           : "min-h-screen bg-[#d9e5df] dark:bg-[#1f2a26]"
       }
     >
-      <header className="sticky top-0 z-20 border-y border-[#d5bca2]/85 bg-[#c8a98a]/90 text-[#fff7ef] shadow-[inset_0_1px_0_rgba(255,243,220,0.26)] backdrop-blur dark:border-[#9f6d3b]/80 dark:bg-[#2a120a]/95 dark:text-amber-100">
+      <header className="sticky top-0 z-20 border-y border-[#d7b06f] bg-[#c8a98a]/90 text-[#fff7ef] shadow-[inset_0_1px_0_rgba(255,243,220,0.26)] backdrop-blur dark:border-[#d7b06f] dark:bg-[#1a0b06]/96 dark:text-amber-100">
         <nav className="mx-auto grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 sm:px-6">
           <Link to="/" className="inline-flex justify-self-start flex-col text-amber-100">
             <span className="font-['Fraunces',serif] text-[2.15rem] leading-none tracking-[0.02em] text-[#f6ead8] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]">
@@ -108,16 +94,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
                 <LogOut className="h-4 w-4" />
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={toggleTheme}
-              className="border-amber-600 bg-amber-900/20 text-amber-100 hover:bg-amber-900/35"
-              aria-label={theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"}
-              title={theme === "dark" ? "Modo claro" : "Modo oscuro"}
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
           </div>
         </nav>
       </header>

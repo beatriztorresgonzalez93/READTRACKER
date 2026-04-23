@@ -1,7 +1,7 @@
 // Página principal con listado, búsqueda y filtros de la biblioteca.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Bookmark, CalendarDays, ChevronLeft, ChevronRight, Clock3, Heart, PencilLine, X } from "lucide-react";
+import { BookOpen, Bookmark, Building2, CalendarDays, ChevronLeft, ChevronRight, Clock3, Heart, MessageSquareText, PencilLine, Quote, Star, Tags, ThumbsUp, X } from "lucide-react";
 import { ApiError, deleteBook, getBookById, getWishlistAcquisitions, updateBook } from "../api/client";
 import { BookList } from "../components/BookList";
 import { Alert } from "../components/ui/alert";
@@ -58,6 +58,8 @@ export const LibraryPage = () => {
   const [recentAcquisitions, setRecentAcquisitions] = useState<WishlistAcquisition[]>([]);
   const [acquisitionsError, setAcquisitionsError] = useState<string | null>(null);
   const [isReadAtPickerOpen, setIsReadAtPickerOpen] = useState(false);
+  const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const [readAtViewMonth, setReadAtViewMonth] = useState<Date>(new Date());
   const readAtPickerRef = useRef<HTMLDivElement | null>(null);
   const acquisitionsTrackRef = useRef<HTMLDivElement | null>(null);
@@ -166,6 +168,19 @@ export const LibraryPage = () => {
       .slice(0, 6)
       .map((item) => item.book);
   }, [books, previewBook]);
+  const booksWithActiveTag = useMemo(() => {
+    if (!activeTagFilter) return [];
+    const normalizedTag = activeTagFilter.trim().toLocaleLowerCase("es");
+    if (!normalizedTag) return [];
+    return books
+      .filter((book) => {
+        if (previewBook && book.id === previewBook.id) return false;
+        return (book.reviewTags ?? []).some(
+          (tag) => tag.trim().toLocaleLowerCase("es") === normalizedTag
+        );
+      })
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  }, [activeTagFilter, books, previewBook]);
   const previewVisibleBooks = useMemo(() => visibleBooks.slice(0, 12), [visibleBooks]);
   const collectionBooks = isShowingAllCollection ? visibleBooks : previewVisibleBooks;
 
@@ -250,6 +265,12 @@ export const LibraryPage = () => {
       document.body.style.overflow = originalBodyOverflow;
       document.documentElement.style.overflow = originalHtmlOverflow;
     };
+  }, [previewBookId]);
+
+  useEffect(() => {
+    if (previewBookId) return;
+    setIsTagDialogOpen(false);
+    setActiveTagFilter(null);
   }, [previewBookId]);
 
   const closePreview = () => {
@@ -400,6 +421,11 @@ export const LibraryPage = () => {
       left: direction === "right" ? amount : -amount,
       behavior: "smooth"
     });
+  };
+
+  const openTagDialog = (tag: string) => {
+    setActiveTagFilter(tag);
+    setIsTagDialogOpen(true);
   };
 
   const recentMarkHistory = useMemo(() => {
@@ -769,15 +795,15 @@ export const LibraryPage = () => {
           />
           <aside className={`${isClosingPreview ? "animate-slide-out-right-soft" : "animate-slide-in-right-soft"} fixed inset-y-0 right-0 z-50 flex w-full max-w-[600px] flex-col border-l-2 border-[#b78945] bg-[#f2e6d3] text-[#4d311d] shadow-2xl`}>
             <header
-              className="relative border-b border-[#8f643f] bg-gradient-to-b from-[#63131d] via-[#4b0f16] to-[#2f0b0f] px-4 pb-2 pt-3 text-amber-50"
+              className="relative border-b border-[#8f643f] bg-gradient-to-b from-[#3a1c11] via-[#2b140c] to-[#1a0b06] px-4 pb-5 pt-5 text-amber-50"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle at center, rgba(200,82,82,0.25) 0 2px, transparent 2px), radial-gradient(circle at center, rgba(200,82,82,0.18) 0 1px, transparent 1px), linear-gradient(to bottom, rgba(99,19,29,0.95), rgba(47,11,15,0.98))",
+                  "radial-gradient(circle at center, rgba(199,157,79,0.2) 0 2px, transparent 2px), radial-gradient(circle at center, rgba(199,157,79,0.14) 0 1px, transparent 1px), linear-gradient(to bottom, rgba(58,28,17,0.96), rgba(26,11,6,0.98))",
                 backgroundSize: "80px 80px, 80px 80px, 100% 100%",
                 backgroundPosition: "0 0, 40px 40px, 0 0"
               }}
             >
-              <div className="mb-2 flex items-start justify-between gap-3">
+              <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-end gap-4">
                   <div className="h-28 w-[4.8rem] shrink-0 overflow-hidden border border-[#b78945] bg-[#6a3f1e] shadow-[0_10px_24px_-12px_rgba(0,0,0,0.8)] [transform:perspective(1000px)_rotateY(-6deg)]">
                     {previewBook?.coverUrl ? (
@@ -793,10 +819,18 @@ export const LibraryPage = () => {
                       {previewLoading ? "Cargando..." : previewBook?.title ?? "Libro"}
                     </h3>
                     <p className="mt-0.5 line-clamp-1 text-[1.35rem] italic text-[#d7b06f]">{previewBook?.author}</p>
-                    <p className="mt-1.5 text-base text-[#cf9f28]">
-                      {"★".repeat(previewBook?.rating ?? 0)}
-                      {"☆".repeat(Math.max(0, 5 - (previewBook?.rating ?? 0)))}
-                    </p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <p className="text-base text-[#cf9f28]">
+                        {"★".repeat(previewBook?.rating ?? 0)}
+                        {"☆".repeat(Math.max(0, 5 - (previewBook?.rating ?? 0)))}
+                      </p>
+                      {previewBook?.isFavorite && (
+                        <span className="inline-flex items-center rounded-sm border border-amber-500/60 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+                          <Heart className="mr-1 h-3 w-3 fill-rose-500 text-rose-500" />
+                          Favorito
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <button
@@ -856,8 +890,12 @@ export const LibraryPage = () => {
               ) : previewBook ? (
                 previewTab === "info" ? (
                   <div className="space-y-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="min-w-[180px]">
+                    <div className="rounded-md bg-[#efe4d1] px-4 py-3 shadow-[0_6px_18px_-14px_rgba(90,47,31,0.55)]">
+                      <div className="min-w-[210px]">
+                        <p className="mb-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">
+                          <Bookmark className="h-3.5 w-3.5" />
+                          Estado de lectura
+                        </p>
                         <Select
                           value={previewBook.status}
                           onChange={(event) => void setPreviewStatus(event.target.value as ReadingStatus)}
@@ -869,96 +907,150 @@ export const LibraryPage = () => {
                           <option value="leido">Leído</option>
                         </Select>
                       </div>
-                      {previewBook.isFavorite && (
-                        <p className="inline-flex items-center rounded-sm border border-amber-500/60 bg-amber-100 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800">
-                          <Heart className="mr-1 h-3.5 w-3.5 fill-rose-500 text-rose-500" />
-                          Favorito
-                        </p>
-                      )}
-                      {isSavingStatus && <span className="text-xs text-[#7a573c]">Guardando estado...</span>}
+                      {isSavingStatus && <span className="mt-2 inline-block text-xs text-[#7a573c]">Guardando estado...</span>}
                     </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Año</p>
-                        <p>{previewBook.publicationYear ?? "—"}</p>
+
+                    <div className="rounded-md bg-[#efe4d1] px-4 py-3 shadow-[0_6px_18px_-14px_rgba(90,47,31,0.55)]">
+                      <div className="mb-3 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-[#b68e66]" />
+                        <p className="text-[1.08rem] font-['Fraunces',serif] text-[#5a2f1f]">Detalles del libro</p>
                       </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Páginas</p>
-                        <p>{previewBook.pages ?? "—"}</p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Género</p>
-                        <p>{previewBook.genre}</p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Editorial</p>
-                        <p>{previewBook.publisher || "—"}</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-5 text-sm">
+                        <div className="border-b border-[#d8c1a1]/70 pb-2">
+                          <p className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#8b6a4f]">
+                            <CalendarDays className="h-3.5 w-3.5" />
+                            Año de publicación
+                          </p>
+                          <p className="mt-1 text-[1.03rem] font-semibold text-[#5a2f1f]">{previewBook.publicationYear ?? "—"}</p>
+                        </div>
+                        <div className="border-b border-[#d8c1a1]/70 pb-2">
+                          <p className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#8b6a4f]">
+                            <BookOpen className="h-3.5 w-3.5" />
+                            Páginas
+                          </p>
+                          <p className="mt-1 text-[1.03rem] font-semibold text-[#5a2f1f]">{previewBook.pages ?? "—"}</p>
+                        </div>
+                        <div className="border-b border-[#d8c1a1]/70 pb-2">
+                          <p className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#8b6a4f]">
+                            <Tags className="h-3.5 w-3.5" />
+                            Género
+                          </p>
+                          <p className="mt-1 text-[1.03rem] font-semibold text-[#5a2f1f]">{previewBook.genre}</p>
+                        </div>
+                        <div className="border-b border-[#d8c1a1]/70 pb-2">
+                          <p className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#8b6a4f]">
+                            <Building2 className="h-3.5 w-3.5" />
+                            Editorial
+                          </p>
+                          <p className="mt-1 text-[1.03rem] font-semibold text-[#5a2f1f]">{previewBook.publisher || "—"}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="border-t border-[#c4a27b]/70 pt-3">
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Sinopsis</p>
-                      <p className="rounded-md border border-[#c4a27b]/70 bg-[#efe4d1] p-3 text-sm leading-relaxed text-[#5a3b24]">
+
+                    <div className="mx-2 rounded-md bg-[#f8f1e5] px-4 py-3 shadow-[0_6px_18px_-14px_rgba(90,47,31,0.6)]">
+                      <p className="mb-2 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Sinopsis</p>
+                      <p className="text-[0.98rem] leading-relaxed text-[#5a3b24]">
                         {previewBook.synopsis?.trim() || "Todavía no has añadido una sinopsis para este libro."}
                       </p>
                     </div>
                   </div>
                 ) : previewTab === "resena" ? (
                   <div className="space-y-3">
-                    <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Mi reseña</p>
-                    <p className="rounded-md border border-[#c4a27b]/70 bg-[#efe4d1] p-3 text-sm leading-relaxed">
-                      {previewBook.review?.trim() || "Todavía no has escrito una reseña para este libro."}
-                    </p>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Leído en</p>
-                        <p>{formatReadAtLabel(previewBook.readAt)}</p>
+                    <div className="rounded-md bg-[#eadcc4] px-3 py-2 shadow-[0_6px_18px_-14px_rgba(90,47,31,0.45)]">
+                      <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a573c]">
+                        <MessageSquareText className="h-3.5 w-3.5" />
+                        Mi reseña
+                      </p>
+                    </div>
+
+                    <div className="rounded-md bg-[#f3e8d8] p-3.5 shadow-[0_8px_20px_-16px_rgba(90,47,31,0.55)]">
+                      <p className="text-[0.98rem] leading-relaxed text-[#5a3b24]">
+                        {previewBook.review?.trim() || "Todavía no has escrito una reseña para este libro."}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-md bg-[#efe1ce] p-3.5 shadow-[0_8px_20px_-16px_rgba(90,47,31,0.5)]">
+                        <p className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">
+                          <CalendarDays className="h-3.5 w-3.5" />
+                          Leído en
+                        </p>
+                        <p className="mt-1 font-['Fraunces',serif] text-[1.12rem] leading-none text-[#5a2f1f]">
+                          {formatReadAtLabel(previewBook.readAt)}
+                        </p>
                       </div>
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Veces leído</p>
-                        <p>{previewBook.timesRead?.trim() || "—"}</p>
+                      <div className="rounded-md bg-[#efe1ce] p-3.5 shadow-[0_8px_20px_-16px_rgba(90,47,31,0.5)]">
+                        <p className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">
+                          <Clock3 className="h-3.5 w-3.5" />
+                          Veces leído
+                        </p>
+                        <p className="mt-1 font-['Fraunces',serif] text-[1.12rem] leading-none text-[#5a2f1f]">
+                          {previewBook.timesRead?.trim() || "—"}
+                        </p>
                       </div>
                     </div>
-                    <div className="border-t border-[#c4a27b]/70 pt-3">
-                      <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Frase o cita favorita</p>
-                      <p className="rounded-md border border-[#c4a27b]/70 bg-[#efe4d1] p-3 text-sm italic leading-relaxed text-[#5a3b24]">
+
+                    <div className="rounded-md bg-[#f3e8d8] p-3.5 shadow-[0_8px_20px_-16px_rgba(90,47,31,0.55)]">
+                      <p className="mb-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">
+                        <Quote className="h-3.5 w-3.5" />
+                        Frase o cita favorita
+                      </p>
+                      <p className="text-[1rem] italic leading-relaxed text-[#5a3b24]">
                         {previewBook.favoriteQuote?.trim() || "Todavía no has guardado una cita favorita."}
                       </p>
                     </div>
-                    <div className="border-t border-[#c4a27b]/70 pt-3">
-                      <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Etiquetas temáticas</p>
+
+                    <div className="rounded-md bg-[#efe1ce] p-3.5 shadow-[0_8px_20px_-16px_rgba(90,47,31,0.5)]">
+                      <p className="mb-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">
+                        <Tags className="h-3.5 w-3.5" />
+                        Etiquetas temáticas
+                      </p>
                       {previewBook.reviewTags && previewBook.reviewTags.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {previewBook.reviewTags.map((tag) => (
-                            <span
+                            <button
                               key={tag}
+                              type="button"
+                              onClick={() => openTagDialog(tag)}
                               className="rounded-sm border border-[#d0b188] bg-[#f5ecde] px-2 py-1 text-xs font-semibold text-[#8e633d]"
+                              title={`Ver libros con etiqueta ${tag}`}
                             >
                               {tag}
-                            </span>
+                            </button>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm">—</p>
+                        <p className="text-sm text-[#7a573c]">Sin etiquetas.</p>
                       )}
                     </div>
-                    <div className="border-t border-[#c4a27b]/70 pt-3">
-                      <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Valoración</p>
-                      <p className="text-base text-[#8e633d]">
-                        {"★".repeat(previewBook.rating ?? 0)}
-                        {"☆".repeat(Math.max(0, 5 - (previewBook.rating ?? 0)))}
-                      </p>
-                    </div>
-                    <div className="border-t border-[#c4a27b]/70 pt-3">
-                      <p className="mb-1 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">Recomendación</p>
-                      <p className="text-sm">
-                        {previewBook.wouldRecommend === "si"
-                          ? "👍 Sí, lo recomendaría"
-                          : previewBook.wouldRecommend === "depende"
-                            ? "🤔 Depende del lector"
-                            : previewBook.wouldRecommend === "no"
-                              ? "👎 No especialmente"
-                              : "—"}
-                      </p>
+
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <div className="rounded-md bg-[#f3e8d8] p-3.5 shadow-[0_8px_20px_-16px_rgba(90,47,31,0.55)]">
+                        <p className="mb-1 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">
+                          <Star className="h-3.5 w-3.5" />
+                          Valoración
+                        </p>
+                        <p className="text-[1.05rem] text-[#8e633d]">
+                          {"★".repeat(previewBook.rating ?? 0)}
+                          {"☆".repeat(Math.max(0, 5 - (previewBook.rating ?? 0)))}
+                        </p>
+                      </div>
+
+                      <div className="rounded-md bg-[#f3e8d8] p-3.5 shadow-[0_8px_20px_-16px_rgba(90,47,31,0.55)]">
+                        <p className="mb-1 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-[#7a573c]">
+                          <ThumbsUp className="h-3.5 w-3.5" />
+                          Recomendación
+                        </p>
+                        <p className="text-[0.97rem] text-[#5a3b24]">
+                          {previewBook.wouldRecommend === "si"
+                            ? "👍 Sí, lo recomendaría"
+                            : previewBook.wouldRecommend === "depende"
+                              ? "🤔 Depende del lector"
+                              : previewBook.wouldRecommend === "no"
+                                ? "👎 No especialmente"
+                                : "—"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -990,7 +1082,7 @@ export const LibraryPage = () => {
                                 { replace: true }
                               );
                             }}
-                            className="rounded-sm border border-[#d3b98f] bg-[#efe4d1] p-2 text-left transition hover:bg-[#e7d6bc]"
+                            className="rounded-sm border border-[#d3b98f] bg-[#e7d6bc] p-2 text-left transition hover:bg-[#dcc3a1]"
                           >
                             <span className="mb-2 block h-16 w-full overflow-hidden">
                               {book.coverUrl ? (
@@ -1125,6 +1217,67 @@ export const LibraryPage = () => {
                   className="min-w-[96px]"
                 >
                   {deletingId === previewBook?.id ? "Eliminando..." : "Eliminar"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog
+            open={isTagDialogOpen}
+            onOpenChange={(open) => {
+              setIsTagDialogOpen(open);
+              if (!open) setActiveTagFilter(null);
+            }}
+          >
+            <DialogContent className="max-w-[760px] border border-[#b68e66] bg-[#efe4d1] p-0 text-[#4d311d]">
+              <DialogHeader className="border-b border-[#c4a27b]/70 px-5 pb-3 pt-4">
+                <DialogTitle className="font-['Fraunces',serif] text-2xl text-[#5a2f1f]">
+                  Libros con etiqueta {activeTagFilter ? `"${activeTagFilter}"` : ""}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-[#7a573c]">
+                  Selecciona un libro para abrir su ficha.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="max-h-[56vh] space-y-2 overflow-y-auto px-5 py-4">
+                {booksWithActiveTag.length === 0 ? (
+                  <p className="rounded-md border border-[#c4a27b]/70 bg-[#f5ecde] p-3 text-sm text-[#6f4b2e]">
+                    No hay más libros con esta etiqueta.
+                  </p>
+                ) : (
+                  booksWithActiveTag.map((book) => (
+                    <button
+                      key={book.id}
+                      type="button"
+                      onClick={() => {
+                        setPreviewTab("info");
+                        setPreviewBookId(book.id);
+                        const params = new URLSearchParams(location.search);
+                        params.set("preview", book.id);
+                        navigate(
+                          {
+                            pathname: location.pathname,
+                            search: `?${params.toString()}`
+                          },
+                          { replace: true }
+                        );
+                        setIsTagDialogOpen(false);
+                        setActiveTagFilter(null);
+                      }}
+                      className="w-full rounded-md border border-[#c4a27b]/70 bg-[#f5ecde] p-3 text-left transition hover:bg-[#ead9bd]"
+                    >
+                      <p className="font-['Fraunces',serif] text-[1.15rem] text-[#5a2f1f]">{book.title}</p>
+                      <p className="text-xs italic text-[#7a573c]">{book.author}</p>
+                    </button>
+                  ))
+                )}
+              </div>
+              <DialogFooter className="!mx-0 !mb-0 border-t border-[#c4a27b]/70 bg-[#eadcc4] px-5 py-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsTagDialogOpen(false)}
+                  className="border-[#b08a63] bg-[#efe4d1] text-[#6f4b2e] hover:border-[#8e633d] hover:bg-[#e2cfb2] hover:text-[#5a3d24]"
+                >
+                  Cerrar
                 </Button>
               </DialogFooter>
             </DialogContent>
