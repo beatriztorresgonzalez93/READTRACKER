@@ -4,7 +4,7 @@ import { BookCard } from "./BookCard";
 
 interface BookListProps {
   books: Book[];
-  onOpenPreview?: (id: string) => void;
+  onOpenPreview: (id: string) => void;
 }
 
 export const BookList = ({ books, onOpenPreview }: BookListProps) => {

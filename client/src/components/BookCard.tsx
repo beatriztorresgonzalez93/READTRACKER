@@ -1,27 +1,21 @@
 // Tarjeta visual de un libro con portada, estado, progreso y acceso a detalle.
 import { KeyboardEvent, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Book } from "../types/book";
 
 interface BookCardProps {
   book: Book;
   index?: number;
-  onOpenPreview?: (id: string) => void;
+  onOpenPreview: (id: string) => void;
 }
 
 export const BookCard = ({ book, index = 0, onOpenPreview }: BookCardProps) => {
-  const navigate = useNavigate();
   const [coverBroken, setCoverBroken] = useState(false);
 
   useEffect(() => {
     setCoverBroken(false);
   }, [book.coverUrl, book.id]);
   const goToDetails = () => {
-    if (onOpenPreview) {
-      onOpenPreview(book.id);
-      return;
-    }
-    navigate(`/books/${book.id}`);
+    onOpenPreview(book.id);
   };
   const handleCardKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.key !== "Enter" && event.key !== " ") return;

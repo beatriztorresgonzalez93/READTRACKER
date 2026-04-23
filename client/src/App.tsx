@@ -2,7 +2,6 @@
 import { Location as RouterLocation, Route, Routes, useLocation } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { BookDetailPage } from "./pages/BookDetailPage";
 import { EditBookPage } from "./pages/EditBookPage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -59,14 +58,6 @@ function App() {
           element={
             <ProtectedRoute>
               <NewBookPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/books/:id"
-          element={
-            <ProtectedRoute>
-              <BookDetailPage />
             </ProtectedRoute>
           }
         />

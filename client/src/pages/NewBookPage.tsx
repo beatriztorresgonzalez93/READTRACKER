@@ -18,7 +18,7 @@ export const NewBookPage = () => {
         setError(null);
         const created = await createBook(data);
         await reloadBooks();
-        navigate(`/books/${created.id}`);
+        navigate(`/?preview=${encodeURIComponent(created.id)}`);
       } catch (err) {
         if (err instanceof ApiError) {
           setError(err.message);

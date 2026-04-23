@@ -40,7 +40,7 @@ export const EditBookPage = () => {
         setError(null);
         await updateBook(id, data);
         await reloadBooks();
-        navigate(`/books/${id}`);
+        navigate(`/?preview=${encodeURIComponent(id)}`);
       } catch (err) {
         if (err instanceof ApiError) {
           setError(err.message);
