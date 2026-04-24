@@ -279,13 +279,28 @@ export const LibraryPage = () => {
   }, [previewBookId]);
 
   useEffect(() => {
-    if (previewBookId) return;
+    if (!previewBookId) {
+      setIsTagDialogOpen(false);
+      setActiveTagFilter(null);
+      setIsReviewDialogOpen(false);
+      setIsMarkPageOpen(false);
+      setIsDeleteConfirmOpen(false);
+      return;
+    }
+    setIsReviewDialogOpen(false);
+    setIsMarkPageOpen(false);
+    setIsDeleteConfirmOpen(false);
     setIsTagDialogOpen(false);
     setActiveTagFilter(null);
   }, [previewBookId]);
 
   const closePreview = () => {
     if (!previewBookId || isClosingPreview) return;
+    setIsReviewDialogOpen(false);
+    setIsMarkPageOpen(false);
+    setIsDeleteConfirmOpen(false);
+    setIsTagDialogOpen(false);
+    setActiveTagFilter(null);
     setIsClosingPreview(true);
     previewCloseTimeoutRef.current = setTimeout(() => {
       setPreviewBookId(null);
@@ -356,11 +371,18 @@ export const LibraryPage = () => {
     }
   };
 
+  /** Evita el aviso de accesibilidad: no dejar foco en un botón del aside si el modal lo marca como aria-hidden/inert. */
+  const releaseFocusBeforeModal = () => {
+    const el = document.activeElement;
+    if (el instanceof HTMLElement) el.blur();
+  };
+
   const openMarkPageDialog = () => {
     if (!previewBook) return;
     if (previewBook.status !== "leyendo") return;
     setMarkPageError(null);
     setMarkPageInput(String(previewBook.currentPage ?? 0));
+    releaseFocusBeforeModal();
     setIsMarkPageOpen(true);
   };
 
@@ -377,6 +399,7 @@ export const LibraryPage = () => {
     setRecommendDraft(previewBook.wouldRecommend ?? "si");
     setReadAtViewMonth(parseIsoDate(previewBook.readAt ?? "") ?? new Date());
     setIsReadAtPickerOpen(false);
+    releaseFocusBeforeModal();
     setIsReviewDialogOpen(true);
   };
 
@@ -441,6 +464,7 @@ export const LibraryPage = () => {
 
   const openTagDialog = (tag: string) => {
     setActiveTagFilter(tag);
+    releaseFocusBeforeModal();
     setIsTagDialogOpen(true);
   };
 
@@ -1279,7 +1303,10 @@ export const LibraryPage = () => {
                 aria-label="Eliminar libro"
                 className="flex h-10 min-w-0 w-full items-center justify-center gap-0 rounded-none border-rose-300 bg-[#efe4d1] px-1 text-rose-700 hover:border-rose-500 hover:bg-rose-100 hover:text-rose-800 md:gap-2 md:px-3"
                 disabled={!previewBook || deletingId === previewBook.id}
-                onClick={() => setIsDeleteConfirmOpen(true)}
+                onClick={() => {
+                  releaseFocusBeforeModal();
+                  setIsDeleteConfirmOpen(true);
+                }}
               >
                 <X className="h-4 w-4 shrink-0 md:h-3.5 md:w-3.5" />
                 <span className="hidden md:inline">Eliminar</span>
