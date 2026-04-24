@@ -24,7 +24,7 @@ function isOptionElement(node: unknown): node is OptionLike {
 }
 
 function SelectImpl(
-  { className, value, defaultValue, onChange, children, disabled, name }: NativeSelectProps,
+  { className, value, defaultValue, onChange, children, disabled, name, id, "aria-labelledby": ariaLabelledby, "aria-describedby": ariaDescribedby }: NativeSelectProps,
   _ref: ForwardedRef<HTMLSelectElement>
 ) {
   const options = useMemo(
@@ -56,6 +56,9 @@ function SelectImpl(
       }}
     >
       <SelectPrimitive.Trigger
+        id={id}
+        aria-labelledby={ariaLabelledby}
+        aria-describedby={ariaDescribedby}
         className={cn(
           "flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-slate-900 shadow-sm ring-1 ring-transparent transition focus-visible:border-[#8e633d] focus-visible:outline-none focus-visible:ring-[#8e633d]/40 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus-visible:border-[#8e633d] dark:focus-visible:ring-[#8e633d]/40",
           className

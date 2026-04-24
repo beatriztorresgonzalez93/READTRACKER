@@ -1,6 +1,21 @@
 // Estado global de autenticación para login/registro/logout.
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
-import { ApiError, authStorage, AuthUser, getMe, loginUser, registerUser } from "../api/client";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  ApiError,
+  authStorage,
+  AuthUser,
+  getMe,
+  loginUser,
+  registerUser,
+  updateProfile as updateProfileRequest,
+  type UpdateProfileBody
+} from "../api/client";
+
+const normalizeAuthUser = (raw: AuthUser): AuthUser => ({
+  ...raw,
+  lastName: typeof raw.lastName === "string" ? raw.lastName : "",
+  avatarUrl: typeof raw.avatarUrl === "string" && raw.avatarUrl.trim() ? raw.avatarUrl.trim() : null
+});
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -9,6 +24,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (body: UpdateProfileBody) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -26,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       try {
         const me = await getMe();
-        setUser(me);
+        setUser(normalizeAuthUser(me));
       } catch {
         authStorage.clearToken();
         setUser(null);
@@ -40,19 +56,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     const auth = await loginUser(email, password);
     authStorage.setToken(auth.token);
-    setUser(auth.user);
+    setUser(normalizeAuthUser(auth.user));
   };
 
   const register = async (name: string, email: string, password: string) => {
     const auth = await registerUser(name, email, password);
     authStorage.setToken(auth.token);
-    setUser(auth.user);
+    setUser(normalizeAuthUser(auth.user));
   };
 
   const logout = () => {
     authStorage.clearToken();
     setUser(null);
   };
+
+  const updateProfile = useCallback(async (body: UpdateProfileBody) => {
+    const updated = await updateProfileRequest(body);
+    setUser(normalizeAuthUser(updated));
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -61,9 +82,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isAuthenticated: Boolean(user),
       login,
       register,
-      logout
+      logout,
+      updateProfile
     }),
-    [loading, user]
+    [loading, updateProfile, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

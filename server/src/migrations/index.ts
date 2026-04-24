@@ -4,12 +4,14 @@ import { logInfo } from "../logger";
 import { migration001InitialUsersBooks } from "./001_initial_users_books";
 import { migration002WishlistTables } from "./002_wishlist_tables";
 import { migration003ReadingSessions } from "./003_reading_sessions";
+import { migration004UserProfileFields } from "./004_user_profile_fields";
 import { Migration } from "./types";
 
 const migrations: Migration[] = [
   migration001InitialUsersBooks,
   migration002WishlistTables,
-  migration003ReadingSessions
+  migration003ReadingSessions,
+  migration004UserProfileFields
 ];
 
 export const runMigrations = async (pool: Pool) => {

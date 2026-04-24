@@ -3,6 +3,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LogOut, Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { UserProfileDialog } from "./UserProfileDialog";
 import { Button } from "./ui/button";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
@@ -122,11 +123,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
                 </Button>
               </Link>
             )}
-            {isAuthenticated && user && (
-              <span className="hidden font-['Fraunces',serif] text-lg font-semibold tracking-tight text-amber-100 sm:inline">
-                Hola, {user.name}
-              </span>
-            )}
+            {isAuthenticated && user && <UserProfileDialog />}
             {isAuthenticated && (
               <Button
                 variant="ghost"

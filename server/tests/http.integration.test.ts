@@ -21,7 +21,8 @@ describe("HTTP integration: contract + auth + errors", () => {
   const authServiceMock = {
     register: vi.fn(),
     login: vi.fn(),
-    getProfile: vi.fn()
+    getProfile: vi.fn(),
+    updateProfile: vi.fn()
   };
   const booksServiceMock = {
     getBooks: vi.fn(),
@@ -89,6 +90,29 @@ describe("HTTP integration: contract + auth + errors", () => {
     expect(response.body).toMatchObject({
       code: "INVALID_CREDENTIALS"
     });
+  });
+
+  it("PATCH /auth/me returns 200 when authorized", async () => {
+    authServiceMock.updateProfile.mockResolvedValueOnce({
+      id: "user-1",
+      name: "Ana",
+      lastName: "López",
+      email: "user@test.com",
+      avatarUrl: null,
+      createdAt: "2026-01-01T00:00:00.000Z"
+    });
+
+    const response = await request(app)
+      .patch("/api/v1/auth/me")
+      .set("Authorization", `Bearer ${buildToken()}`)
+      .send({ name: "Ana", lastName: "López" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({ name: "Ana", lastName: "López" });
+    expect(authServiceMock.updateProfile).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({ name: "Ana", lastName: "López" })
+    );
   });
 
   it("requires auth token for protected endpoints", async () => {

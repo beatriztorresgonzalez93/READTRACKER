@@ -10,9 +10,17 @@ const AUTH_TOKEN_KEY = "readtracker-auth-token";
 export interface AuthUser {
   id: string;
   name: string;
+  lastName: string;
   email: string;
+  avatarUrl: string | null;
   createdAt: string;
 }
+
+export type UpdateProfileBody = {
+  name?: string;
+  lastName?: string;
+  avatarUrl?: string | null;
+};
 
 export interface AuthResult {
   token: string;
@@ -150,6 +158,14 @@ export const loginUser = async (email: string, password: string): Promise<AuthRe
 
 export const getMe = async (): Promise<AuthUser> => {
   const response = await apiFetch<ApiResponse<AuthUser>>("/auth/me");
+  return response.data;
+};
+
+export const updateProfile = async (body: UpdateProfileBody): Promise<AuthUser> => {
+  const response = await apiFetch<ApiResponse<AuthUser>>("/auth/me", {
+    method: "PATCH",
+    body: JSON.stringify(body)
+  });
   return response.data;
 };
 

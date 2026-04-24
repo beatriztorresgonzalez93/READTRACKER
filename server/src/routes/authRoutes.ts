@@ -9,6 +9,7 @@ export const createAuthRouter = (controller: AuthController) => {
   router.post("/register", controller.register);
   router.post("/login", controller.login);
   router.get("/me", requireAuth, controller.me);
+  router.patch("/me", requireAuth, controller.patchMe);
 
   return router;
 };

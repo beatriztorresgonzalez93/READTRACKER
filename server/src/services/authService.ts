@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { UsersRepository } from "../repositories/usersRepository";
-import { AuthResult, AuthUser, LoginDto, RegisterDto } from "../types/auth";
+import { AuthResult, AuthUser, LoginDto, RegisterDto, UpdateProfileDto } from "../types/auth";
 
 const TOKEN_EXPIRES_IN = "7d";
 
@@ -52,5 +52,24 @@ export class AuthService {
 
   async getProfile(userId: string): Promise<AuthUser | null> {
     return this.usersRepository.findById(userId);
+  }
+
+  async updateProfile(userId: string, patch: UpdateProfileDto): Promise<AuthUser | null> {
+    const current = await this.usersRepository.findById(userId);
+    if (!current) return null;
+
+    const name = patch.name !== undefined ? patch.name.trim() : current.name;
+    const lastName = patch.lastName !== undefined ? patch.lastName.trim() : current.lastName;
+    let avatarUrl = current.avatarUrl;
+    if (patch.avatarUrl !== undefined) {
+      if (patch.avatarUrl === null || patch.avatarUrl === "") {
+        avatarUrl = null;
+      } else {
+        const trimmed = patch.avatarUrl.trim();
+        avatarUrl = trimmed.length ? trimmed : null;
+      }
+    }
+
+    return this.usersRepository.updateProfile(userId, { name, lastName, avatarUrl });
   }
 }

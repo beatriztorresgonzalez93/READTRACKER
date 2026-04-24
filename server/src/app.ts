@@ -94,7 +94,7 @@ export const createApp = () => {
       }
     })
   );
-  app.use(express.json());
+  app.use(express.json({ limit: "512kb" }));
 
   const booksRepository = new BooksRepository();
   const booksService = new BooksService(booksRepository);
