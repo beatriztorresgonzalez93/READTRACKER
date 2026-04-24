@@ -51,3 +51,28 @@ export interface CreateBookDto {
 }
 
 export interface UpdateBookDto extends Partial<CreateBookDto> {}
+
+/** Ordenación alineada con la biblioteca del cliente. */
+export type BookSortKey = "recientes" | "titulo" | "autor" | "genero" | "valoracion";
+
+/** Filtros para listado paginado de libros. */
+export interface BookListPageFilters {
+  search?: string;
+  hookStatus?: string;
+  shelf?: string;
+  genre?: string | null;
+  sort: BookSortKey;
+}
+
+/** Totales globales de la biblioteca (barra lateral / reseñas). */
+export interface LibrarySummaryDto {
+  total: number;
+  pendiente: number;
+  leyendo: number;
+  leido: number;
+  favoritos: number;
+  ratedSum: number;
+  ratedCount: number;
+  latestYear: number;
+  genres: { genre: string; count: number }[];
+}

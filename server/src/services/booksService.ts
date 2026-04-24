@@ -1,12 +1,16 @@
 // Capa de negocio: coordina operaciones de libros usando el repositorio.
 import { BooksRepository } from "../repositories/booksRepository";
-import { CreateBookDto, UpdateBookDto } from "../types/book";
+import { BookListPageFilters, CreateBookDto, LibrarySummaryDto, UpdateBookDto } from "../types/book";
 
 export class BooksService {
   constructor(private readonly repository: BooksRepository) {}
 
-  async getBooks(userId: string, search?: string, status?: string) {
-    return this.repository.findAll(userId, search, status);
+  async getBooksPage(userId: string, filters: BookListPageFilters, limit: number, offset: number) {
+    return this.repository.listPage(userId, filters, limit, offset);
+  }
+
+  async getLibrarySummary(userId: string): Promise<LibrarySummaryDto> {
+    return this.repository.getLibrarySummary(userId);
   }
 
   async getBookById(id: string, userId: string) {

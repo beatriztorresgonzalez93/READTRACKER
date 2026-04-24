@@ -5,13 +5,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Alert } from "../components/ui/alert";
 import { Input } from "../components/ui/input";
 import { Select } from "../components/ui/select";
-import { useBooksContext } from "../context/BooksContext";
+import { useAuth } from "../context/AuthContext";
+import { useFullBooksSnapshot } from "../hooks/useFullBooksSnapshot";
 
 type RatingFilter = "todas" | "1" | "2" | "3" | "4" | "5";
 type ReviewSort = "reciente" | "valoracion" | "titulo";
 
 export const ReviewsPage = () => {
-  const { books, loading, error } = useBooksContext();
+  const { isAuthenticated } = useAuth();
+  const { books, loading, error } = useFullBooksSnapshot(isAuthenticated);
   const navigate = useNavigate();
   const location = useLocation();
   const [search, setSearch] = useState("");

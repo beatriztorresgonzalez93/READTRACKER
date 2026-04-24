@@ -19,13 +19,17 @@ import {
   intensityColorByPages,
   WEEK_LABELS
 } from "../components/history/historyUtils";
+import { useAuth } from "../context/AuthContext";
 import { useBooksContext } from "../context/BooksContext";
+import { useFullBooksSnapshot } from "../hooks/useFullBooksSnapshot";
 import { useReadingSessions } from "../hooks/useReadingSessions";
 
 export const ReadingHistoryPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { books, reloadBooks } = useBooksContext();
+  const { isAuthenticated } = useAuth();
+  const { books } = useFullBooksSnapshot(isAuthenticated);
+  const { reloadBooks } = useBooksContext();
   const { sessions, loading, error, deletingSessionId, removeSession } = useReadingSessions({
     onDeleteSuccess: async () => {
       await reloadBooks();

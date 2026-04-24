@@ -25,7 +25,8 @@ describe("HTTP integration: contract + auth + errors", () => {
     updateProfile: vi.fn()
   };
   const booksServiceMock = {
-    getBooks: vi.fn(),
+    getBooksPage: vi.fn(),
+    getLibrarySummary: vi.fn(),
     getBookById: vi.fn(),
     createBook: vi.fn(),
     updateBook: vi.fn(),
@@ -143,18 +144,21 @@ describe("HTTP integration: contract + auth + errors", () => {
   });
 
   it("returns books list for authorized user", async () => {
-    booksServiceMock.getBooks.mockResolvedValueOnce([
-      {
-        id: "book-1",
-        title: "Dune",
-        author: "Frank Herbert",
-        publisher: "Ace",
-        genre: "Sci-Fi",
-        status: "leyendo",
-        createdAt: "2026-01-01T00:00:00.000Z",
-        updatedAt: "2026-01-01T00:00:00.000Z"
-      }
-    ]);
+    booksServiceMock.getBooksPage.mockResolvedValueOnce({
+      rows: [
+        {
+          id: "book-1",
+          title: "Dune",
+          author: "Frank Herbert",
+          publisher: "Ace",
+          genre: "Sci-Fi",
+          status: "leyendo",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z"
+        }
+      ],
+      total: 1
+    });
 
     const response = await request(app)
       .get("/api/v1/books")
@@ -163,6 +167,7 @@ describe("HTTP integration: contract + auth + errors", () => {
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body.data)).toBe(true);
     expect(response.body.data[0]).toMatchObject({ id: "book-1", title: "Dune" });
+    expect(response.body.meta).toMatchObject({ total: 1, limit: 12, offset: 0 });
   });
 
   it("returns 201 for valid create book", async () => {

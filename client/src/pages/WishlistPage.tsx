@@ -13,7 +13,8 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Select } from "../components/ui/select";
-import { useBooksContext } from "../context/BooksContext";
+import { useAuth } from "../context/AuthContext";
+import { useFullBooksSnapshot } from "../hooks/useFullBooksSnapshot";
 import type { WishlistItem, WishlistPriority } from "../types/wishlist";
 import { capitalizeFirst, capitalizeWords } from "../utils/textCase";
 
@@ -29,7 +30,8 @@ const getPriorityLabel = (priority: WishlistPriority) => {
 };
 
 export const WishlistPage = () => {
-  const { books } = useBooksContext();
+  const { isAuthenticated } = useAuth();
+  const { books } = useFullBooksSnapshot(isAuthenticated);
   const [search, setSearch] = useState("");
   const [store, setStore] = useState("todos");
   const [sortBy, setSortBy] = useState<WishlistSort>("prioridad");

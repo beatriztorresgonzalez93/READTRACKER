@@ -20,8 +20,12 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../context/BooksContext", () => ({
-  useBooksContext: () => ({
+vi.mock("../context/AuthContext", () => ({
+  useAuth: () => ({ isAuthenticated: true })
+}));
+
+vi.mock("../hooks/useFullBooksSnapshot", () => ({
+  useFullBooksSnapshot: () => ({
     books: [
       {
         id: "book-1",
@@ -35,6 +39,13 @@ vi.mock("../context/BooksContext", () => ({
         createdAt: new Date().toISOString()
       }
     ],
+    loading: false,
+    error: null
+  })
+}));
+
+vi.mock("../context/BooksContext", () => ({
+  useBooksContext: () => ({
     reloadBooks: reloadBooksMock
   })
 }));

@@ -4,7 +4,7 @@ import { BookOpen, Bookmark, CalendarDays, Clock3, Flame, Heart, ShoppingBag, St
 import { getReadableErrorMessage, getWishlistAcquisitions } from "../api/client";
 import { Select } from "../components/ui/select";
 import { useAuth } from "../context/AuthContext";
-import { useBooksContext } from "../context/BooksContext";
+import { useFullBooksSnapshot } from "../hooks/useFullBooksSnapshot";
 import { Book } from "../types/book";
 import { WishlistAcquisition } from "../types/wishlist";
 
@@ -114,7 +114,7 @@ const toRoman = (value: number) => {
 
 export const StatisticsPage = () => {
   const { isAuthenticated } = useAuth();
-  const { books, loading, error } = useBooksContext();
+  const { books, loading, error } = useFullBooksSnapshot(isAuthenticated);
   const [acquisitions, setAcquisitions] = useState<WishlistAcquisition[]>([]);
   const [acquisitionsLoading, setAcquisitionsLoading] = useState(false);
   const [acquisitionsError, setAcquisitionsError] = useState<string | null>(null);

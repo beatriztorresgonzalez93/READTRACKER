@@ -1,7 +1,7 @@
 // Capa de acceso a datos en PostgreSQL (Neon) para libros.
 import { randomUUID } from "crypto";
 import { pool } from "../config/db";
-import { Book, CreateBookDto, UpdateBookDto } from "../types/book";
+import { Book, BookListPageFilters, BookSortKey, CreateBookDto, LibrarySummaryDto, UpdateBookDto } from "../types/book";
 
 interface BookRow {
   id: string;
@@ -55,31 +55,140 @@ const mapRow = (row: BookRow): Book => ({
   updatedAt: row.updated_at.toISOString()
 });
 
+const orderByClause = (sort: BookSortKey) => {
+  switch (sort) {
+    case "titulo":
+      return "ORDER BY title ASC";
+    case "autor":
+      return "ORDER BY author ASC";
+    case "genero":
+      return "ORDER BY genre ASC";
+    case "valoracion":
+      return "ORDER BY rating DESC NULLS LAST, created_at DESC";
+    default:
+      return "ORDER BY created_at DESC";
+  }
+};
+
+const buildWhereFragments = (
+  userId: string,
+  search?: string | null,
+  hookStatus?: string | null,
+  shelf?: string | null,
+  genre?: string | null
+): { where: string; values: unknown[] } => {
+  const parts: string[] = ["user_id = $1"];
+  const values: unknown[] = [userId];
+  let i = 2;
+
+  const s = search?.trim();
+  if (s) {
+    parts.push(`(title ILIKE $${i} OR author ILIKE $${i} OR publisher ILIKE $${i} OR genre ILIKE $${i})`);
+    values.push(`%${s}%`);
+    i += 1;
+  }
+
+  const hs = hookStatus?.trim();
+  if (hs && hs !== "todos") {
+    parts.push(`status = $${i}`);
+    values.push(hs);
+    i += 1;
+  }
+
+  const sh = shelf?.trim() ?? "todos";
+  if (sh !== "todos") {
+    if (sh === "favoritos") {
+      parts.push("is_favorite = true");
+    } else {
+      parts.push(`status = $${i}`);
+      values.push(sh);
+      i += 1;
+    }
+  }
+
+  const g = genre?.trim();
+  if (g) {
+    parts.push(`LOWER(TRIM(genre)) = LOWER(TRIM($${i}))`);
+    values.push(g);
+    i += 1;
+  }
+
+  return { where: parts.join(" AND "), values };
+};
+
 export class BooksRepository {
-  async findAll(userId: string, search?: string, status?: string): Promise<Book[]> {
-    let sql = "SELECT * FROM books";
-    const clauses: string[] = ["user_id = $1"];
-    const values: unknown[] = [userId];
-    let idx = 2;
+  async listPage(
+    userId: string,
+    filters: BookListPageFilters,
+    limit: number,
+    offset: number
+  ): Promise<{ rows: Book[]; total: number }> {
+    const { where, values } = buildWhereFragments(
+      userId,
+      filters.search,
+      filters.hookStatus,
+      filters.shelf,
+      filters.genre ?? null
+    );
+    const order = orderByClause(filters.sort);
 
-    if (search) {
-      clauses.push(`(title ILIKE $${idx} OR author ILIKE $${idx} OR publisher ILIKE $${idx} OR genre ILIKE $${idx})`);
-      values.push(`%${search}%`);
-      idx += 1;
-    }
+    const countResult = await pool.query<{ c: string }>(`SELECT COUNT(*)::int AS c FROM books WHERE ${where}`, values);
+    const total = Number(countResult.rows[0]?.c ?? 0);
 
-    if (status) {
-      clauses.push(`status = $${idx}`);
-      values.push(status);
-      idx += 1;
-    }
+    const limIdx = values.length + 1;
+    const offIdx = values.length + 2;
+    const dataResult = await pool.query<BookRow>(
+      `SELECT * FROM books WHERE ${where} ${order} LIMIT $${limIdx} OFFSET $${offIdx}`,
+      [...values, limit, offset]
+    );
+    return { rows: dataResult.rows.map(mapRow), total };
+  }
 
-    sql += ` WHERE ${clauses.join(" AND ")}`;
-
-    sql += " ORDER BY created_at DESC";
-
-    const result = await pool.query<BookRow>(sql, values);
-    return result.rows.map(mapRow);
+  async getLibrarySummary(userId: string): Promise<LibrarySummaryDto> {
+    const agg = await pool.query<{
+      total: string;
+      pendiente: string;
+      leyendo: string;
+      leido: string;
+      favoritos: string;
+      rated_sum: string;
+      rated_count: string;
+      latest_year: string;
+    }>(
+      `SELECT
+         COUNT(*)::int AS total,
+         COUNT(*) FILTER (WHERE status = 'pendiente')::int AS pendiente,
+         COUNT(*) FILTER (WHERE status = 'leyendo')::int AS leyendo,
+         COUNT(*) FILTER (WHERE status = 'leido')::int AS leido,
+         COUNT(*) FILTER (WHERE is_favorite = true)::int AS favoritos,
+         COALESCE(SUM(rating) FILTER (WHERE status = 'leido' AND rating IS NOT NULL), 0)::float AS rated_sum,
+         COUNT(*) FILTER (WHERE status = 'leido' AND rating IS NOT NULL AND rating > 0)::int AS rated_count,
+         COALESCE(MAX(EXTRACT(YEAR FROM updated_at))::int, EXTRACT(YEAR FROM CURRENT_DATE)::int) AS latest_year
+       FROM books
+       WHERE user_id = $1`,
+      [userId]
+    );
+    const row = agg.rows[0];
+    const genresResult = await pool.query<{ genre: string; c: string }>(
+      `SELECT TRIM(genre) AS genre, COUNT(*)::int AS c
+       FROM books
+       WHERE user_id = $1 AND TRIM(genre) <> ''
+       GROUP BY TRIM(genre)
+       ORDER BY c DESC, genre ASC`,
+      [userId]
+    );
+    const genres = genresResult.rows.map((r) => ({ genre: r.genre, count: Number(r.c) }));
+    return {
+      total: Number(row?.total ?? 0),
+      pendiente: Number(row?.pendiente ?? 0),
+      leyendo: Number(row?.leyendo ?? 0),
+      leido: Number(row?.leido ?? 0),
+      favoritos: Number(row?.favoritos ?? 0),
+      ratedSum: Number(row?.rated_sum ?? 0),
+      ratedCount: Number(row?.rated_count ?? 0),
+      latestYear: Number(row?.latest_year ?? new Date().getFullYear()),
+      genres
+    };
   }
 
   async findById(id: string, userId: string): Promise<Book | undefined> {

@@ -9,6 +9,7 @@ export const createBooksRouter = (controller: BooksController) => {
   router.use(requireAuth);
 
   router.get("/", controller.getBooks);
+  router.get("/summary", controller.getBooksSummary);
   router.get("/:id", controller.getBookById);
   router.post("/", validateCreateBook, controller.createBook);
   router.put("/:id", validateUpdateBook, controller.updateBook);

@@ -103,13 +103,77 @@ export const authStorage = {
   clearToken: () => localStorage.removeItem(AUTH_TOKEN_KEY)
 };
 
-export const getBooks = async (search?: string, status?: string): Promise<Book[]> => {
-  const params = new URLSearchParams();
-  if (search) params.set("search", search);
-  if (status) params.set("status", status);
-  const query = params.toString() ? `?${params.toString()}` : "";
-  const response = await apiFetch<ApiResponse<Book[]>>(`/books${query}`);
-  return response.data;
+export const BOOKS_PAGE_SIZE = 12;
+
+export interface BooksPageMeta {
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface LibrarySummary {
+  total: number;
+  pendiente: number;
+  leyendo: number;
+  leido: number;
+  favoritos: number;
+  ratedSum: number;
+  ratedCount: number;
+  latestYear: number;
+  genres: { genre: string; count: number }[];
+}
+
+export type BooksSortParam = "recientes" | "titulo" | "autor" | "genero" | "valoracion";
+
+export interface GetBooksPageParams {
+  search?: string;
+  status?: string;
+  shelf?: string;
+  genre?: string | null;
+  sort?: BooksSortParam;
+  limit?: number;
+  offset?: number;
+}
+
+export const getBooksPage = async (
+  params: GetBooksPageParams
+): Promise<{ data: Book[]; meta: BooksPageMeta }> => {
+  const q = new URLSearchParams();
+  if (params.search?.trim()) q.set("search", params.search.trim());
+  q.set("status", params.status?.trim() || "todos");
+  q.set("shelf", params.shelf?.trim() || "todos");
+  if (params.genre?.trim()) q.set("genre", params.genre.trim());
+  q.set("sort", params.sort ?? "recientes");
+  q.set("limit", String(params.limit ?? BOOKS_PAGE_SIZE));
+  q.set("offset", String(params.offset ?? 0));
+  const raw = await apiFetch<{ data: Book[]; meta: BooksPageMeta }>(`/books?${q.toString()}`);
+  return { data: raw.data, meta: raw.meta };
+};
+
+export const getBooksSummary = async (): Promise<LibrarySummary> => {
+  const raw = await apiFetch<{ data: LibrarySummary }>("/books/summary");
+  return raw.data;
+};
+
+/** Acumula todas las páginas (filtros neutros) para páginas que aún necesitan la colección completa. */
+export const fetchAllBooksSnapshot = async (pageSize = 24): Promise<Book[]> => {
+  const acc: Book[] = [];
+  let offset = 0;
+  while (true) {
+    const { data, meta } = await getBooksPage({
+      search: "",
+      status: "todos",
+      shelf: "todos",
+      genre: null,
+      sort: "recientes",
+      limit: pageSize,
+      offset
+    });
+    acc.push(...data);
+    offset += data.length;
+    if (data.length === 0 || acc.length >= meta.total) break;
+  }
+  return acc;
 };
 
 export const getBookById = async (id: string): Promise<Book> => {

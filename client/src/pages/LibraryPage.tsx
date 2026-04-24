@@ -28,9 +28,21 @@ import { capitalizeFirst } from "../utils/textCase";
 export const LibraryPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { books, loading, error, reloadBooks, upsertBook } = useBooksContext();
+  const {
+    books,
+    booksTotal,
+    librarySummary,
+    nowReadingPreview,
+    loading,
+    loadingMore,
+    error,
+    syncLibraryQuery,
+    loadMoreBooks,
+    reloadBooks,
+    upsertBook
+  } = useBooksContext();
   const isPreviewOnly = (location.state as { previewOnly?: boolean } | null)?.previewOnly === true;
-  const { search, setSearch, status, setStatus, sortBy, setSortBy, filteredBooks } = useBookFilters(books);
+  const { search, setSearch, status, setStatus, sortBy, setSortBy } = useBookFilters(books);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [activeGenre, setActiveGenre] = useState<string | null>(null);
@@ -57,7 +69,6 @@ export const LibraryPage = () => {
   const [isSavingMarkPage, setIsSavingMarkPage] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
   const [isSavingReview, setIsSavingReview] = useState(false);
-  const [isShowingAllCollection, setIsShowingAllCollection] = useState(false);
   const [recentAcquisitions, setRecentAcquisitions] = useState<WishlistAcquisition[]>([]);
   const [acquisitionsError, setAcquisitionsError] = useState<string | null>(null);
   const [isReadAtPickerOpen, setIsReadAtPickerOpen] = useState(false);
@@ -104,28 +115,23 @@ export const LibraryPage = () => {
     return cells;
   };
   const previewCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const nowReadingBooks = useMemo(
-    () =>
-      books
-        .filter((book) => book.status === "leyendo")
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
-    [books]
-  );
-  const readCount = useMemo(() => books.filter((book) => book.status === "leido").length, [books]);
-  const averageRating = useMemo(() => {
-    const rated = books.filter(
-      (book) => book.status === "leido" && typeof book.rating === "number" && (book.rating ?? 0) > 0
-    );
-    if (rated.length === 0) return "0.0";
-    const total = rated.reduce((acc, item) => acc + (item.rating ?? 0), 0);
-    return (total / rated.length).toFixed(1);
-  }, [books]);
-  const latestYear = useMemo(() => {
-    const years = books
-      .map((book) => new Date(book.updatedAt).getFullYear())
-      .filter((year) => Number.isFinite(year));
-    return years.length > 0 ? Math.max(...years) : new Date().getFullYear();
-  }, [books]);
+
+  useEffect(() => {
+    void syncLibraryQuery({
+      search,
+      status,
+      sort: sortBy,
+      shelf: activeShelf,
+      genre: activeGenre
+    });
+  }, [activeGenre, activeShelf, search, sortBy, status, syncLibraryQuery]);
+
+  const readCount = librarySummary?.leido ?? 0;
+  const averageRating =
+    librarySummary && librarySummary.ratedCount > 0
+      ? (librarySummary.ratedSum / librarySummary.ratedCount).toFixed(1)
+      : "0.0";
+  const latestYear = librarySummary?.latestYear ?? new Date().getFullYear();
   const recentReviews = useMemo(
     () =>
       books
@@ -134,24 +140,13 @@ export const LibraryPage = () => {
         .slice(0, 3),
     [books]
   );
-  const genres = useMemo(() => {
-    const counts = new Map<string, number>();
-    books.forEach((book) => {
-      const normalized = book.genre.trim();
-      if (!normalized) return;
-      counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
-    });
-    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es"));
-  }, [books]);
-  const shelfFilteredBooks = useMemo(() => {
-    if (activeShelf === "todos") return filteredBooks;
-    if (activeShelf === "favoritos") return filteredBooks.filter((book) => book.isFavorite);
-    return filteredBooks.filter((book) => book.status === activeShelf);
-  }, [activeShelf, filteredBooks]);
-  const visibleBooks = useMemo(() => {
-    if (!activeGenre) return shelfFilteredBooks;
-    return shelfFilteredBooks.filter((book) => book.genre.localeCompare(activeGenre, "es", { sensitivity: "base" }) === 0);
-  }, [activeGenre, shelfFilteredBooks]);
+  const genres = useMemo(
+    () =>
+      (librarySummary?.genres ?? [])
+        .map((g) => [g.genre, g.count] as [string, number])
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es")),
+    [librarySummary]
+  );
   const similarBooks = useMemo(() => {
     if (!previewBook) return [];
     const previewTags = (previewBook.reviewTags ?? [])
@@ -191,8 +186,6 @@ export const LibraryPage = () => {
       })
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }, [activeTagFilter, books, previewBook]);
-  const previewVisibleBooks = useMemo(() => visibleBooks.slice(0, 12), [visibleBooks]);
-  const collectionBooks = isShowingAllCollection ? visibleBooks : previewVisibleBooks;
 
   const handleDeleteBook = async (id: string) => {
     if (deletingId !== null) return;
@@ -595,7 +588,7 @@ export const LibraryPage = () => {
             <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
               <div>
-                <p className="font-['Fraunces',serif] text-3xl">{books.length}</p>
+                <p className="font-['Fraunces',serif] text-3xl">{librarySummary?.total ?? 0}</p>
                 <p className="text-[11px] uppercase tracking-[0.12em]">Libros</p>
               </div>
               <div>
@@ -615,9 +608,9 @@ export const LibraryPage = () => {
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
             <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
-            {nowReadingBooks.length > 0 ? (
+            {nowReadingPreview.length > 0 ? (
               <div className="divide-y divide-[#dcc8a7]">
-                {nowReadingBooks.slice(0, 2).map((book) => (
+                {nowReadingPreview.slice(0, 2).map((book) => (
                   <div key={book.id} className="px-4 py-2.5">
                     <p className="font-['Fraunces',serif] text-lg leading-tight">{book.title}</p>
                     <p className="text-sm">{book.author}</p>
@@ -647,7 +640,7 @@ export const LibraryPage = () => {
                 >
                   <BookOpen className="h-3.5 w-3.5" />Todos
                 </button>
-                <span className="font-semibold text-[#6f4b2e]">{books.length}</span>
+                <span className="font-semibold text-[#6f4b2e]">{librarySummary?.total ?? 0}</span>
               </li>
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
@@ -657,7 +650,7 @@ export const LibraryPage = () => {
                 >
                   <BookOpen className="h-3.5 w-3.5" />Pendientes
                 </button>
-                <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.status === "pendiente").length}</span>
+                <span className="font-semibold text-[#6f4b2e]">{librarySummary?.pendiente ?? 0}</span>
               </li>
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
@@ -677,7 +670,7 @@ export const LibraryPage = () => {
                 >
                   <Clock3 className="h-3.5 w-3.5" />En progreso
                 </button>
-                <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.status === "leyendo").length}</span>
+                <span className="font-semibold text-[#6f4b2e]">{librarySummary?.leyendo ?? 0}</span>
               </li>
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
@@ -687,7 +680,7 @@ export const LibraryPage = () => {
                 >
                   <Heart className="h-3.5 w-3.5" />Favoritos
                 </button>
-                <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.isFavorite).length}</span>
+                <span className="font-semibold text-[#6f4b2e]">{librarySummary?.favoritos ?? 0}</span>
               </li>
             </ul>
           </div>
@@ -705,7 +698,7 @@ export const LibraryPage = () => {
                   >
                     Todos
                   </button>
-                  <span className="font-semibold text-[#6f4b2e]">{books.length}</span>
+                  <span className="font-semibold text-[#6f4b2e]">{librarySummary?.total ?? 0}</span>
                 </li>
                 {genres.map(([genre, count]) => (
                   <li key={genre} className="flex items-center justify-between px-4 py-2.5">
@@ -778,40 +771,49 @@ export const LibraryPage = () => {
           )}
 
           <div className="border-t border-[#d7b06f] pt-4">
-            <div className="mb-4 flex items-center justify-between gap-2">
+            <div className="mb-4">
               <p className="font-['Fraunces',serif] text-xl text-[#5a2f1f] dark:text-amber-100 sm:text-2xl">✦ Colección</p>
-              <button
-                type="button"
-                onClick={() => setIsShowingAllCollection((current) => !current)}
-                className="text-xs text-[#8e633d] transition hover:underline dark:text-amber-200/80"
-              >
-                {isShowingAllCollection ? "Ver menos ←" : "Ver todos →"}
-              </button>
             </div>
             {loading && <p className="rt-body-copy text-amber-100/90">Cargando libros...</p>}
             {error && <Alert variant="destructive">{error}</Alert>}
             {!loading && !error && (
-              <BookList
-                books={collectionBooks}
-                onOpenPreview={(id) => {
-                  if (previewCloseTimeoutRef.current) {
-                    clearTimeout(previewCloseTimeoutRef.current);
-                    previewCloseTimeoutRef.current = null;
-                  }
-                  setIsClosingPreview(false);
-                  setPreviewTab("info");
-                  setPreviewBookId(id);
-                  const params = new URLSearchParams(location.search);
-                  params.set("preview", id);
-                  navigate(
-                    {
-                      pathname: location.pathname,
-                      search: `?${params.toString()}`
-                    },
-                    { replace: true }
-                  );
-                }}
-              />
+              <>
+                <BookList
+                  books={books}
+                  onOpenPreview={(id) => {
+                    if (previewCloseTimeoutRef.current) {
+                      clearTimeout(previewCloseTimeoutRef.current);
+                      previewCloseTimeoutRef.current = null;
+                    }
+                    setIsClosingPreview(false);
+                    setPreviewTab("info");
+                    setPreviewBookId(id);
+                    const params = new URLSearchParams(location.search);
+                    params.set("preview", id);
+                    navigate(
+                      {
+                        pathname: location.pathname,
+                        search: `?${params.toString()}`
+                      },
+                      { replace: true }
+                    );
+                  }}
+                />
+                {books.length < booksTotal && (
+                  <div className="mt-6 flex justify-center pb-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={loadingMore}
+                      onClick={() => void loadMoreBooks()}
+                      className="border-[#8e633d] bg-[#f8f1e5] text-sm text-[#5a2f1f] hover:bg-[#ead9bd] dark:text-[#5a2f1f]"
+                    >
+                      {loadingMore ? "Cargando…" : `Cargar 12 más (${books.length}/${booksTotal})`}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
           <div className="border-t border-[#d7b06f] pt-4">
