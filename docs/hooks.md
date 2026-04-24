@@ -14,9 +14,11 @@
 - texto de busqueda,
 - filtro por estado,
 - ordenacion,
-- lista resultante memoizada.
+- lista resultante memoizada,
+- persistencia de filtros en `localStorage` con manejo seguro de errores.
 
 ## Patrones destacados
 
 - guardas de ruta con `ProtectedRoute` + hooks de auth.
-- paginas de auth y CRUD separadas, compartiendo cliente API tipado.
+- paginas de auth y CRUD separadas, compartiendo cliente API tipado,
+- query param `preview` para abrir detalle de libro en panel lateral.

@@ -4,12 +4,15 @@ import { useBooksContext } from "../context/BooksContext";
 import { Book } from "../types/book";
 
 const monthLabels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+const ONE_DAY_MS = 86400000;
 
 const parseDate = (value?: string) => {
   if (!value) return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 };
+
+const toStartOfLocalDayMs = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 
 const getReadDate = (book: Book) => parseDate(book.readAt) ?? parseDate(book.updatedAt) ?? parseDate(book.createdAt);
 
@@ -163,6 +166,7 @@ export const StatisticsPage = () => {
         pagesPerDay: 0,
         daysPerBook: 0,
         bestMonth: "-",
+        currentStreakDays: 0,
         longestStreakDays: 0,
         yearlyProjection: 0
       };
@@ -192,16 +196,39 @@ export const StatisticsPage = () => {
       bestMonth = monthLabels[month] ?? "-";
     });
 
-    const uniqueDaySet = new Set(readDates.map((date) => date.toISOString().slice(0, 10)));
-    const uniqueDays = Array.from(uniqueDaySet).sort();
-    let longestStreakDays = uniqueDays.length > 0 ? 1 : 0;
-    let currentStreak = longestStreakDays;
-    for (let i = 1; i < uniqueDays.length; i += 1) {
-      const prev = new Date(uniqueDays[i - 1]).getTime();
-      const current = new Date(uniqueDays[i]).getTime();
-      const deltaDays = Math.round((current - prev) / 86400000);
-      currentStreak = deltaDays === 1 ? currentStreak + 1 : 1;
-      longestStreakDays = Math.max(longestStreakDays, currentStreak);
+    const activityDates = books
+      .map((book) => {
+        if (book.status === "leido") {
+          return getReadDate(book);
+        }
+        if (book.status === "leyendo") {
+          return parseDate(book.lastPageMarkedAt);
+        }
+        return null;
+      })
+      .filter((date): date is Date => date !== null);
+
+    const uniqueActivityDays = Array.from(new Set(activityDates.map((date) => toStartOfLocalDayMs(date)))).sort(
+      (a, b) => a - b
+    );
+    let longestStreakDays = uniqueActivityDays.length > 0 ? 1 : 0;
+    let currentRun = longestStreakDays;
+    for (let i = 1; i < uniqueActivityDays.length; i += 1) {
+      const prev = uniqueActivityDays[i - 1];
+      const current = uniqueActivityDays[i];
+      const deltaDays = Math.round((current - prev) / ONE_DAY_MS);
+      currentRun = deltaDays === 1 ? currentRun + 1 : 1;
+      longestStreakDays = Math.max(longestStreakDays, currentRun);
+    }
+    const todayDayMs = toStartOfLocalDayMs(now);
+    let currentStreakDays = 0;
+    if (uniqueActivityDays.length > 0 && uniqueActivityDays[uniqueActivityDays.length - 1] === todayDayMs) {
+      currentStreakDays = 1;
+      for (let i = uniqueActivityDays.length - 1; i > 0; i -= 1) {
+        const deltaDays = Math.round((uniqueActivityDays[i] - uniqueActivityDays[i - 1]) / ONE_DAY_MS);
+        if (deltaDays !== 1) break;
+        currentStreakDays += 1;
+      }
     }
 
     const yearlyProjection = Math.round((readBooks.length / elapsedDays) * 365);
@@ -210,10 +237,11 @@ export const StatisticsPage = () => {
       pagesPerDay,
       daysPerBook,
       bestMonth,
+      currentStreakDays,
       longestStreakDays,
       yearlyProjection
     };
-  }, [now, readBooks, totalReadPages]);
+  }, [books, now, readBooks, totalReadPages]);
 
   return (
     <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
@@ -249,14 +277,14 @@ export const StatisticsPage = () => {
             </div>
             <div className="divide-y divide-[#dcc8a7]">
               {nowReadingBooks.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-[#7a573c]">Sin lecturas activas.</p>
+                <p className="px-4 py-3 text-sm">No hay lectura activa ahora mismo.</p>
               ) : (
                 nowReadingBooks.slice(0, 2).map((book) => (
                   <div key={book.id} className="px-4 py-2.5">
-                    <p className="truncate font-['Fraunces',serif] text-base leading-tight">{book.title}</p>
-                    <p className="truncate text-xs italic text-[#7a573c]">{book.author}</p>
-                    <p className="mt-1 text-xs text-[#7a573c]">Avance: {book.progress ?? 0}%</p>
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#d9c7ad]">
+                    <p className="font-['Fraunces',serif] text-lg leading-tight">{book.title}</p>
+                    <p className="text-sm">{book.author}</p>
+                    <p className="text-xs">Avance: {book.progress ?? 0}%</p>
+                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[#d9c7ad]">
                       <div
                         className="h-full rounded-full bg-[#8e633d]"
                         style={{ width: `${Math.max(0, Math.min(100, book.progress ?? 0))}%` }}
@@ -502,6 +530,13 @@ export const StatisticsPage = () => {
                         Mejor mes del año
                       </span>
                       <strong>{rhythmStats.bestMonth}</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-2">
+                        <Flame className="h-4 w-4 text-[#8e633d]" />
+                        Racha actual
+                      </span>
+                      <strong>{rhythmStats.currentStreakDays} días</strong>
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <span className="inline-flex items-center gap-2">

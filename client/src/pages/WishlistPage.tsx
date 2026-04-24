@@ -1,7 +1,7 @@
 // Página de lista de deseos independiente de la biblioteca.
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Bookmark, Clock3, Heart, Plus, Sparkles, Trash2 } from "lucide-react";
-import { ApiError, createWishlistItem, getWishlistItems, purchaseWishlistItem, updateWishlistItem } from "../api/client";
+import { createWishlistItem, getReadableErrorMessage, getWishlistItems, purchaseWishlistItem, updateWishlistItem } from "../api/client";
 import { Alert } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
 import {
@@ -82,7 +82,7 @@ export const WishlistPage = () => {
         }
         setItems(list);
       } catch (err) {
-        setLoadError(err instanceof ApiError ? err.message : "No se pudo cargar la lista de deseos");
+        setLoadError(getReadableErrorMessage(err, "No se pudo cargar la lista de deseos."));
         setItems([]);
       } finally {
         setLoading(false);
@@ -169,6 +169,7 @@ export const WishlistPage = () => {
   };
 
   const saveWish = async () => {
+    if (savingWish) return;
     if (!newTitle.trim() || !newAuthor.trim()) return;
     const title = capitalizeFirst(newTitle.trim());
     const author = capitalizeWords(newAuthor.trim());
@@ -205,20 +206,26 @@ export const WishlistPage = () => {
       setNewPriority(3);
       setIsAddOpen(false);
     } catch (err) {
-      setLoadError(err instanceof ApiError ? err.message : editingId ? "No se pudo actualizar el deseo" : "No se pudo guardar el deseo");
+      setLoadError(
+        getReadableErrorMessage(
+          err,
+          editingId ? "No se pudo actualizar el deseo." : "No se pudo guardar el deseo."
+        )
+      );
     } finally {
       setSavingWish(false);
     }
   };
 
   const markWishAsPurchased = async (id: string) => {
+    if (deletingId !== null) return;
     setDeletingId(id);
     setLoadError(null);
     try {
       await purchaseWishlistItem(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      setLoadError(err instanceof ApiError ? err.message : "No se pudo marcar el deseo como comprado");
+      setLoadError(getReadableErrorMessage(err, "No se pudo marcar el deseo como comprado."));
     } finally {
       setDeletingId(null);
     }

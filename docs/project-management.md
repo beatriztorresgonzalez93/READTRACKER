@@ -34,7 +34,9 @@ Cada tarjeta incluye:
 - Auth JWT funcional (`register/login/me`) con rutas privadas en frontend.
 - Modelo multiusuario aplicado (`books.user_id`).
 - Frontend en React + TypeScript con `AuthContext` y `BooksContext`.
-- Filtros, ordenacion, cards con acciones y detalle enriquecido.
+- Filtros, ordenacion, cards con acciones y detalle enriquecido (fuente única en `LibraryPage`).
+- Vistas funcionales de `Reseñas`, `Lista de deseos` y `Estadísticas`.
+- Flujo modal de detalle desde reseñas con `backgroundLocation` y `preview`.
 - Deploy activo en Vercel (frontend) y Render (backend), con CORS configurado.
 
 ## Recomendaciones

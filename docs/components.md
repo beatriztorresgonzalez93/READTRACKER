@@ -4,10 +4,16 @@
 
 - `Layout`: contenedor global, branding, tema y acciones de sesion.
 - `ProtectedRoute`: guard para rutas privadas cuando no hay login.
-- `BookList`: listado de portadas/cards.
-- `BookCard`: card interactiva con menu, estado y acciones.
+- `BookList`: listado de cards de libros.
+- `BookCard`: card interactiva que abre detalle via callback `onOpenPreview`.
 - `BookForm`: formulario reutilizable para crear/editar.
-- `StarRating`: render de valoracion por estrellas.
+- `LibraryPage` (incluye panel lateral de detalle y modales asociados):
+  - tabs de detalle (`Información`, `Mi reseña`, `Similares`),
+  - cambio de estado/valoración,
+  - marcar página,
+  - reseñar,
+  - favoritos,
+  - eliminar.
 
 ## UI base reusable (`components/ui`)
 
@@ -26,9 +32,11 @@ Basada en el stack de componentes shadcn con primitives de Base UI (`@base-ui/re
 ## Paginas montadas sobre componentes
 
 - `LibraryPage`
+- `ReviewsPage`
+- `WishlistPage`
+- `StatisticsPage`
 - `NewBookPage`
 - `EditBookPage`
-- `BookDetailPage`
 - `LoginPage`
 - `RegisterPage`
 - `NotFoundPage`

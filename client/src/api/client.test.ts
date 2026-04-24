@@ -63,7 +63,9 @@ describe("apiFetch", () => {
       expect.fail("debería lanzar");
     } catch (e) {
       expect(e).toBeInstanceOf(ApiError);
-      expect((e as ApiError).message).toBe("No se pudo completar la petición");
+      expect((e as ApiError).message).toBe(
+        "Hay un problema temporal en el servidor. Inténtalo de nuevo en unos minutos."
+      );
       expect((e as ApiError).status).toBe(500);
     }
   });

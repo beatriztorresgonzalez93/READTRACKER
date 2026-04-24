@@ -1,6 +1,7 @@
 // Validaciones básicas de payload para crear y actualizar libros.
 import { Request, Response, NextFunction } from "express";
 import { ReadingStatus } from "../types/book";
+import { sendApiError } from "../utils/apiResponse";
 
 const validStatuses: ReadingStatus[] = ["pendiente", "leyendo", "leido"];
 
@@ -38,64 +39,69 @@ export const validateCreateBook = (
   const { title, author, publisher, genre, pages, publicationYear, status, rating, progress, currentPage, lastPageMarkedAt, reviewTags, synopsis, readAt, timesRead, favoriteQuote, wouldRecommend, isFavorite } = req.body;
 
   if (!title || !author || !publisher || !genre || !isValidStatus(status)) {
-    res.status(400).json({ error: "Título, autor, editorial, género y estado son obligatorios" });
+    sendApiError(
+      res,
+      400,
+      "INVALID_BOOK_REQUIRED_FIELDS",
+      "Título, autor, editorial, género y estado son obligatorios"
+    );
     return;
   }
 
   if (rating !== undefined && (rating < 0 || rating > 5)) {
-    res.status(400).json({ error: "La calificación debe estar entre 0 y 5" });
+    sendApiError(res, 400, "INVALID_RATING", "La calificación debe estar entre 0 y 5");
     return;
   }
 
   if (progress !== undefined && (progress < 0 || progress > 100)) {
-    res.status(400).json({ error: "El progreso debe estar entre 0 y 100" });
+    sendApiError(res, 400, "INVALID_PROGRESS", "El progreso debe estar entre 0 y 100");
     return;
   }
 
   if (currentPage !== undefined && (typeof currentPage !== "number" || currentPage < 0 || currentPage > 20000)) {
-    res.status(400).json({ error: "La página actual no es válida" });
+    sendApiError(res, 400, "INVALID_CURRENT_PAGE", "La página actual no es válida");
     return;
   }
 
   if (lastPageMarkedAt !== undefined && Number.isNaN(new Date(String(lastPageMarkedAt)).getTime())) {
-    res.status(400).json({ error: "La fecha de marcado no es válida" });
+    sendApiError(res, 400, "INVALID_LAST_PAGE_MARKED_AT", "La fecha de marcado no es válida");
     return;
   }
 
   if (isFavorite !== undefined && typeof isFavorite !== "boolean") {
-    res.status(400).json({ error: "El campo favorito no es válido" });
+    sendApiError(res, 400, "INVALID_IS_FAVORITE", "El campo favorito no es válido");
     return;
   }
 
   if (synopsis !== undefined && typeof synopsis !== "string") {
-    res.status(400).json({ error: "La sinopsis no es válida" });
+    sendApiError(res, 400, "INVALID_SYNOPSIS", "La sinopsis no es válida");
     return;
   }
 
   if (reviewTags !== undefined) {
     if (!Array.isArray(reviewTags) || reviewTags.some((tag) => typeof tag !== "string" || !tag.trim() || tag.length > 40)) {
-      res.status(400).json({ error: "Las etiquetas de reseña no son válidas" });
+      sendApiError(res, 400, "INVALID_REVIEW_TAGS", "Las etiquetas de reseña no son válidas");
       return;
     }
   }
 
   if (readAt !== undefined && typeof readAt !== "string") {
-    res.status(400).json({ error: "El campo 'leído en' no es válido" });
+    sendApiError(res, 400, "INVALID_READ_AT", "El campo 'leído en' no es válido");
     return;
   }
 
   if (timesRead !== undefined && typeof timesRead !== "string") {
-    res.status(400).json({ error: "El campo 'veces leído' no es válido" });
+    sendApiError(res, 400, "INVALID_TIMES_READ", "El campo 'veces leído' no es válido");
     return;
   }
 
   if (favoriteQuote !== undefined && typeof favoriteQuote !== "string") {
-    res.status(400).json({ error: "La cita favorita no es válida" });
+    sendApiError(res, 400, "INVALID_FAVORITE_QUOTE", "La cita favorita no es válida");
     return;
   }
 
   if (wouldRecommend !== undefined && !["si", "depende", "no"].includes(String(wouldRecommend))) {
-    res.status(400).json({ error: "La recomendación no es válida" });
+    sendApiError(res, 400, "INVALID_WOULD_RECOMMEND", "La recomendación no es válida");
     return;
   }
 
@@ -103,12 +109,12 @@ export const validateCreateBook = (
     publicationYear !== undefined &&
     (typeof publicationYear !== "number" || publicationYear < 0 || publicationYear > 3000)
   ) {
-    res.status(400).json({ error: "El año de publicación no es válido" });
+    sendApiError(res, 400, "INVALID_PUBLICATION_YEAR", "El año de publicación no es válido");
     return;
   }
 
   if (pages !== undefined && (typeof pages !== "number" || pages < 1 || pages > 20000)) {
-    res.status(400).json({ error: "El número de páginas no es válido" });
+    sendApiError(res, 400, "INVALID_PAGES", "El número de páginas no es válido");
     return;
   }
 
@@ -123,14 +129,20 @@ export const validateUpdateBook = (
   const body = req.body;
 
   if (body === null || typeof body !== "object" || Array.isArray(body)) {
-    res.status(400).json({ error: "El cuerpo debe ser un objeto JSON" });
+    sendApiError(res, 400, "INVALID_JSON_BODY", "El cuerpo debe ser un objeto JSON");
     return;
   }
 
   const keys = Object.keys(body as Record<string, unknown>);
   const unknown = keys.filter((k) => !updateBookKeys.includes(k as (typeof updateBookKeys)[number]));
   if (unknown.length > 0) {
-    res.status(400).json({ error: `Campos no permitidos: ${unknown.join(", ")}` });
+    sendApiError(
+      res,
+      400,
+      "UNKNOWN_BOOK_FIELDS",
+      `Campos no permitidos: ${unknown.join(", ")}`,
+      { fields: unknown }
+    );
     return;
   }
 
@@ -138,27 +150,27 @@ export const validateUpdateBook = (
     Object.prototype.hasOwnProperty.call(body, k)
   );
   if (allowedPresent.length === 0) {
-    res.status(400).json({ error: "Debes enviar al menos un campo para actualizar" });
+    sendApiError(res, 400, "EMPTY_BOOK_UPDATE", "Debes enviar al menos un campo para actualizar");
     return;
   }
 
   const { status, rating, progress, publicationYear, pages, currentPage, lastPageMarkedAt, publisher, reviewTags, synopsis, readAt, timesRead, favoriteQuote, wouldRecommend, isFavorite } = body as Record<string, unknown>;
 
   if (status !== undefined && !isValidStatus(status)) {
-    res.status(400).json({ error: "El estado no es válido" });
+    sendApiError(res, 400, "INVALID_STATUS", "El estado no es válido");
     return;
   }
 
   if (rating !== undefined) {
     if (typeof rating !== "number" || rating < 0 || rating > 5) {
-      res.status(400).json({ error: "La calificación debe estar entre 0 y 5" });
+      sendApiError(res, 400, "INVALID_RATING", "La calificación debe estar entre 0 y 5");
       return;
     }
   }
 
   if (progress !== undefined) {
     if (typeof progress !== "number" || progress < 0 || progress > 100) {
-      res.status(400).json({ error: "El progreso debe estar entre 0 y 100" });
+      sendApiError(res, 400, "INVALID_PROGRESS", "El progreso debe estar entre 0 y 100");
       return;
     }
   }
@@ -169,69 +181,69 @@ export const validateUpdateBook = (
       publicationYear < 0 ||
       publicationYear > 3000
     ) {
-      res.status(400).json({ error: "El año de publicación no es válido" });
+      sendApiError(res, 400, "INVALID_PUBLICATION_YEAR", "El año de publicación no es válido");
       return;
     }
   }
 
   if (pages !== undefined) {
     if (typeof pages !== "number" || pages < 1 || pages > 20000) {
-      res.status(400).json({ error: "El número de páginas no es válido" });
+      sendApiError(res, 400, "INVALID_PAGES", "El número de páginas no es válido");
       return;
     }
   }
 
   if (currentPage !== undefined) {
     if (typeof currentPage !== "number" || currentPage < 0 || currentPage > 20000) {
-      res.status(400).json({ error: "La página actual no es válida" });
+      sendApiError(res, 400, "INVALID_CURRENT_PAGE", "La página actual no es válida");
       return;
     }
   }
 
   if (lastPageMarkedAt !== undefined && Number.isNaN(new Date(String(lastPageMarkedAt)).getTime())) {
-    res.status(400).json({ error: "La fecha de marcado no es válida" });
+    sendApiError(res, 400, "INVALID_LAST_PAGE_MARKED_AT", "La fecha de marcado no es válida");
     return;
   }
 
   if (publisher !== undefined && (typeof publisher !== "string" || !publisher.trim())) {
-    res.status(400).json({ error: "La editorial no es válida" });
+    sendApiError(res, 400, "INVALID_PUBLISHER", "La editorial no es válida");
     return;
   }
 
   if (synopsis !== undefined && typeof synopsis !== "string") {
-    res.status(400).json({ error: "La sinopsis no es válida" });
+    sendApiError(res, 400, "INVALID_SYNOPSIS", "La sinopsis no es válida");
     return;
   }
 
   if (reviewTags !== undefined) {
     if (!Array.isArray(reviewTags) || reviewTags.some((tag) => typeof tag !== "string" || !tag.trim() || tag.length > 40)) {
-      res.status(400).json({ error: "Las etiquetas de reseña no son válidas" });
+      sendApiError(res, 400, "INVALID_REVIEW_TAGS", "Las etiquetas de reseña no son válidas");
       return;
     }
   }
 
   if (readAt !== undefined && typeof readAt !== "string") {
-    res.status(400).json({ error: "El campo 'leído en' no es válido" });
+    sendApiError(res, 400, "INVALID_READ_AT", "El campo 'leído en' no es válido");
     return;
   }
 
   if (timesRead !== undefined && typeof timesRead !== "string") {
-    res.status(400).json({ error: "El campo 'veces leído' no es válido" });
+    sendApiError(res, 400, "INVALID_TIMES_READ", "El campo 'veces leído' no es válido");
     return;
   }
 
   if (favoriteQuote !== undefined && typeof favoriteQuote !== "string") {
-    res.status(400).json({ error: "La cita favorita no es válida" });
+    sendApiError(res, 400, "INVALID_FAVORITE_QUOTE", "La cita favorita no es válida");
     return;
   }
 
   if (wouldRecommend !== undefined && !["si", "depende", "no"].includes(String(wouldRecommend))) {
-    res.status(400).json({ error: "La recomendación no es válida" });
+    sendApiError(res, 400, "INVALID_WOULD_RECOMMEND", "La recomendación no es válida");
     return;
   }
 
   if (isFavorite !== undefined && typeof isFavorite !== "boolean") {
-    res.status(400).json({ error: "El campo favorito no es válido" });
+    sendApiError(res, 400, "INVALID_IS_FAVORITE", "El campo favorito no es válido");
     return;
   }
 

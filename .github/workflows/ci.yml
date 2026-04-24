@@ -1,0 +1,42 @@
+# Pipeline de CI: valida build + tests en cada PR y push a main.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    # Job único para asegurar que frontend y backend están en estado desplegable.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: Install client deps
+        run: npm ci
+        working-directory: client
+
+      - name: Install server deps
+        run: npm ci
+        working-directory: server
+
+      - name: Client smoke predeploy
+        run: npm run smoke:predeploy
+        working-directory: client
+
+      - name: Server smoke predeploy
+        run: npm run smoke:predeploy
+        working-directory: server

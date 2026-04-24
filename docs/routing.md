@@ -12,15 +12,23 @@ Router principal en:
 ## Rutas protegidas (`ProtectedRoute`)
 
 - `/` -> `LibraryPage`
+- `/reviews` -> `ReviewsPage`
+- `/wishlist` -> `WishlistPage`
+- `/stats` -> `StatisticsPage`
 - `/books/new` -> `NewBookPage`
-- `/books/:id` -> `BookDetailPage`
 - `/books/:id/edit` -> `EditBookPage`
 
 Si no hay sesion valida, `ProtectedRoute` redirige a `/login`.
+
+## Flujo de detalle de libro (actual)
+
+- No existe una pantalla de detalle independiente.
+- El detalle se abre mediante panel lateral de `LibraryPage` con query param:
+  - `/?preview=<bookId>`
+- Cuando se abre desde `ReviewsPage`, se usa navegacion modal (`backgroundLocation`) para mantener la pantalla de reseñas detrás desenfocada.
 
 ## Layout
 
 Todas las rutas renderizan dentro de `Layout`, que contiene:
 - header global,
-- switch de tema,
 - acciones de auth (entrar/registro o usuario/logout).

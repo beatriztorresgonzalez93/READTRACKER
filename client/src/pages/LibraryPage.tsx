@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, Bookmark, Building2, CalendarDays, ChevronLeft, ChevronRight, Clock3, Heart, MessageSquareText, PencilLine, Quote, Star, Tags, ThumbsUp, X } from "lucide-react";
-import { ApiError, deleteBook, getBookById, getWishlistAcquisitions, updateBook } from "../api/client";
+import { createReadingSession, deleteBook, getBookById, getReadableErrorMessage, getReadingSessions, getWishlistAcquisitions, updateBook } from "../api/client";
 import { BookList } from "../components/BookList";
 import { Alert } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
@@ -20,6 +20,7 @@ import { Textarea } from "../components/ui/textarea";
 import { useBooksContext } from "../context/BooksContext";
 import { useBookFilters } from "../hooks/useBookFilters";
 import { Book, ReadingStatus } from "../types/book";
+import { ReadingSession } from "../types/readingSession";
 import { WishlistAcquisition } from "../types/wishlist";
 import { capitalizeFirst } from "../utils/textCase";
 
@@ -32,7 +33,7 @@ export const LibraryPage = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [activeGenre, setActiveGenre] = useState<string | null>(null);
-  const [activeShelf, setActiveShelf] = useState<"todos" | "pendiente" | "leido" | "leyendo" | "favoritos" | null>(null);
+  const [activeShelf, setActiveShelf] = useState<"todos" | "pendiente" | "leido" | "leyendo" | "favoritos">("todos");
   const [previewBookId, setPreviewBookId] = useState<string | null>(null);
   const [previewBook, setPreviewBook] = useState<Book | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -62,6 +63,7 @@ export const LibraryPage = () => {
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const [readAtViewMonth, setReadAtViewMonth] = useState<Date>(new Date());
+  const [readingSessionsByBook, setReadingSessionsByBook] = useState<Record<string, ReadingSession[]>>({});
   const readAtPickerRef = useRef<HTMLDivElement | null>(null);
   const acquisitionsTrackRef = useRef<HTMLDivElement | null>(null);
   const formatReadAtLabel = (value?: string) => {
@@ -141,7 +143,7 @@ export const LibraryPage = () => {
     return Array.from(counts.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es"));
   }, [books]);
   const shelfFilteredBooks = useMemo(() => {
-    if (!activeShelf || activeShelf === "todos") return filteredBooks;
+    if (activeShelf === "todos") return filteredBooks;
     if (activeShelf === "favoritos") return filteredBooks.filter((book) => book.isFavorite);
     return filteredBooks.filter((book) => book.status === activeShelf);
   }, [activeShelf, filteredBooks]);
@@ -192,13 +194,14 @@ export const LibraryPage = () => {
   const collectionBooks = isShowingAllCollection ? visibleBooks : previewVisibleBooks;
 
   const handleDeleteBook = async (id: string) => {
+    if (deletingId !== null) return;
     try {
       setDeleteError(null);
       setDeletingId(id);
       await deleteBook(id);
       await reloadBooks();
-    } catch {
-      setDeleteError("No se pudo eliminar el libro. Inténtalo de nuevo.");
+    } catch (err) {
+      setDeleteError(getReadableErrorMessage(err, "No se pudo eliminar el libro. Inténtalo de nuevo."));
     } finally {
       setDeletingId(null);
     }
@@ -256,7 +259,7 @@ export const LibraryPage = () => {
         setRecentAcquisitions(data);
       } catch (err) {
         setRecentAcquisitions([]);
-        setAcquisitionsError(err instanceof ApiError ? err.message : "No se pudieron cargar las adquisiciones");
+        setAcquisitionsError(getReadableErrorMessage(err, "No se pudieron cargar las adquisiciones."));
       }
     };
     void loadAcquisitions();
@@ -377,7 +380,7 @@ export const LibraryPage = () => {
   };
 
   const saveReview = async () => {
-    if (!previewBook) return;
+    if (!previewBook || isSavingReview) return;
     setIsSavingReview(true);
     setReviewError(null);
     try {
@@ -393,8 +396,8 @@ export const LibraryPage = () => {
       setPreviewBook(updated);
       upsertBook(updated);
       setIsReviewDialogOpen(false);
-    } catch {
-      setReviewError("No se pudo guardar la reseña. Inténtalo de nuevo.");
+    } catch (err) {
+      setReviewError(getReadableErrorMessage(err, "No se pudo guardar la reseña. Inténtalo de nuevo."));
     } finally {
       setIsSavingReview(false);
     }
@@ -442,22 +445,65 @@ export const LibraryPage = () => {
 
   const recentMarkHistory = useMemo(() => {
     if (!previewBook) return [];
-    const events: Array<{ date: Date; label: string; page: number }> = [];
-    if (typeof previewBook.currentPage === "number") {
-      const baseDate = previewBook.lastPageMarkedAt ? new Date(previewBook.lastPageMarkedAt) : new Date(previewBook.updatedAt);
-      if (!Number.isNaN(baseDate.getTime())) {
-        events.push({
-          date: baseDate,
-          label: baseDate.toLocaleDateString("es-ES", { day: "numeric", month: "short" }),
-          page: previewBook.currentPage
-        });
-      }
+    const sessions = (readingSessionsByBook[previewBook.id] ?? []).slice(0, 3);
+    if (sessions.length > 0) {
+      return sessions.map((session) => {
+        const date = new Date(session.recordedAt);
+        return {
+          date,
+          label: date.toLocaleString("es-ES", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit"
+          }),
+          page: session.currentPage
+        };
+      });
     }
-    return events.slice(0, 3);
-  }, [previewBook]);
+    if (typeof previewBook.currentPage === "number" && previewBook.lastPageMarkedAt) {
+      const date = new Date(previewBook.lastPageMarkedAt);
+      return [{
+        date,
+        label: date.toLocaleString("es-ES", {
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit"
+        }),
+        page: previewBook.currentPage
+      }];
+    }
+    return [];
+  }, [previewBook, readingSessionsByBook]);
+
+  useEffect(() => {
+    const loadReadingSessionsByBook = async () => {
+      if (!isMarkPageOpen) return;
+      try {
+        const sessions = await getReadingSessions();
+        const grouped = sessions.reduce<Record<string, ReadingSession[]>>((acc, session) => {
+          if (!acc[session.bookId]) acc[session.bookId] = [];
+          acc[session.bookId].push(session);
+          return acc;
+        }, {});
+        Object.values(grouped).forEach((list) => {
+          list.sort(
+            (a, b) =>
+              new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime() ||
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+        setReadingSessionsByBook(grouped);
+      } catch {
+        // Ignore history refresh errors in mark-page dialog.
+      }
+    };
+    void loadReadingSessionsByBook();
+  }, [isMarkPageOpen]);
 
   const saveMarkedPage = async () => {
-    if (!previewBook) return;
+    if (!previewBook || isSavingMarkPage) return;
     if (previewBook.status !== "leyendo") {
       setMarkPageError("Solo puedes marcar página cuando el libro está en estado Leyendo.");
       return;
@@ -483,17 +529,33 @@ export const LibraryPage = () => {
         : previewBook.status;
 
     try {
+      const previousPage = previewBook.currentPage ?? null;
       const updated = await updateBook(previewBook.id, {
         currentPage: parsed,
         lastPageMarkedAt: nowIso,
         progress: computedProgress,
         status: nextStatus
       });
+      if (previousPage !== parsed) {
+        const createdSession = await createReadingSession({
+          bookId: previewBook.id,
+          previousPage: previousPage ?? undefined,
+          currentPage: parsed,
+          recordedAt: nowIso
+        });
+        setReadingSessionsByBook((current) => {
+          const existing = current[previewBook.id] ?? [];
+          const nextForBook = [createdSession, ...existing].slice(0, 20);
+          return { ...current, [previewBook.id]: nextForBook };
+        });
+      }
       setPreviewBook(updated);
       upsertBook(updated);
       setIsMarkPageOpen(false);
-    } catch {
-      setMarkPageError("No se pudo guardar la marca de página. Inténtalo de nuevo.");
+    } catch (err) {
+      setMarkPageError(
+        getReadableErrorMessage(err, "No se pudo guardar la marca de página. Inténtalo de nuevo.")
+      );
     } finally {
       setIsSavingMarkPage(false);
     }
@@ -530,9 +592,9 @@ export const LibraryPage = () => {
             <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
             {nowReadingBooks.length > 0 ? (
               <div className="divide-y divide-[#dcc8a7]">
-                {nowReadingBooks.slice(0, 3).map((book) => (
-                  <div key={book.id} className="space-y-1 px-4 py-2.5">
-                    <p className="font-['Fraunces',serif] text-base leading-tight">{book.title}</p>
+                {nowReadingBooks.slice(0, 2).map((book) => (
+                  <div key={book.id} className="px-4 py-2.5">
+                    <p className="font-['Fraunces',serif] text-lg leading-tight">{book.title}</p>
                     <p className="text-sm">{book.author}</p>
                     <p className="text-xs">Avance: {book.progress ?? 0}%</p>
                     <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[#d9c7ad]">
@@ -543,9 +605,6 @@ export const LibraryPage = () => {
                     </div>
                   </div>
                 ))}
-                {nowReadingBooks.length > 3 && (
-                  <p className="px-4 py-2 text-xs italic text-[#7a573c]">+{nowReadingBooks.length - 3} más en lectura.</p>
-                )}
               </div>
             ) : (
               <p className="px-4 py-3 text-sm">No hay lectura activa ahora mismo.</p>
@@ -558,7 +617,7 @@ export const LibraryPage = () => {
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
-                  onClick={() => setActiveShelf((current) => (current === "todos" ? null : "todos"))}
+                  onClick={() => setActiveShelf("todos")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "todos" ? "font-semibold underline" : ""}`}
                 >
                   <BookOpen className="h-3.5 w-3.5" />Todos
@@ -568,7 +627,7 @@ export const LibraryPage = () => {
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
-                  onClick={() => setActiveShelf((current) => (current === "pendiente" ? null : "pendiente"))}
+                  onClick={() => setActiveShelf("pendiente")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "pendiente" ? "font-semibold underline" : ""}`}
                 >
                   <BookOpen className="h-3.5 w-3.5" />Pendientes
@@ -578,7 +637,7 @@ export const LibraryPage = () => {
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
-                  onClick={() => setActiveShelf((current) => (current === "leido" ? null : "leido"))}
+                  onClick={() => setActiveShelf("leido")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "leido" ? "font-semibold underline" : ""}`}
                 >
                   <Bookmark className="h-3.5 w-3.5" />Leídos
@@ -588,7 +647,7 @@ export const LibraryPage = () => {
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
-                  onClick={() => setActiveShelf((current) => (current === "leyendo" ? null : "leyendo"))}
+                  onClick={() => setActiveShelf("leyendo")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "leyendo" ? "font-semibold underline" : ""}`}
                 >
                   <Clock3 className="h-3.5 w-3.5" />En progreso
@@ -598,7 +657,7 @@ export const LibraryPage = () => {
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
-                  onClick={() => setActiveShelf((current) => (current === "favoritos" ? null : "favoritos"))}
+                  onClick={() => setActiveShelf("favoritos")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "favoritos" ? "font-semibold underline" : ""}`}
                 >
                   <Heart className="h-3.5 w-3.5" />Favoritos

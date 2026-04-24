@@ -28,8 +28,10 @@ Expone:
 - `loading`
 - `error`
 - `reloadBooks()`
+- `upsertBook(book)`
 
 Comportamiento:
 - carga libros desde API tipada,
 - si no hay sesion, limpia estado y no consulta biblioteca,
-- evita prop drilling entre pantallas de libros.
+- evita prop drilling entre pantallas de libros,
+- permite sincronizar actualizaciones puntuales en UI (`upsertBook`) sin recargar toda la biblioteca.

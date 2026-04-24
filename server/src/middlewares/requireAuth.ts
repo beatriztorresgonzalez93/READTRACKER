@@ -2,6 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
+import { sendApiError } from "../utils/apiResponse";
 
 interface TokenPayload {
   sub?: string;
@@ -10,7 +11,7 @@ interface TokenPayload {
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
-    res.status(401).json({ error: "No autorizado" });
+    sendApiError(res, 401, "AUTH_REQUIRED", "No autorizado");
     return;
   }
 
@@ -18,12 +19,12 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
   try {
     const payload = jwt.verify(token, env.jwtSecret) as TokenPayload;
     if (!payload.sub) {
-      res.status(401).json({ error: "Token inválido" });
+      sendApiError(res, 401, "INVALID_TOKEN", "Token inválido");
       return;
     }
     res.locals.userId = payload.sub;
     next();
   } catch {
-    res.status(401).json({ error: "Token inválido o expirado" });
+    sendApiError(res, 401, "INVALID_OR_EXPIRED_TOKEN", "Token inválido o expirado");
   }
 };

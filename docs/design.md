@@ -4,7 +4,12 @@
 
 Monorepo con dos apps:
 - `client/` (React + TS + Vite)
-- `server/` (Express + TS + PostgreSQL)
+- `server/` (Express + TS + PostgreSQL en Neon)
+
+Infraestructura de despliegue:
+- frontend en Vercel,
+- backend en Render,
+- base de datos en Neon.
 
 Patron backend:
 `route -> controller -> service -> repository`
@@ -15,7 +20,13 @@ Patron backend:
   - `id`, `name`, `email`, `password_hash`, `created_at`
 - `books`
   - `id`, `user_id`, `title`, `author`, `genre`, `publication_year`,
-    `status`, `rating`, `review`, `progress`, `cover_url`, timestamps
+    `status`, `rating`, `review`, `progress`, `cover_url`,
+    `synopsis`, `read_at`, `times_read`, `favorite_quote`,
+    `would_recommend`, `review_tags`, `current_page`, `last_page_marked_at`, timestamps
+- `wishlist_items`
+  - `id`, `user_id`, `title`, `author`, `price`, `store`, `priority`, timestamps
+- `wishlist_acquisitions`
+  - `id`, `user_id`, `title`, `author`, `price`, `store`, `purchased_at`, timestamps
 
 `books.user_id` define propiedad del recurso y aislamiento por cuenta.
 
@@ -31,6 +42,7 @@ Patron backend:
 - `AuthContext`: sesion global.
 - `BooksContext`: estado de biblioteca.
 - `ProtectedRoute`: control de acceso por ruta.
+- `LibraryPage`: fuente de verdad del panel de detalle (`?preview=<id>`).
 
 ## Principios usados
 

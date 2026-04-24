@@ -11,6 +11,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const modalState = location.state as { backgroundLocation?: { pathname?: string } } | null;
   const activePathname = modalState?.backgroundLocation?.pathname ?? location.pathname;
   const isLibraryView = activePathname === "/";
+  const isHistoryView = activePathname === "/history";
   const isReviewsView = activePathname === "/reviews";
   const isWishlistView = activePathname === "/wishlist";
   const isStatsView = activePathname === "/stats";
@@ -27,7 +28,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       className={
         isAuthView
           ? "min-h-screen bg-[#2b130b]"
-          : isLibraryView || isReviewsView || isWishlistView || isStatsView || isBookFormView
+          : isLibraryView || isHistoryView || isReviewsView || isWishlistView || isStatsView || isBookFormView
           ? "min-h-screen bg-[#6a422d]"
           : "min-h-screen bg-[#2b130b]"
       }
@@ -68,6 +69,12 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               >
                 Estadísticas
               </Link>
+              <Link
+                to="/history"
+                className={`px-3 py-1 ${isHistoryView ? "rounded-sm border border-amber-500/75 bg-amber-900/30" : ""}`}
+              >
+                Historial
+              </Link>
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-self-end justify-end gap-2.5 text-sm font-medium">
@@ -107,7 +114,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       </header>
       <main
         className={
-          isLibraryView || isReviewsView || isWishlistView || isStatsView || isAuthView
+          isLibraryView || isHistoryView || isReviewsView || isWishlistView || isStatsView || isAuthView
             ? "w-full min-h-[calc(100vh-72px)] px-0 py-5 sm:py-6"
             : "mx-auto max-w-6xl px-4 py-10 sm:px-6"
         }

@@ -9,33 +9,40 @@ Formulario controlado y reutilizable en:
 
 - titulo
 - autor
+- editorial
 - genero
+- paginas
 - anio de publicacion (`publicationYear`)
 - url de portada
 - busqueda automatica de portada
-- estado (`pendiente`, `leyendo`, `leido`)
-- progreso (solo visible en `leyendo`)
-- resena + valoracion por estrellas (solo visible en `leido`)
-
-### Reglas por estado
-
-- `pendiente`:
-  - progreso automatico `0`
-  - sin progreso manual
-  - sin resena/valoracion
-- `leyendo`:
-  - progreso manual visible (0..100)
-  - sin resena/valoracion
-- `leido`:
-  - progreso automatico `100`
-  - muestra resena y valoracion por estrellas
+- sinopsis
 
 ### Validaciones
 
-- requeridos: titulo, autor, genero, estado.
+- requeridos: titulo, autor, editorial, genero.
+- `pages`: entero valido en rango 1..20000.
 - `publicationYear`: entero valido y en rango razonable.
-- `rating`: 0..5.
-- `progress`: 0..100 cuando estado `leyendo`.
+
+## Estado, progreso y reseña
+
+La gestion de estado de lectura, progreso y reseña ya no se resuelve en `BookForm`.
+Ahora se gestiona desde el panel lateral de detalle en `LibraryPage`:
+
+- cambio de estado (`pendiente`, `leyendo`, `leido`),
+- marcado de pagina y progreso,
+- reseña completa (texto, valoración, metadatos y etiquetas).
+
+## Formulario de reseña (panel lateral)
+
+Desde el panel de detalle de `LibraryPage`, el dialogo de reseña permite editar:
+
+- reseña,
+- valoración por estrellas,
+- fecha de lectura (`readAt`),
+- veces leído (`timesRead`),
+- cita favorita (`favoriteQuote`),
+- recomendación (`wouldRecommend`),
+- etiquetas (`reviewTags`).
 
 ## Auth forms
 

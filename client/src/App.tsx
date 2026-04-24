@@ -1,5 +1,6 @@
 // Define el enrutado principal de la app dentro del layout global.
 import { Location as RouterLocation, Route, Routes, useLocation } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { EditBookPage } from "./pages/EditBookPage";
@@ -9,8 +10,14 @@ import { NewBookPage } from "./pages/NewBookPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ReviewsPage } from "./pages/ReviewsPage";
-import { StatisticsPage } from "./pages/StatisticsPage";
 import { WishlistPage } from "./pages/WishlistPage";
+
+const ReadingHistoryPage = lazy(() =>
+  import("./pages/ReadingHistoryPage").then((module) => ({ default: module.ReadingHistoryPage }))
+);
+const StatisticsPage = lazy(() =>
+  import("./pages/StatisticsPage").then((module) => ({ default: module.StatisticsPage }))
+);
 
 function App() {
   const location = useLocation();
@@ -26,6 +33,16 @@ function App() {
           element={
             <ProtectedRoute>
               <LibraryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<div className="px-4 py-3 text-amber-100">Cargando historial...</div>}>
+                <ReadingHistoryPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -49,7 +66,9 @@ function App() {
           path="/stats"
           element={
             <ProtectedRoute>
-              <StatisticsPage />
+              <Suspense fallback={<div className="px-4 py-3 text-amber-100">Cargando estadísticas...</div>}>
+                <StatisticsPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />

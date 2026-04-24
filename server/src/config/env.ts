@@ -3,6 +3,23 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const isProduction = (process.env.NODE_ENV ?? "").toLowerCase() === "production";
+const jwtSecretFromEnv = process.env.JWT_SECRET ?? "";
+// Fail-fast: en prod nunca arrancamos con secreto por defecto o vacío.
+if (isProduction && (!jwtSecretFromEnv.trim() || jwtSecretFromEnv === "change-this-secret-in-production")) {
+  throw new Error("JWT_SECRET seguro es obligatorio en producción");
+}
+
+function parseBoolean(value: string | undefined, defaultValue: boolean): boolean {
+  if (value === undefined) return defaultValue;
+  return value.trim().toLowerCase() === "true";
+}
+
+function parseNumber(value: string | undefined, defaultValue: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
+}
+
 function normalizeOrigin(origin: string): string {
   // El header `Origin` en el navegador no incluye path, pero a veces el valor en env
   // se guarda con slash final ("/") o con mayúsculas.
@@ -18,6 +35,10 @@ function parseClientOrigins(): string[] {
       .filter(Boolean)
       .map(normalizeOrigin);
   }
+  // En producción exigimos origen explícito para evitar CORS permisivo accidental.
+  if (isProduction && !process.env.CLIENT_ORIGIN?.trim()) {
+    throw new Error("CLIENT_ORIGIN o CLIENT_ORIGINS son obligatorios en producción");
+  }
   return [normalizeOrigin(process.env.CLIENT_ORIGIN ?? "http://localhost:5173")];
 }
 
@@ -29,10 +50,25 @@ function parseCorsOriginSuffixes(): string[] {
 }
 
 export const env = {
+  nodeEnv: (process.env.NODE_ENV ?? "development").toLowerCase(),
+  isProduction,
   port: Number(process.env.PORT ?? 4000),
   clientOrigins: parseClientOrigins(),
   /** Orígenes https://... que terminan en uno de estos sufijos pasan CORS (útil para previews Vercel). */
   corsOriginSuffixes: parseCorsOriginSuffixes(),
+  corsAllowVercelPreviews: parseBoolean(process.env.CORS_ALLOW_VERCEL_PREVIEWS, !isProduction),
+  rateLimitWindowMs: parseNumber(process.env.RATE_LIMIT_WINDOW_MS, 60000),
+  rateLimitMaxRequests: parseNumber(process.env.RATE_LIMIT_MAX_REQUESTS, 120),
   databaseUrl: process.env.DATABASE_URL ?? "",
-  jwtSecret: process.env.JWT_SECRET ?? "change-this-secret-in-production"
+  jwtSecret: jwtSecretFromEnv || "change-this-secret-in-production"
 };
+
+if (env.isProduction) {
+  // Protección extra: bloquear configuración de CORS apuntando solo a localhost.
+  const onlyLocalhostOrigins = env.clientOrigins.every((origin) =>
+    origin.includes("localhost") || origin.includes("127.0.0.1")
+  );
+  if (onlyLocalhostOrigins) {
+    throw new Error("CLIENT_ORIGIN(S) no pueden ser localhost en producción");
+  }
+}

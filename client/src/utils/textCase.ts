@@ -1,3 +1,4 @@
+// Utilidades de formato de texto para capitalizar cadenas en español.
 export const capitalizeFirst = (value: string): string => {
   if (!value) return value;
   return value.charAt(0).toLocaleUpperCase("es") + value.slice(1);

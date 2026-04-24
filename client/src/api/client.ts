@@ -1,5 +1,6 @@
 // Cliente HTTP base reutilizable para llamadas a la API con manejo de errores.
 import { Book, CreateBookDto, UpdateBookDto } from "../types/book";
+import { CreateReadingSessionDto, ReadingSession } from "../types/readingSession";
 import { WishlistAcquisition, WishlistItem } from "../types/wishlist";
 
 export const API_BASE_URL =
@@ -20,6 +21,8 @@ export interface AuthResult {
 
 interface ApiErrorBody {
   error?: string;
+  message?: string;
+  code?: string;
 }
 
 interface ApiResponse<T> {
@@ -33,20 +36,50 @@ export class ApiError extends Error {
   }
 }
 
+const getHttpErrorMessage = (status: number, serverMessage?: string) => {
+  if (serverMessage?.trim()) return serverMessage;
+  if (status === 400) return "Los datos enviados no son válidos. Revisa los campos e inténtalo de nuevo.";
+  if (status === 401) return "Tu sesión ha caducado. Inicia sesión de nuevo.";
+  if (status === 403) return "No tienes permisos para realizar esta acción.";
+  if (status === 404) return "No se encontró el recurso solicitado.";
+  if (status === 409) return "Se detectó un conflicto con los datos actuales. Recarga la página e inténtalo de nuevo.";
+  if (status >= 500) return "Hay un problema temporal en el servidor. Inténtalo de nuevo en unos minutos.";
+  return "No se pudo completar la petición.";
+};
+
+export const getReadableErrorMessage = (error: unknown, fallback = "Ha ocurrido un error inesperado.") => {
+  if (error instanceof ApiError) return error.message;
+  if (error instanceof Error) {
+    return "No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.";
+  }
+  return fallback;
+};
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init?.headers ?? {})
-    },
-    ...init
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init?.headers ?? {})
+      },
+      ...init
+    });
+  } catch {
+    throw new ApiError(
+      "No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.",
+      0
+    );
+  }
 
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => ({}))) as ApiErrorBody;
-    throw new ApiError(errorBody.error ?? "No se pudo completar la petición", response.status);
+    throw new ApiError(
+      getHttpErrorMessage(response.status, errorBody.message ?? errorBody.error),
+      response.status
+    );
   }
 
   if (response.status === 204) {
@@ -170,6 +203,26 @@ export const deleteWishlistItem = async (id: string): Promise<void> => {
 export const purchaseWishlistItem = async (id: string): Promise<WishlistAcquisition> => {
   const response = await apiFetch<ApiResponse<WishlistAcquisition>>(`/wishlist/${id}/purchase`, {
     method: "POST"
+  });
+  return response.data;
+};
+
+export const getReadingSessions = async (): Promise<ReadingSession[]> => {
+  const response = await apiFetch<ApiResponse<ReadingSession[]>>("/reading-sessions");
+  return response.data;
+};
+
+export const createReadingSession = async (body: CreateReadingSessionDto): Promise<ReadingSession> => {
+  const response = await apiFetch<ApiResponse<ReadingSession>>("/reading-sessions", {
+    method: "POST",
+    body: JSON.stringify(body)
+  });
+  return response.data;
+};
+
+export const deleteReadingSession = async (id: string): Promise<{ id: string }> => {
+  const response = await apiFetch<ApiResponse<{ id: string }>>(`/reading-sessions/${id}`, {
+    method: "DELETE"
   });
   return response.data;
 };
