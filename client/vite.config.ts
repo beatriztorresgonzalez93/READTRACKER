@@ -7,6 +7,22 @@ import { fileURLToPath } from "node:url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// En Vercel, `VITE_*` se inyecta en tiempo de build; sin URL pública la SPA llama a localhost y falla en el navegador.
+// Vitest también carga este config: no aplicar la comprobación ahí (p. ej. shell con VERCEL heredado).
+const isVitest = process.env.VITEST === "true" || process.env.VITEST === "1";
+if (process.env.VERCEL === "1" && !isVitest) {
+  const api = process.env.VITE_API_BASE_URL?.trim() ?? "";
+  if (!api) {
+    throw new Error(
+      "Falta VITE_API_BASE_URL en Vercel. Añádela en Project → Settings → Environment Variables " +
+        '(Production y Preview si aplica), valor p. ej. https://readtracker-api.onrender.com/api/v1, y redeploy.'
+    );
+  }
+  if (api.includes("localhost") || api.includes("127.0.0.1")) {
+    throw new Error("VITE_API_BASE_URL no puede ser localhost en Vercel: usa la URL pública de tu API.");
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   resolve: {
