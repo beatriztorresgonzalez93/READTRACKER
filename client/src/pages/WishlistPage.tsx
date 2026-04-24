@@ -234,7 +234,7 @@ export const WishlistPage = () => {
   return (
     <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
       <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-4">
+        <aside className="order-2 space-y-4 lg:order-1">
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
             <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
@@ -327,7 +327,7 @@ export const WishlistPage = () => {
           </div>
         </aside>
 
-        <div className="space-y-4">
+        <div className="order-1 min-w-0 w-full max-w-full space-y-4 lg:order-2">
           {loadError && (
             <Alert variant="destructive" className="border-amber-800/80 bg-[#3a0f0f]/90 text-amber-50">
               {loadError}
@@ -388,7 +388,7 @@ export const WishlistPage = () => {
                 Tu lista de deseos está vacía. Añade libros que quieras comprar.
               </Alert>
             ) : (
-              <section className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              <section className="grid w-full min-w-0 grid-cols-2 items-stretch gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                 {visibleItems.map((item) => (
                   <article
                     key={item.id}
