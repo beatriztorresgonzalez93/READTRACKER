@@ -1,5 +1,6 @@
 // Página principal con listado, búsqueda y filtros de la biblioteca.
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, Bookmark, Building2, CalendarDays, ChevronLeft, ChevronRight, Clock3, Heart, MessageSquareText, PencilLine, Quote, Star, Tags, ThumbsUp, X } from "lucide-react";
 import { createReadingSession, deleteBook, getBookById, getReadableErrorMessage, getReadingSessions, getWishlistAcquisitions, updateBook } from "../api/client";
@@ -872,14 +873,15 @@ export const LibraryPage = () => {
         </div>
       </div>
       )}
-      {previewBookId && (
-        <>
+      {previewBookId &&
+        createPortal(
+          <>
           <div
-            className={`${isClosingPreview ? "animate-fade-out-soft" : "animate-fade-in-soft"} fixed left-0 top-0 z-40 h-[100dvh] w-[100vw] bg-black/45 backdrop-blur-[2px]`}
+            className={`${isClosingPreview ? "animate-fade-out-soft" : "animate-fade-in-soft"} fixed left-0 top-0 z-[100] h-[100dvh] w-[100vw] bg-black/45 backdrop-blur-[2px]`}
             onClick={closePreview}
             aria-hidden
           />
-          <aside className={`${isClosingPreview ? "animate-slide-out-right-soft" : "animate-slide-in-right-soft"} fixed inset-y-0 right-0 z-50 flex w-full max-w-[600px] flex-col border-l-2 border-[#b78945] bg-[#f2e6d3] text-[#4d311d] shadow-2xl`}>
+          <aside className={`${isClosingPreview ? "animate-slide-out-right-soft" : "animate-slide-in-right-soft"} fixed inset-y-0 right-0 z-[110] flex w-full max-w-[600px] flex-col border-l-2 border-[#b78945] bg-[#f2e6d3] text-[#4d311d] shadow-2xl`}>
             <header
               className="relative border-b border-[#8f643f] bg-gradient-to-b from-[#3a1c11] via-[#2b140c] to-[#1a0b06] px-4 pb-5 pt-5 text-amber-50"
               style={{
@@ -1223,57 +1225,64 @@ export const LibraryPage = () => {
                 <p className="text-sm">No se pudo cargar este libro.</p>
               )}
             </div>
-            <footer className="grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-3 border-t border-[#8f643f] bg-[#e9dcc4] p-3">
+            <footer className="grid grid-cols-4 gap-1.5 border-t border-[#8f643f] bg-[#e9dcc4] p-2 md:grid-cols-[1.2fr_1fr_1fr_1fr] md:gap-3 md:p-3">
               {previewTab === "resena" ? (
                 <Button
                   size="sm"
                   onClick={openReviewDialog}
                   disabled={!previewBook}
-                  className="h-10 w-full rounded-none border border-[#8e633d] bg-[#8e633d] px-3 text-[#f8f1e5] hover:bg-[#7c5534]"
+                  aria-label="Reseñar"
+                  className="flex h-10 min-w-0 w-full items-center justify-center gap-0 rounded-none border border-[#8e633d] bg-[#8e633d] px-1 text-[#f8f1e5] hover:bg-[#7c5534] md:gap-2 md:px-3"
                 >
-                  <PencilLine className="mr-2 h-3.5 w-3.5" />
-                  Reseñar
+                  <PencilLine className="h-4 w-4 shrink-0 md:h-3.5 md:w-3.5" />
+                  <span className="hidden md:inline">Reseñar</span>
                 </Button>
               ) : (
-                <Link to={previewBook ? `/books/${previewBook.id}/edit` : "#"}>
+                <Link to={previewBook ? `/books/${previewBook.id}/edit` : "#"} className="min-w-0">
                   <Button
                     size="sm"
-                    className="h-10 w-full rounded-none border border-[#8e633d] bg-[#8e633d] px-3 text-[#f8f1e5] hover:bg-[#7c5534]"
+                    aria-label="Editar información"
+                    className="flex h-10 min-w-0 w-full items-center justify-center gap-0 rounded-none border border-[#8e633d] bg-[#8e633d] px-1 text-[#f8f1e5] hover:bg-[#7c5534] md:gap-2 md:px-3"
                   >
-                    <PencilLine className="mr-2 h-3.5 w-3.5" />
-                    Editar información
+                    <PencilLine className="h-4 w-4 shrink-0 md:h-3.5 md:w-3.5" />
+                    <span className="hidden md:inline">Editar información</span>
                   </Button>
                 </Link>
               )}
               <Button
                 size="sm"
                 variant="outline"
-                className="h-10 w-full rounded-none border-[#b08a63] bg-[#efe4d1] text-[#8e633d] hover:border-[#8e633d] hover:bg-[#dcbf98] hover:text-[#6f4b2e]"
+                aria-label="Marcar página"
+                className="flex h-10 min-w-0 w-full items-center justify-center gap-0 rounded-none border-[#b08a63] bg-[#efe4d1] px-1 text-[#8e633d] hover:border-[#8e633d] hover:bg-[#dcbf98] hover:text-[#6f4b2e] md:gap-2 md:px-3"
                 onClick={openMarkPageDialog}
                 disabled={!previewBook || previewBook.status !== "leyendo"}
               >
-                <Bookmark className="mr-1 h-3.5 w-3.5 text-rose-500" />
-                Marcar página
+                <Bookmark className="h-4 w-4 shrink-0 text-rose-500 md:h-3.5 md:w-3.5" />
+                <span className="hidden md:inline">Marcar página</span>
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                className="h-10 w-full rounded-none border-[#b08a63] bg-[#efe4d1] text-[#8e633d] hover:border-[#8e633d] hover:bg-[#dcbf98] hover:text-[#6f4b2e]"
+                aria-label={previewBook?.isFavorite ? "Quitar favorito" : "Marcar como favorito"}
+                className="flex h-10 min-w-0 w-full items-center justify-center gap-0 rounded-none border-[#b08a63] bg-[#efe4d1] px-1 text-[#8e633d] hover:border-[#8e633d] hover:bg-[#dcbf98] hover:text-[#6f4b2e] md:gap-2 md:px-3"
                 onClick={() => void toggleFavorite()}
                 disabled={!previewBook}
               >
-                <Heart className={`mr-1 h-3.5 w-3.5 ${previewBook?.isFavorite ? "fill-rose-500 text-rose-500" : "text-rose-500"}`} />
-                {previewBook?.isFavorite ? "Quitar favorito" : "Favoritos"}
+                <Heart
+                  className={`h-4 w-4 shrink-0 md:h-3.5 md:w-3.5 ${previewBook?.isFavorite ? "fill-rose-500 text-rose-500" : "text-rose-500"}`}
+                />
+                <span className="hidden md:inline">{previewBook?.isFavorite ? "Quitar favorito" : "Favoritos"}</span>
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                className="h-10 w-full rounded-none border-rose-300 bg-[#efe4d1] text-rose-700 hover:border-rose-500 hover:bg-rose-100 hover:text-rose-800"
+                aria-label="Eliminar libro"
+                className="flex h-10 min-w-0 w-full items-center justify-center gap-0 rounded-none border-rose-300 bg-[#efe4d1] px-1 text-rose-700 hover:border-rose-500 hover:bg-rose-100 hover:text-rose-800 md:gap-2 md:px-3"
                 disabled={!previewBook || deletingId === previewBook.id}
                 onClick={() => setIsDeleteConfirmOpen(true)}
               >
-                <X className="mr-1 h-3.5 w-3.5" />
-                Eliminar
+                <X className="h-4 w-4 shrink-0 md:h-3.5 md:w-3.5" />
+                <span className="hidden md:inline">Eliminar</span>
               </Button>
             </footer>
           </aside>
@@ -1731,8 +1740,9 @@ export const LibraryPage = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </>
-      )}
+          </>,
+          document.body
+        )}
     </section>
   );
 };
