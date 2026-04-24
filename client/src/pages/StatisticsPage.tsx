@@ -246,7 +246,7 @@ export const StatisticsPage = () => {
   return (
     <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
       <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-3">
+        <aside className="order-2 space-y-3 lg:order-1">
           <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
             <div className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
               📚 Mi biblioteca
@@ -344,7 +344,7 @@ export const StatisticsPage = () => {
           </article>
         </aside>
 
-        <div>
+        <div className="order-1 min-w-0 w-full max-w-full lg:order-2">
           <div className="mb-4 flex items-center justify-between border-b border-[#d7b06f]/70 pb-3 text-[#f0dfc5]">
             <p className="font-['Fraunces',serif] text-xl">✦ Estadísticas de lectura</p>
             <span className="text-xs uppercase tracking-[0.1em] text-amber-100/70">Resumen actualizado</span>

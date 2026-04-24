@@ -88,7 +88,7 @@ export const ReviewsPage = () => {
   return (
     <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
       <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-4">
+        <aside className="order-2 space-y-4 lg:order-1">
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
             <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
@@ -190,45 +190,43 @@ export const ReviewsPage = () => {
           </div>
         </aside>
 
-        <div className="space-y-4">
-          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="order-1 min-w-0 w-full max-w-full space-y-4 lg:order-2">
+          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-2 sm:p-3">
+            <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-row sm:items-center sm:gap-2">
               <Input
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar por palabras en tus reseñas..."
-                className="h-9 border-[#b08a63] bg-[#f8f1e5] text-[#4d311d] placeholder:text-[#8d6d4d] sm:flex-1"
+                className="col-span-2 h-7 border-[#b08a63] bg-[#f8f1e5] text-xs text-[#4d311d] placeholder:text-[#8d6d4d] sm:col-span-1 sm:h-9 sm:min-w-0 sm:flex-1 sm:text-sm"
               />
-              <div className="flex gap-2 sm:ml-auto">
-                <Select
-                  value={ratingFilter}
-                  onChange={(event) => setRatingFilter(event.target.value as RatingFilter)}
-                  className="h-9 w-[210px] rounded-md !border-[#8e633d] !bg-[#8e633d] !py-1.5 !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
-                >
-                  <option value="todas">Todas las valoraciones</option>
-                  <option value="5">5 estrellas</option>
-                  <option value="4">4 estrellas</option>
-                  <option value="3">3 estrellas</option>
-                  <option value="2">2 estrellas</option>
-                  <option value="1">1 estrella</option>
-                </Select>
-                <Select
-                  value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value as ReviewSort)}
-                  className="h-9 w-[210px] rounded-md !border-[#8e633d] !bg-[#8e633d] !py-1.5 !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
-                >
-                  <option value="reciente">Ordenar: Reciente</option>
-                  <option value="valoracion">Ordenar: Valoración</option>
-                  <option value="titulo">Ordenar: Título</option>
-                </Select>
-              </div>
+              <Select
+                value={ratingFilter}
+                onChange={(event) => setRatingFilter(event.target.value as RatingFilter)}
+                className="h-7 min-w-0 w-full rounded-md !border-[#8e633d] !bg-[#8e633d] !py-1 !text-[0.7rem] !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5] sm:h-9 sm:w-[210px] sm:!py-1.5 sm:!text-sm"
+              >
+                <option value="todas">Todas las valoraciones</option>
+                <option value="5">5 estrellas</option>
+                <option value="4">4 estrellas</option>
+                <option value="3">3 estrellas</option>
+                <option value="2">2 estrellas</option>
+                <option value="1">1 estrella</option>
+              </Select>
+              <Select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as ReviewSort)}
+                className="h-7 min-w-0 w-full rounded-md !border-[#8e633d] !bg-[#8e633d] !py-1 !text-[0.7rem] !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5] sm:h-9 sm:w-[210px] sm:!py-1.5 sm:!text-sm"
+              >
+                <option value="reciente">Ordenar: Reciente</option>
+                <option value="valoracion">Ordenar: Valoración</option>
+                <option value="titulo">Ordenar: Título</option>
+              </Select>
             </div>
           </div>
 
           <div className="border-t border-[#d7b06f] pt-4">
             <div className="mb-4 flex items-center justify-between gap-2">
-              <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Mis reseñas</p>
+              <p className="font-['Fraunces',serif] text-xl text-[#5a2f1f] dark:text-amber-100 sm:text-2xl">✦ Mis reseñas</p>
               <span className="text-xs text-[#8e633d] dark:text-amber-200/80">{reviewBooks.length} reseñas escritas</span>
             </div>
             {loading && <p className="rt-body-copy text-amber-100/90">Cargando reseñas...</p>}

@@ -154,18 +154,21 @@ export const ReadingHistoryPage = () => {
   return (
     <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
       <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
-        <HistorySidebar
-          monthLabel={formatMonthLabel(viewMonth)}
-          monthPages={monthSummary.pages}
-          monthSessions={monthSummary.sessionsCount}
-          pagesPerDay={monthSummary.pagesPerDay}
-          currentStreak={currentStreak}
-          nowReadingBooks={nowReadingBooks}
-          intensityLegend={intensityLegend}
-          bestDays={bestDays}
-          formatDayLabel={formatDayLabel}
-        />
+        <div className="order-2 lg:order-1">
+          <HistorySidebar
+            monthLabel={formatMonthLabel(viewMonth)}
+            monthPages={monthSummary.pages}
+            monthSessions={monthSummary.sessionsCount}
+            pagesPerDay={monthSummary.pagesPerDay}
+            currentStreak={currentStreak}
+            nowReadingBooks={nowReadingBooks}
+            intensityLegend={intensityLegend}
+            bestDays={bestDays}
+            formatDayLabel={formatDayLabel}
+          />
+        </div>
 
+        <div className="order-1 min-w-0 w-full max-w-full lg:order-2">
         <HistoryCalendar
           loading={loading}
           error={error}
@@ -179,6 +182,7 @@ export const ReadingHistoryPage = () => {
           onShiftMonth={shiftMonth}
           onOpenDay={setSelectedDayKey}
         />
+        </div>
       </div>
 
       <DayDetailPanel
