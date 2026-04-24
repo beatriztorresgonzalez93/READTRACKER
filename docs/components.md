@@ -35,6 +35,7 @@ Basada en el stack de componentes shadcn con primitives de Base UI (`@base-ui/re
 - `ReviewsPage`
 - `WishlistPage`
 - `StatisticsPage`
+- `ReadingHistoryPage`
 - `NewBookPage`
 - `EditBookPage`
 - `LoginPage`

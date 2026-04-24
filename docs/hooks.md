@@ -10,12 +10,18 @@
 
 ## Hook/abstraccion de filtros
 
-`useBookFilters`:
-- texto de busqueda,
-- filtro por estado,
-- ordenacion,
-- lista resultante memoizada,
-- persistencia de filtros en `localStorage` con manejo seguro de errores.
+`useBookFilters(books)`:
+
+- estado de UI: texto de busqueda, filtro por estado (`todos` / estados de lectura), ordenacion (`sortBy`),
+- persistencia de esos valores en `localStorage` con manejo seguro de errores,
+- devuelve `filteredBooks` como alias de `books` (el filtrado y orden reales los aplica el servidor vía `BooksContext.syncLibraryQuery` en `LibraryPage`).
+
+## Carga completa de biblioteca para otras pantallas
+
+`useFullBooksSnapshot(enabled?)` (`client/src/hooks/useFullBooksSnapshot.ts`):
+
+- cuando `enabled` es true (p. ej. usuario autenticado), llama a `fetchAllBooksSnapshot` del cliente API, que pagina con `getBooksPage` hasta reunir todos los libros,
+- usado en estadisticas, reseñas, lista de deseos e historial para no bloquear la coleccion principal con listas enormes en memoria alli.
 
 ## Patrones destacados
 

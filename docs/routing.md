@@ -12,6 +12,7 @@ Router principal en:
 ## Rutas protegidas (`ProtectedRoute`)
 
 - `/` -> `LibraryPage`
+- `/history` -> `ReadingHistoryPage` (carga perezosa)
 - `/reviews` -> `ReviewsPage`
 - `/wishlist` -> `WishlistPage`
 - `/stats` -> `StatisticsPage`
@@ -31,4 +32,6 @@ Si no hay sesion valida, `ProtectedRoute` redirige a `/login`.
 
 Todas las rutas renderizan dentro de `Layout`, que contiene:
 - header global,
-- acciones de auth (entrar/registro o usuario/logout).
+- acciones de auth (entrar/registro o menu de usuario con perfil y logout).
+
+El perfil se edita desde el header (dialog); no hay ruta dedicada `/profile`.

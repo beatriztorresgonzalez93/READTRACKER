@@ -17,7 +17,7 @@ Patron backend:
 ## Modelo de datos actual
 
 - `users`
-  - `id`, `name`, `email`, `password_hash`, `created_at`
+  - `id`, `name`, `last_name`, `email`, `password_hash`, `avatar_url`, `created_at`
 - `books`
   - `id`, `user_id`, `title`, `author`, `genre`, `publication_year`,
     `status`, `rating`, `review`, `progress`, `cover_url`,
@@ -33,14 +33,17 @@ Patron backend:
 ## Seguridad y acceso
 
 - JWT para autenticacion de API.
-- Middleware `requireAuth` protege `/books` y `/auth/me`.
+- Middleware `requireAuth` protege `/books`, `/books/summary`, `/auth/me` y `PATCH /auth/me`.
 - La autorizacion de libros se hace en SQL filtrando por `user_id`.
+
+Migraciones versionadas en `server/src/migrations/` (incluye perfil de usuario `004_user_profile_fields`).
 
 ## Frontend: separacion de responsabilidades
 
 - `api/client.ts`: red y errores tipados.
 - `AuthContext`: sesion global.
-- `BooksContext`: estado de biblioteca.
+- `BooksContext`: coleccion paginada + resumen para la biblioteca principal.
+- `useFullBooksSnapshot`: carga encadenada por paginas donde hace falta el conjunto completo de libros.
 - `ProtectedRoute`: control de acceso por ruta.
 - `LibraryPage`: fuente de verdad del panel de detalle (`?preview=<id>`).
 

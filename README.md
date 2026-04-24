@@ -5,12 +5,13 @@ Aplicacion web fullstack para gestionar lecturas personales, registrar progreso 
 ## ✨ Funcionalidades principales
 
 - Autenticacion con JWT y aislamiento estricto por usuario.
-- Biblioteca personal con CRUD de libros y panel lateral de detalle.
+- Perfil de cuenta desde el header (nombre, apellidos, correo, foto, fechas de alta); actualizacion con `PATCH /auth/me`.
+- Biblioteca personal con CRUD de libros, panel lateral de detalle y **listado paginado** (12 libros por peticion; boton para cargar mas debajo de la rejilla). Resumen global de totales y generos vía `GET /books/summary`.
 - Reseñas personales por libro con valoración por estrellas, etiquetas y recomendación.
 - Marcado de pagina con registro de sesiones de lectura en backend.
 - Historial mensual con calendario de intensidad y detalle diario.
 - Borrado de sesiones con recalculo automatico de progreso del libro.
-- Estadisticas de lectura (ritmo, rachas, actividad anual, generos y valoraciones).
+- Estadisticas de lectura (ritmo, rachas, actividad anual, generos, valoraciones y **compras desde lista de deseos** con desglose por mes).
 - Lista de deseos y adquisiciones con flujo independiente.
 
 ## 🧱 Stack y arquitectura
@@ -116,7 +117,7 @@ Variable frontend importante:
 
 ## 📚 Documentacion
 
-La carpeta `docs/` contiene guias funcionales y operativas:
+La carpeta `docs/` contiene guias funcionales y operativas (mantener alineadas con `docs/api.md` y `docs/api-client.md` tras cambios de API):
 
 - `idea.md`
 - `design.md`

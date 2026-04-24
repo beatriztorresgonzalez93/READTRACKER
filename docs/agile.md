@@ -36,3 +36,4 @@ Es util cuando el trabajo llega de forma variable y se necesita flexibilidad dia
 - Se ha trabajado de forma cercana a Kanban: peticiones cortas, feedback inmediato y ajustes frecuentes.
 - Cada bloque tecnico se ha cerrado con validacion (`build/test`) antes de pasar al siguiente.
 - Las ramas se han usado para comparar estilos/versiones y reducir riesgo al integrar.
+- Tras cambios de API o de flujos de datos compartidos (`AuthContext`, `BooksContext`, paginacion de libros), conviene cerrar el ciclo actualizando `docs/api.md`, `docs/api-client.md`, `README.md` y, si aplica, `docs/context.md` / `docs/hooks.md` para que la documentacion siga siendo fuente de verdad operativa.

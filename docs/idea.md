@@ -17,10 +17,13 @@ Estudiantes y lectores que quieren un sistema simple para:
 ## Funcionalidades principales (estado actual)
 
 - registro e inicio de sesion con JWT,
+- perfil de cuenta desde el header (nombre, apellidos, correo, avatar); persistencia con `PATCH /auth/me`,
 - biblioteca aislada por usuario (cada cuenta ve solo sus libros),
-- listado de libros con busqueda por texto (titulo, autor, editorial, genero),
-- filtro por estado (`pendiente`, `leyendo`, `leido`),
-- ordenacion por `titulo`, `autor`, `genero` y `valoracion`,
+- listado **paginado** en la biblioteca (carga por paginas con “cargar mas”); filtros y orden se aplican en servidor,
+- busqueda por texto (titulo, autor, editorial, genero),
+- filtro por estado de lectura (`pendiente`, `leyendo`, `leido`, `todos`),
+- estantes rapidos (`todos`, por estado y **favoritos**) y filtro por **genero** a partir del resumen de biblioteca (`GET /books/summary`),
+- ordenacion por `recientes`, `titulo`, `autor`, `genero` y `valoracion`,
 - crear, editar y eliminar libros,
 - panel lateral de detalle con tabs (`Información`, `Mi reseña`, `Similares`),
 - formulario con validaciones, anio de publicacion y reglas de progreso:
@@ -32,8 +35,10 @@ Estudiantes y lectores que quieren un sistema simple para:
 - gestion de reseña avanzada (fecha lectura, veces leído, cita, recomendación, etiquetas),
 - lista de deseos persistida en backend (precio, tienda, prioridad, edición inline),
 - sección de últimas adquisiciones en la biblioteca,
+- sesiones de lectura al marcar pagina; **historial** en ruta dedicada (`/history`) con calendario mensual e intensidad,
+- borrado de sesiones con recalculo de progreso del libro,
 - pantalla de reseñas con cards clicables a detalle,
-- pantalla de estadísticas de lectura,
+- pantalla de estadísticas (ritmo, rachas, actividad, generos, valoraciones y **compras desde lista de deseos** por mes),
 - tema oscuro global.
 
 ## Funcionalidades opcionales / futuras

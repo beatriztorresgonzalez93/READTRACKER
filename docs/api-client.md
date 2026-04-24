@@ -17,10 +17,13 @@ El frontend usa una unica capa tipada en:
 - `registerUser(name, email, password)`
 - `loginUser(email, password)`
 - `getMe()`
+- `updateProfile(body)` — `PATCH /auth/me` (`name`, `lastName`, `avatarUrl` opcionales)
 - `authStorage.getToken()/setToken()/clearToken()`
 
 ### Books
-- `getBooks(search?, status?)`
+- `getBooksPage(params)` — listado paginado; devuelve `{ data, meta }` con `meta.total`, `meta.limit`, `meta.offset`. Parametros tipados: `search`, `status`, `shelf`, `genre`, `sort`, `limit`, `offset`. Constante `BOOKS_PAGE_SIZE` (12).
+- `getBooksSummary()` — totales y generos (`GET /books/summary`)
+- `fetchAllBooksSnapshot(pageSize?)` — encadena paginas con filtros neutros (para pantallas que necesitan la coleccion completa)
 - `getBookById(id)`
 - `createBook(data)`
 - `updateBook(id, data)`
@@ -65,6 +68,11 @@ Además, el cliente ahora incluye utilidades para mensajes más claros:
   - `404`: recurso no encontrado,
   - `409`: conflicto de datos,
   - `5xx`: error temporal de servidor.
+
+## Biblioteca en UI
+
+- **Coleccion (`LibraryPage`)**: `BooksContext` llama a `getBooksPage` al cambiar filtros/orden/estante/genero; `loadMoreBooks()` pide la siguiente pagina y concatena resultados (nuevas tarjetas debajo).
+- **Estadisticas, reseñas, lista de deseos, historial**: hook `useFullBooksSnapshot` (ver `docs/hooks.md`) usa `fetchAllBooksSnapshot` cuando hace falta el conjunto completo para calculos o listas.
 
 ## Flujos de sesiones y borrado
 
