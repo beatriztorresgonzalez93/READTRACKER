@@ -15,7 +15,7 @@ export const BookList = ({ books, onOpenPreview }: BookListProps) => {
   }
 
   return (
-    <section className="grid grid-cols-2 items-start justify-items-start gap-x-2 gap-y-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+    <section className="grid w-full min-w-0 grid-cols-3 items-stretch justify-items-stretch gap-x-1.5 gap-y-3 sm:grid-cols-4 sm:gap-x-2 sm:gap-y-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
       {books.map((book, index) => (
         <BookCard
           key={book.id}

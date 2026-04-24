@@ -701,7 +701,7 @@ export const LibraryPage = () => {
           </div>
         </aside>
 
-        <div className="order-1 space-y-4 lg:order-2">
+        <div className="order-1 min-w-0 w-full max-w-full space-y-4 lg:order-2">
           <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-3">
             <div className="grid gap-2 sm:grid-cols-[1fr_170px_170px_auto]">
               <Input

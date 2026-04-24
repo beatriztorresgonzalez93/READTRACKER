@@ -30,7 +30,7 @@ export const BookCard = ({ book, index = 0, onOpenPreview }: BookCardProps) => {
       onClick={goToDetails}
       onKeyDown={handleCardKeyDown}
       aria-label={`Ver detalle de ${book.title}`}
-      className="group relative animate-fade-in-up w-full max-w-none cursor-pointer overflow-hidden rounded-sm border border-[#b78945] bg-[#f2e6d3] text-left shadow-[0_9px_20px_-12px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_26px_-12px_rgba(0,0,0,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+      className="group relative animate-fade-in-up h-full w-full min-w-0 max-w-full cursor-pointer overflow-hidden rounded-sm border border-[#b78945] bg-[#f2e6d3] text-left shadow-[0_9px_20px_-12px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_26px_-12px_rgba(0,0,0,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
       style={{ animationDelay: `${index * 40}ms` }}
     >
       {book.coverUrl && !coverBroken ? (
@@ -73,14 +73,14 @@ export const BookCard = ({ book, index = 0, onOpenPreview }: BookCardProps) => {
         </span>
       )}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/35 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="min-h-[7.2rem] space-y-1 border-t border-[#b78945] bg-[#f2e6d3] px-2.5 py-2.5 text-[#4d311d]">
-        <p className="line-clamp-2 min-h-[2.4rem] font-['Fraunces',serif] text-[0.95rem] leading-tight">{book.title}</p>
-        <p className="line-clamp-1 min-h-[1rem] text-xs italic opacity-85">{book.author}</p>
+      <div className="min-h-[5.25rem] space-y-0.5 border-t border-[#b78945] bg-[#f2e6d3] px-1.5 py-2 text-[#4d311d] sm:min-h-[7.2rem] sm:space-y-1 sm:px-2.5 sm:py-2.5">
+        <p className="line-clamp-2 min-h-[2rem] font-['Fraunces',serif] text-[0.78rem] leading-tight sm:min-h-[2.4rem] sm:text-[0.95rem]">{book.title}</p>
+        <p className="line-clamp-1 min-h-[0.85rem] text-[10px] italic opacity-85 sm:min-h-[1rem] sm:text-xs">{book.author}</p>
         <div className="flex items-center justify-between pt-1 text-[10px] uppercase tracking-[0.12em] text-[#7a573c]">
           <span>{book.genre}</span>
           <span>{book.publicationYear ?? "s/f"}</span>
         </div>
-        <div className="border-t border-[#d7b06f] pt-1 text-[11px] text-[#8e633d]">
+        <div className="border-t border-[#d7b06f] pt-1 text-[9px] text-[#8e633d] sm:text-[11px]">
           {"★".repeat(book.rating ?? 0)}
           {"☆".repeat(Math.max(0, 5 - (book.rating ?? 0)))}
         </div>
