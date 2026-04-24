@@ -565,7 +565,7 @@ export const LibraryPage = () => {
     <section className={isPreviewOnly ? "relative z-[45]" : "relative min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6"}>
       {!isPreviewOnly && (
       <div className={`grid gap-5 lg:grid-cols-[260px_1fr] ${previewBookId ? "pointer-events-none select-none" : ""}`}>
-        <aside className="space-y-4">
+        <aside className="order-2 space-y-4 lg:order-1">
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
             <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
@@ -701,7 +701,7 @@ export const LibraryPage = () => {
           </div>
         </aside>
 
-        <div className="space-y-4">
+        <div className="order-1 space-y-4 lg:order-2">
           <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-3">
             <div className="grid gap-2 sm:grid-cols-[1fr_170px_170px_auto]">
               <Input
