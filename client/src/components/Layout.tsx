@@ -34,12 +34,12 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       }
     >
       <header className="sticky top-0 z-20 border-y border-[#d7b06f] bg-[#1a0b06]/96 text-amber-100 shadow-[inset_0_1px_0_rgba(255,243,220,0.26)] backdrop-blur">
-        <nav className="mx-auto grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 sm:px-6">
+        <nav className="mx-auto grid w-full grid-cols-[auto_1fr] items-center gap-3 px-3 py-3 sm:px-6 md:grid-cols-[1fr_auto_1fr] md:gap-4">
           <Link to="/" className="inline-flex justify-self-start flex-col text-amber-100">
-            <span className="font-['Fraunces',serif] text-[2.15rem] leading-none tracking-[0.02em] text-[#f6ead8] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]">
+            <span className="font-['Fraunces',serif] text-[1.55rem] leading-none tracking-[0.02em] text-[#f6ead8] drop-shadow-[0_1px_0_rgba(0,0,0,0.35)] sm:text-[2.15rem]">
               Script<span className="italic text-[#e6bf74]">orium</span>
             </span>
-            <span className="mt-1 text-[0.66rem] font-semibold tracking-[0.32em] text-[#c89c33]">
+            <span className="mt-1 hidden text-[0.66rem] font-semibold tracking-[0.32em] text-[#c89c33] sm:inline">
               ✦ BIBLIOTECA PERSONAL ✦
             </span>
           </Link>
@@ -77,7 +77,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               </Link>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-self-end justify-end gap-2.5 text-sm font-medium">
+          <div className="flex flex-wrap items-center justify-self-end justify-end gap-1.5 text-xs font-medium sm:gap-2.5 sm:text-sm">
             {!isAuthenticated && location.pathname !== "/login" && (
               <Link to="/login">
                 <Button variant="outline" size="sm" className="border-amber-600 bg-amber-900/20 font-semibold text-amber-100 hover:bg-amber-900/35">
