@@ -50,7 +50,8 @@ export const ReadingHistoryPage = () => {
             title: session.title,
             author: session.author,
             at,
-            dayKey: session.recordedAt.slice(0, 10),
+            // Misma convención que las celdas del calendario (fecha local), no el prefijo UTC del ISO.
+            dayKey: getDayKey(at),
             page: session.currentPage,
             previousPage,
             pagesRead:
