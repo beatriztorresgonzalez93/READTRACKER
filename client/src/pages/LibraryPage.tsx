@@ -1511,16 +1511,16 @@ export const LibraryPage = () => {
               }
             }}
           >
-            <DialogContent className="w-[99vw] max-w-[1200px] border-2 border-[#b6852f] bg-[#efe4d1] p-0 text-[#5a3b24] shadow-[0_24px_70px_rgba(0,0,0,0.5)]">
-              <DialogHeader className="border-b border-[#b6852f] bg-[#6a320f] px-6 pb-3 pt-4 text-[#f3e7d5]">
-                <DialogTitle className="font-['Fraunces',serif] text-3xl leading-none">
+            <DialogContent className="flex max-h-[calc(100dvh-1.25rem)] w-[calc(100vw-1rem)] max-w-[1200px] flex-col gap-0 overflow-hidden border-2 border-[#b6852f] bg-[#efe4d1] p-0 text-[#5a3b24] shadow-[0_24px_70px_rgba(0,0,0,0.5)] sm:max-h-[min(90vh,920px)]">
+              <DialogHeader className="shrink-0 border-b border-[#b6852f] bg-[#6a320f] px-6 pb-3 pt-4 pr-14 text-[#f3e7d5]">
+                <DialogTitle className="font-['Fraunces',serif] text-2xl leading-tight sm:text-3xl sm:leading-none">
                   ✍️ Escribir reseña y valoración
                 </DialogTitle>
                 <DialogDescription className="pt-2 text-sm text-[#e8cfaa]">
                   {previewBook?.title} · {previewBook?.author}
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-5 px-6 py-5">
+              <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 py-5">
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8e633d]">
                     Valoración global
@@ -1665,7 +1665,7 @@ export const LibraryPage = () => {
                     value={reviewDraft}
                     onChange={(event) => setReviewDraft(capitalizeFirst(event.target.value))}
                     maxLength={2000}
-                    className="min-h-[220px] resize-y border-[#b68e66] bg-[#f5ecde] text-[#5a3b24] placeholder:text-[#8e633d]/80"
+                    className="min-h-[140px] resize-y border-[#b68e66] bg-[#f5ecde] text-[#5a3b24] placeholder:text-[#8e633d]/80 sm:min-h-[220px]"
                     placeholder="¿Qué te pareció el libro? Escribe con libertad..."
                   />
                 </div>
@@ -1746,12 +1746,12 @@ export const LibraryPage = () => {
                 </div>
                 {reviewError && <p className="text-sm text-rose-700">{reviewError}</p>}
               </div>
-              <DialogFooter className="!mx-0 !mb-0 flex flex-row items-center justify-between gap-3 border-t border-[#c4a27b]/70 bg-[#eadcc4] px-6 py-4">
+              <DialogFooter className="!mx-0 !mb-0 flex shrink-0 flex-row flex-wrap items-center justify-between gap-3 border-t border-[#c4a27b]/70 bg-[#eadcc4] px-4 py-3 sm:px-6 sm:py-4">
                 <Button
                   onClick={() => setIsReviewDialogOpen(false)}
                   variant="outline"
                   size="sm"
-                  className="h-10 min-w-[140px] border-[#b08a63] bg-[#efe4d1] text-[#6f4b2e] hover:border-[#8e633d] hover:bg-[#e2cfb2] hover:text-[#5a3d24]"
+                  className="h-10 min-w-0 flex-1 border-[#b08a63] bg-[#efe4d1] text-[#6f4b2e] hover:border-[#8e633d] hover:bg-[#e2cfb2] hover:text-[#5a3d24] sm:min-w-[140px] sm:flex-none"
                   disabled={isSavingReview}
                 >
                   Cancelar
@@ -1759,7 +1759,7 @@ export const LibraryPage = () => {
                 <Button
                   onClick={() => void saveReview()}
                   size="sm"
-                  className="h-10 min-w-[180px] border border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534]"
+                  className="h-10 min-w-0 flex-1 border border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534] sm:min-w-[180px] sm:flex-none"
                   disabled={isSavingReview || !previewBook}
                 >
                   {isSavingReview ? "Guardando..." : "✦ Publicar reseña"}
