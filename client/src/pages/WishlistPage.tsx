@@ -333,19 +333,19 @@ export const WishlistPage = () => {
               {loadError}
             </Alert>
           )}
-          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-3">
-            <div className="grid gap-2 sm:grid-cols-[1fr_170px_170px_auto]">
+          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-2 sm:p-3">
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-[1fr_170px_170px_auto] sm:gap-2">
               <Input
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar en lista de deseos..."
-                className="border-[#b08a63] bg-[#f8f1e5] text-[#4d311d] placeholder:text-[#8d6d4d]"
+                className="col-span-2 h-7 border-[#b08a63] bg-[#f8f1e5] px-2 text-sm text-[#4d311d] placeholder:text-[#8d6d4d] sm:col-span-1 sm:h-8 sm:px-2.5 sm:text-base"
               />
               <Select
                 value={store}
                 onChange={(event) => setStore(event.target.value)}
-                className="!border-[#8e633d] !bg-[#8e633d] !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
+                className="h-7 min-h-7 rounded-lg !border-[#8e633d] !bg-[#8e633d] px-2 py-1 !text-[#f8f1e5] text-xs hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5] sm:h-auto sm:min-h-0 sm:px-3 sm:py-2.5 sm:text-sm"
               >
                 <option value="todos">Todas las tiendas</option>
                 {stores.map(([name]) => (
@@ -357,26 +357,28 @@ export const WishlistPage = () => {
               <Select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as WishlistSort)}
-                className="!border-[#8e633d] !bg-[#8e633d] !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
+                className="h-7 min-h-7 rounded-lg !border-[#8e633d] !bg-[#8e633d] px-2 py-1 !text-[#f8f1e5] text-xs hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5] sm:h-auto sm:min-h-0 sm:px-3 sm:py-2.5 sm:text-sm"
               >
                 <option value="prioridad">Ordenar: Prioridad</option>
                 <option value="reciente">Ordenar: Reciente</option>
                 <option value="titulo">Ordenar: Título</option>
               </Select>
-              <Button
-                size="default"
-                className="h-8 border border-[#8e633d] bg-[#8e633d] px-4 font-semibold text-[#f8f1e5] hover:bg-[#7c5534]"
-                onClick={openCreateDialog}
-              >
-                <Plus className="mr-1 h-3.5 w-3.5" />
-                Añadir deseo
-              </Button>
+              <div className="col-span-2 sm:col-span-1">
+                <Button
+                  size="default"
+                  className="h-7 w-full border border-[#8e633d] bg-[#8e633d] px-3 text-xs font-semibold text-[#f8f1e5] hover:bg-[#7c5534] sm:h-8 sm:w-auto sm:px-4 sm:text-sm"
+                  onClick={openCreateDialog}
+                >
+                  <Plus className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  Añadir deseo
+                </Button>
+              </div>
             </div>
           </div>
 
           <div className="border-t border-[#d7b06f] pt-4">
             <div className="mb-4 flex items-center justify-between gap-2">
-              <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Lista de deseos</p>
+              <p className="font-['Fraunces',serif] text-xl text-[#5a2f1f] dark:text-amber-100 sm:text-2xl">✦ Lista de deseos</p>
               <span className="text-xs text-[#8e633d] dark:text-amber-200/80">{visibleItems.length} libros por comprar</span>
             </div>
             {loading ? (

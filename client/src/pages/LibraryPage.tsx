@@ -702,30 +702,41 @@ export const LibraryPage = () => {
         </aside>
 
         <div className="order-1 min-w-0 w-full max-w-full space-y-4 lg:order-2">
-          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-3">
-            <div className="grid gap-2 sm:grid-cols-[1fr_170px_170px_auto]">
+          <div className="rounded-md border border-amber-700/60 bg-[#e9dcc4] p-2 sm:p-3">
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-[1fr_170px_170px_auto] sm:gap-2">
               <Input
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar por título, autor, editorial o género..."
-                className="border-[#b08a63] bg-[#f8f1e5] text-[#4d311d] placeholder:text-[#8d6d4d]"
+                className="col-span-2 h-7 border-[#b08a63] bg-[#f8f1e5] px-2 text-sm text-[#4d311d] placeholder:text-[#8d6d4d] sm:col-span-1 sm:h-8 sm:px-2.5 sm:text-base"
               />
-              <Select value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className="border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534] dark:border-[#8e633d] dark:bg-[#8e633d] dark:text-[#f8f1e5]">
+              <Select
+                value={status}
+                onChange={(event) => setStatus(event.target.value as typeof status)}
+                className="h-7 min-h-7 rounded-lg border-[#8e633d] bg-[#8e633d] px-2 py-1 text-xs text-[#f8f1e5] hover:bg-[#7c5534] dark:border-[#8e633d] dark:bg-[#8e633d] dark:text-[#f8f1e5] sm:h-auto sm:min-h-0 sm:px-3 sm:py-2.5 sm:text-sm"
+              >
                 <option value="todos">Todos</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="leyendo">Leyendo</option>
                 <option value="leido">Leído</option>
               </Select>
-              <Select value={sortBy} onChange={(event) => setSortBy(event.target.value as typeof sortBy)} className="border-[#8e633d] bg-[#8e633d] text-[#f8f1e5] hover:bg-[#7c5534] dark:border-[#8e633d] dark:bg-[#8e633d] dark:text-[#f8f1e5]">
+              <Select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
+                className="h-7 min-h-7 rounded-lg border-[#8e633d] bg-[#8e633d] px-2 py-1 text-xs text-[#f8f1e5] hover:bg-[#7c5534] dark:border-[#8e633d] dark:bg-[#8e633d] dark:text-[#f8f1e5] sm:h-auto sm:min-h-0 sm:px-3 sm:py-2.5 sm:text-sm"
+              >
                 <option value="recientes">Más recientes</option>
                 <option value="titulo">Título (A-Z)</option>
                 <option value="autor">Autor (A-Z)</option>
                 <option value="genero">Género (A-Z)</option>
                 <option value="valoracion">Valoración</option>
               </Select>
-              <Link to="/books/new">
-                <Button size="default" className="h-8 border border-[#8e633d] bg-[#8e633d] px-4 font-semibold text-[#f8f1e5] hover:bg-[#7c5534]">
+              <Link to="/books/new" className="col-span-2 sm:col-span-1">
+                <Button
+                  size="default"
+                  className="h-7 w-full border border-[#8e633d] bg-[#8e633d] px-3 text-xs font-semibold text-[#f8f1e5] hover:bg-[#7c5534] sm:h-8 sm:w-auto sm:px-4 sm:text-sm"
+                >
                   + Añadir libro
                 </Button>
               </Link>
@@ -743,7 +754,7 @@ export const LibraryPage = () => {
 
           <div className="border-t border-[#d7b06f] pt-4">
             <div className="mb-4 flex items-center justify-between gap-2">
-              <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Colección</p>
+              <p className="font-['Fraunces',serif] text-xl text-[#5a2f1f] dark:text-amber-100 sm:text-2xl">✦ Colección</p>
               <button
                 type="button"
                 onClick={() => setIsShowingAllCollection((current) => !current)}
@@ -780,7 +791,7 @@ export const LibraryPage = () => {
           </div>
           <div className="border-t border-[#d7b06f] pt-4">
             <div className="mb-4 flex items-center justify-between gap-2">
-              <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Últimas reseñas</p>
+              <p className="font-['Fraunces',serif] text-xl text-[#5a2f1f] dark:text-amber-100 sm:text-2xl">✦ Últimas reseñas</p>
               <Link to="/reviews" className="text-xs text-[#8e633d] transition hover:underline dark:text-amber-200/80">
                 Ver todas →
               </Link>
@@ -803,7 +814,7 @@ export const LibraryPage = () => {
           </div>
           <div className="border-t border-[#d7b06f] pt-4">
             <div className="mb-4 flex items-center justify-between gap-2">
-              <p className="font-['Fraunces',serif] text-2xl text-[#5a2f1f] dark:text-amber-100">✦ Últimas adquisiciones</p>
+              <p className="font-['Fraunces',serif] text-xl text-[#5a2f1f] dark:text-amber-100 sm:text-2xl">✦ Últimas adquisiciones</p>
               <Link to="/wishlist" className="text-xs text-[#8e633d] transition hover:underline dark:text-amber-200/80">
                 Ver lista de deseos →
               </Link>
