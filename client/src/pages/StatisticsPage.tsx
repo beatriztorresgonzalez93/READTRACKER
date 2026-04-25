@@ -11,7 +11,6 @@ import { Book } from "../types/book";
 import { WishlistAcquisition } from "../types/wishlist";
 
 const monthLabels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-const ONE_DAY_MS = 86400000;
 
 const parseDate = (value?: string) => {
   if (!value) return null;
