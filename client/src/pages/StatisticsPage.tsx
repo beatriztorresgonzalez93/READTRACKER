@@ -21,7 +21,7 @@ const parseDate = (value?: string) => {
 
 const toStartOfLocalDayMs = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 
-const getReadDate = (book: Book) => parseDate(book.readAt) ?? parseDate(book.updatedAt) ?? parseDate(book.createdAt);
+const getReadDate = (book: Book) => parseDate(book.readAt) ?? parseDate(book.createdAt);
 
 const formatCompactNumber = (value: number) => {
   if (value >= 1000) {
@@ -166,6 +166,7 @@ export const StatisticsPage = () => {
   const readBooks = useMemo(() => books.filter((book) => book.status === "leido"), [books]);
   const now = new Date();
   const currentYear = now.getFullYear();
+  const [activityYear, setActivityYear] = useState(currentYear);
 
   const booksReadThisYear = useMemo(() => {
     return readBooks.filter((book) => getReadDate(book)?.getFullYear() === currentYear).length;
@@ -199,6 +200,17 @@ export const StatisticsPage = () => {
     });
     return Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
   }, [readBooks]);
+
+  const activityYearOptions = useMemo(() => {
+    const years = new Set<number>([currentYear, activityYear]);
+    booksByYear.forEach(([year]) => years.add(year));
+    return Array.from(years).sort((a, b) => b - a);
+  }, [activityYear, booksByYear, currentYear]);
+
+  useEffect(() => {
+    if (activityYearOptions.length === 0) return;
+    setActivityYear((prev) => (activityYearOptions.includes(prev) ? prev : activityYearOptions[0]));
+  }, [activityYearOptions]);
 
   const topGenres = useMemo(() => {
     const map = new Map<string, number>();
@@ -239,23 +251,18 @@ export const StatisticsPage = () => {
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es"));
   }, [books]);
 
-  const selectedYear = useMemo(() => {
-    if (booksByYear.length === 0) return currentYear;
-    return booksByYear[booksByYear.length - 1][0];
-  }, [booksByYear, currentYear]);
-
   const monthlyReadActivity = useMemo(() => {
     const counts = Array.from({ length: 12 }, () => 0);
     const booksByMonth: string[][] = Array.from({ length: 12 }, () => []);
     readBooks.forEach((book) => {
       const date = getReadDate(book);
-      if (!date || date.getFullYear() !== selectedYear) return;
+      if (!date || date.getFullYear() !== activityYear) return;
       const month = date.getMonth();
       counts[month] += 1;
       booksByMonth[month].push(book.title);
     });
     return { counts, booksByMonth };
-  }, [readBooks, selectedYear]);
+  }, [activityYear, readBooks]);
 
   const bestRatedBooks = useMemo(() => {
     return readBooks
@@ -339,15 +346,15 @@ export const StatisticsPage = () => {
 
     const monthMap = new Map<number, number>();
     readDates.forEach((date) => {
-      const key = date.getFullYear() * 100 + date.getMonth();
+      if (date.getFullYear() !== currentYear) return;
+      const key = date.getMonth();
       monthMap.set(key, (monthMap.get(key) ?? 0) + 1);
     });
     let bestMonth = "-";
     let bestMonthCount = 0;
-    monthMap.forEach((count, key) => {
+    monthMap.forEach((count, month) => {
       if (count <= bestMonthCount) return;
       bestMonthCount = count;
-      const month = key % 100;
       bestMonth = monthLabels[month] ?? "-";
     });
 
@@ -386,7 +393,7 @@ export const StatisticsPage = () => {
       longestStreakDays,
       yearlyProjection
     };
-  }, [books, now, readBooks, sessions, totalReadPages]);
+  }, [books, currentYear, now, readBooks, sessions, totalReadPages]);
 
   return (
     <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
@@ -594,7 +601,22 @@ export const StatisticsPage = () => {
 
               <article className="overflow-visible rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
                 <div className="border-b border-[#c89c33] bg-[#5b2a17] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8cf9f]">
-                  🧩 Actividad de lectura {selectedYear}
+                  <div className="flex items-center justify-between gap-2">
+                    <span>🧩 Actividad de lectura {activityYear}</span>
+                    <Select
+                      id="stats-activity-year"
+                      value={String(activityYear)}
+                      onChange={(event) => setActivityYear(Number(event.target.value))}
+                      disabled={loading || activityYearOptions.length === 0}
+                      className="h-8 !w-[84px] shrink-0 rounded-md border-[#8e633d] bg-[#8e633d] px-2 text-[11px] font-semibold !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
+                    >
+                      {activityYearOptions.map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
                 </div>
                 <div className="px-4 pb-4 pt-10">
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-12">
@@ -606,7 +628,7 @@ export const StatisticsPage = () => {
                         {monthlyReadActivity.booksByMonth[index].length > 0 && (
                           <div className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-20 hidden w-52 -translate-x-1/2 rounded-md border border-[#c69253] bg-[#f8f1e5] p-2 text-left shadow-lg group-hover:block">
                             <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#7a573c]">
-                              {monthLabels[index]} {selectedYear}
+                              {monthLabels[index]} {activityYear}
                             </p>
                             <ul className="space-y-0.5">
                               {monthlyReadActivity.booksByMonth[index].slice(0, 6).map((title) => (
