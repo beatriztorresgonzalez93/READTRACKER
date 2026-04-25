@@ -73,16 +73,6 @@ const activityColorByCount = (count: number) => {
   return "#8f6430";
 };
 
-const spendColorByRatio = (amount: number, maxAmount: number) => {
-  if (amount <= 0 || maxAmount <= 0) return "#efe3cd";
-  const r = amount / maxAmount;
-  if (r < 0.15) return "#e3cfa0";
-  if (r < 0.35) return "#d6b56c";
-  if (r < 0.55) return "#bf9339";
-  if (r < 0.75) return "#a56f2d";
-  return "#74451d";
-};
-
 /** Colores de barra por posición (evita repetir el mismo marrón en géneros 1.º, 6.º, etc.). */
 const GENRE_BAR_COLORS = [
   "#4f8cff",
@@ -538,31 +528,31 @@ export const StatisticsPage = () => {
           {!loading && !error && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-4 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
+                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-5 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
                   <p className="inline-flex items-center justify-center gap-1 text-sm text-[#9a724f]">
-                    <BookOpen className="h-5 w-5" />
-                    <span className="font-['Fraunces',serif] text-2xl leading-none text-[#7d5637]">{allBooksCount}</span>
+                    <BookOpen className="h-6 w-6" />
+                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#7d5637]">{allBooksCount}</span>
                   </p>
                   <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8d6a4a]">En colección</p>
                 </article>
-                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-4 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
+                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-5 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
                   <p className="inline-flex items-center justify-center gap-1 text-sm text-[#9a724f]">
-                    <CalendarDays className="h-5 w-5" />
-                    <span className="font-['Fraunces',serif] text-2xl leading-none text-[#7d5637]">{booksReadThisYear}</span>
+                    <CalendarDays className="h-6 w-6" />
+                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#7d5637]">{booksReadThisYear}</span>
                   </p>
                   <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8d6a4a]">Este año</p>
                 </article>
-                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-4 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
+                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-5 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
                   <p className="inline-flex items-center justify-center gap-1 text-sm text-[#9a724f]">
-                    <Star className="h-5 w-5" />
-                    <span className="font-['Fraunces',serif] text-2xl leading-none text-[#7d5637]">{averageRating}</span>
+                    <Star className="h-6 w-6" />
+                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#7d5637]">{averageRating}</span>
                   </p>
                   <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8d6a4a]">Valoración media</p>
                 </article>
-                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-4 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
+                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-5 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
                   <p className="inline-flex items-center justify-center gap-1 text-sm text-[#9a724f]">
-                    <Bookmark className="h-5 w-5" />
-                    <span className="font-['Fraunces',serif] text-2xl leading-none text-[#7d5637]">{formatCompactNumber(totalReadPages)}</span>
+                    <Bookmark className="h-6 w-6" />
+                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#7d5637]">{formatCompactNumber(totalReadPages)}</span>
                   </p>
                   <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8d6a4a]">Páginas leídas</p>
                 </article>
