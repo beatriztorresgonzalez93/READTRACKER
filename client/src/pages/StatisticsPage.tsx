@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { BookOpen, Bookmark, CalendarDays, Clock3, Flame, Heart, Star, Trophy } from "lucide-react";
 import { getReadableErrorMessage, getWishlistAcquisitions } from "../api/client";
 import ritmoLecturaImage from "../assets/ritmo-de-lectura.png";
@@ -99,15 +98,6 @@ const GENRE_BAR_COLORS = [
 ];
 
 const genreBarColorAt = (index: number) => GENRE_BAR_COLORS[index % GENRE_BAR_COLORS.length];
-
-const formatMoneyShortEur = (n: number, hasPurchasesInMonth: boolean) => {
-  if (n <= 0) return hasPurchasesInMonth ? "0 €" : "—";
-  if (n >= 1000) {
-    const k = n / 1000;
-    return `${k >= 10 ? Math.round(k) : k.toFixed(1).replace(".", ",")}k €`;
-  }
-  return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
-};
 
 const toRoman = (value: number) => {
   const map: Array<[number, string]> = [
@@ -331,9 +321,10 @@ export const StatisticsPage = () => {
       if (n !== null) amounts[m] += n;
     });
     const maxAmount = Math.max(...amounts, 0);
+    const maxCount = Math.max(...counts, 0);
     const yearBookTotal = counts.reduce((a, b) => a + b, 0);
     const yearSpentTotal = amounts.reduce((a, b) => a + b, 0);
-    return { counts, amounts, maxAmount, yearBookTotal, yearSpentTotal };
+    return { counts, amounts, maxAmount, maxCount, yearBookTotal, yearSpentTotal };
   }, [acquisitions, purchaseBreakdownYear]);
 
   const rhythmStats = useMemo(() => {
@@ -533,7 +524,7 @@ export const StatisticsPage = () => {
           </article>
         </aside>
 
-        <div className="order-1 min-w-0 w-full max-w-full lg:order-2">
+        <div className="order-1 min-w-0 w-full max-w-full font-['Fraunces',serif] lg:order-2">
           <div className="mb-4 flex items-center justify-between border-b border-[#d7b06f]/70 pb-3 text-[#f0dfc5]">
             <p className="font-['Fraunces',serif] text-xl">✦ Estadísticas de lectura</p>
             <span className="text-xs uppercase tracking-[0.1em] text-amber-100/70">Resumen actualizado</span>
@@ -580,7 +571,11 @@ export const StatisticsPage = () => {
               <div className="grid gap-4 lg:grid-cols-2">
                 <article className="overflow-hidden rounded-xl border border-[#c89c66] bg-[#efe3cd] text-[#4d311d] shadow-[0_2px_0_rgba(110,69,37,0.2)]">
                   <div className="px-4 pb-4 pt-3">
-                    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7a573c]">✦ Libros por año</p>
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className="h-px flex-1 bg-[#cfab72]/35" />
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Libros por año</p>
+                      <span className="h-px flex-1 bg-[#cfab72]/35" />
+                    </div>
                     {booksByYear.length === 0 ? (
                       <p className="text-sm text-[#7a573c]">Aún no hay libros leídos para mostrar.</p>
                     ) : (
@@ -616,28 +611,49 @@ export const StatisticsPage = () => {
                   </div>
                 </article>
 
-                <section className="px-1 text-[#dfcda9]">
-                  <div className="mb-5 flex items-center gap-3">
-                    <span className="h-px flex-1 bg-[#cfab72]/32" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Géneros favoritos</p>
-                    <span className="h-px flex-1 bg-[#cfab72]/32" />
+                <article className="rounded-xl border border-[#c89c66] bg-[#efe3cd] p-4 text-[#4d311d] shadow-[0_2px_0_rgba(110,69,37,0.2)]">
+                  <div className="mb-3 flex items-center gap-3">
+                    <span className="h-px flex-1 bg-[#cfab72]/35" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Ritmo de lectura</p>
+                    <span className="h-px flex-1 bg-[#cfab72]/35" />
                   </div>
-                  <div className="space-y-3">
-                    {topGenres.length === 0 && <p className="text-sm text-amber-100/70">Aún no hay géneros suficientes.</p>}
-                    {topGenres.map((item, index) => (
-                      <div key={item.genre} className="grid grid-cols-[minmax(118px,1fr)_minmax(150px,3fr)_34px] items-center gap-3 text-[0.98rem]">
-                        <span className="truncate text-[#e6d1af]">{item.genre}</span>
-                        <div className="h-[8px] overflow-hidden bg-[#e8d6b5]/26">
-                          <div
-                            className="h-full shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
-                            style={{ width: `${item.percentage}%`, backgroundColor: genreBarColorAt(index) }}
-                          />
-                        </div>
-                        <span className="text-right text-[1.08rem] font-['Fraunces',serif] text-[#cfab69]">{item.percentage}%</span>
+                  <div className="grid gap-4 md:grid-cols-[1fr_210px] md:items-center">
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
+                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><BookOpen className="h-4 w-4" />Páginas por día (media)</span>
+                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.pagesPerDay.toFixed(1)}</strong>
                       </div>
-                    ))}
+                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
+                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><Clock3 className="h-4 w-4" />Días por libro (media)</span>
+                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.daysPerBook.toFixed(1)}</strong>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
+                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><Trophy className="h-4 w-4" />Mejor mes del año</span>
+                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.bestMonth}</strong>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
+                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><Flame className="h-4 w-4" />Racha actual</span>
+                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.currentStreakDays} días</strong>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><Star className="h-4 w-4 text-[#c89c33]" />Racha más larga</span>
+                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.longestStreakDays} días</strong>
+                      </div>
+                    </div>
+                    <div className="hidden h-[170px] md:flex md:items-end md:justify-end">
+                      <img
+                        src={ritmoLecturaImage}
+                        alt="Ilustración de libros apilados y una taza de café"
+                        className="h-[128px] w-auto translate-y-8 object-contain"
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
-                </section>
+                  <div className="mt-4 h-px w-[72%] bg-[#d6bb92]/45" />
+                  <p className="pt-3 text-sm italic text-[#7a573c]">
+                    ✦ A este ritmo leerás ~{rhythmStats.yearlyProjection} libros en {currentYear}.
+                  </p>
+                </article>
               </div>
 
               <article className="overflow-visible rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
@@ -710,7 +726,7 @@ export const StatisticsPage = () => {
                 </div>
               </article>
 
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]">
+              <div className="grid gap-5 lg:grid-cols-2">
                 <section className="text-[#e9dcc4]">
                   <div className="mb-2 flex items-center gap-3">
                     <span className="h-px flex-1 bg-[#d5b882]/35" />
@@ -759,60 +775,39 @@ export const StatisticsPage = () => {
                   )}
                 </section>
 
-                <article className="rounded-xl border border-[#c89c66] bg-[#efe3cd] p-4 text-[#4d311d] shadow-[0_2px_0_rgba(110,69,37,0.2)]">
-                  <div className="mb-3 flex items-center gap-3">
-                    <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Ritmo de lectura</p>
-                    <span className="h-px flex-1 bg-[#cfab72]/35" />
+                <section className="flex h-full flex-col border-l border-[#cfab72]/35 pl-5 text-[#dfcda9]">
+                  <div className="mb-5 flex items-center gap-3">
+                    <span className="h-px flex-1 bg-[#cfab72]/32" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Géneros favoritos</p>
+                    <span className="h-px flex-1 bg-[#cfab72]/32" />
                   </div>
-                  <div className="grid gap-4 md:grid-cols-[1fr_210px] md:items-center">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-1.5 text-xs">
-                        <span className="inline-flex items-center gap-2 text-[#6f4b2e]"><BookOpen className="h-4 w-4" />Páginas por día (media)</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.pagesPerDay.toFixed(1)}</strong>
+                  <div className="flex-1 space-y-5">
+                    {topGenres.length === 0 && <p className="text-sm text-amber-100/70">Aún no hay géneros suficientes.</p>}
+                    {topGenres.map((item, index) => (
+                      <div key={item.genre} className="grid grid-cols-[minmax(118px,1fr)_minmax(150px,3fr)_34px] items-center gap-3 text-[0.98rem]">
+                        <span className="truncate text-[#e6d1af]">{item.genre}</span>
+                        <div className="h-[8px] overflow-hidden bg-[#e8d6b5]/26">
+                          <div
+                            className="h-full shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
+                            style={{ width: `${item.percentage}%`, backgroundColor: genreBarColorAt(index) }}
+                          />
+                        </div>
+                        <span className="text-right text-[1.08rem] font-['Fraunces',serif] text-[#cfab69]">{item.percentage}%</span>
                       </div>
-                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-1.5 text-xs">
-                        <span className="inline-flex items-center gap-2 text-[#6f4b2e]"><Clock3 className="h-4 w-4" />Días por libro (media)</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.daysPerBook.toFixed(1)}</strong>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-1.5 text-xs">
-                        <span className="inline-flex items-center gap-2 text-[#6f4b2e]"><Trophy className="h-4 w-4" />Mejor mes del año</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.bestMonth}</strong>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-1.5 text-xs">
-                        <span className="inline-flex items-center gap-2 text-[#6f4b2e]"><Flame className="h-4 w-4" />Racha actual</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.currentStreakDays} días</strong>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="inline-flex items-center gap-2 text-[#6f4b2e]"><Star className="h-4 w-4 text-[#c89c33]" />Racha más larga</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.longestStreakDays} días</strong>
-                      </div>
-                    </div>
-                    <div className="hidden h-[170px] md:flex md:items-end md:justify-end">
-                      <img
-                        src={ritmoLecturaImage}
-                        alt="Ilustración de libros apilados y una taza de café"
-                        className="h-[138px] w-auto translate-y-14 object-contain"
-                        loading="lazy"
-                      />
-                    </div>
+                    ))}
                   </div>
-                  <div className="mt-3 h-px w-[72%] bg-[#d6bb92]/45" />
-                  <p className="pt-2 text-sm italic text-[#7a573c]">
-                    ✦ A este ritmo leerás ~{rhythmStats.yearlyProjection} libros en {currentYear}.
-                  </p>
-                </article>
+                </section>
               </div>
 
               <article className="overflow-hidden rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
                 <div className="px-4 pb-3 pt-5">
                   <div className="flex items-center gap-3">
                     <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Compras desde la lista de deseos</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Libros comprados</p>
                     <span className="h-px flex-1 bg-[#cfab72]/35" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 divide-x divide-[#c4a27b]/50">
+                <div className="grid grid-cols-2">
                   <div className="p-4 text-center">
                     <p className="font-['Fraunces',serif] text-4xl leading-none">
                       {acquisitionsLoading ? "…" : purchaseStats.totalAcquisitions}
@@ -835,7 +830,6 @@ export const StatisticsPage = () => {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7a573c]">Por mes</p>
-                      <p className="text-xs text-[#8e633d]">Elige un año para ver compras y gasto mes a mes.</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <label htmlFor="stats-purchase-year" className="sr-only">
@@ -866,28 +860,35 @@ export const StatisticsPage = () => {
                       </>
                     )}
                   </p>
-                  <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-12">
-                    {monthLabels.map((label, idx) => {
-                      const count = purchaseMonthlyForYear.counts[idx] ?? 0;
-                      const amount = purchaseMonthlyForYear.amounts[idx] ?? 0;
-                      const bg = spendColorByRatio(amount, purchaseMonthlyForYear.maxAmount);
-                      return (
-                        <div key={label} className="rounded-sm border border-[#c4a27b]/55 bg-[#f5ecde]/90 p-1.5 text-center">
-                          <p className="text-[9px] font-semibold uppercase tracking-[0.06em] text-[#7a573c]">{label}</p>
-                          <div className="my-1 h-10 overflow-hidden rounded-sm border border-[#c4a27b]/40 bg-[#efe3cd]">
-                            <div className="h-full w-full transition-colors" style={{ backgroundColor: bg }} />
-                          </div>
-                          <p className="font-['Fraunces',serif] text-base leading-none text-[#5a2f1f]">{count}</p>
-                          <p className="mt-0.5 text-[9px] leading-tight text-[#8e633d]">
-                            {formatMoneyShortEur(amount, count > 0)}
-                          </p>
-                        </div>
-                      );
-                    })}
+                  <div className="mt-4">
+                    <div className="relative mb-2 h-10">
+                      <div className="absolute inset-x-0 top-6 h-px bg-[#c9ab77]/45" />
+                      <div className="grid grid-cols-12 gap-1">
+                        {monthLabels.map((label, idx) => {
+                          const count = purchaseMonthlyForYear.counts[idx] ?? 0;
+                          return (
+                            <div key={`purchase-point-${label}`} className="relative h-10 text-center">
+                              {count > 0 && (
+                                <p className="absolute left-1/2 top-[2px] -translate-x-1/2 text-[11px] font-['Fraunces',serif] text-[#8a603b]">
+                                  {count}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-12 gap-1 text-center">
+                      {monthLabels.map((label) => (
+                        <p key={`purchase-label-${label}`} className="text-[10px] font-semibold uppercase tracking-[0.05em] text-[#8a603b]">
+                          {label}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2 border-t border-[#c4a27b]/50 bg-[#f5ecde]/60 px-4 py-3 text-[11px] leading-snug text-[#7a573c]">
+                <div className="space-y-2 bg-[#f5ecde]/60 px-4 py-3 text-[11px] leading-snug text-[#7a573c]">
                   {acquisitionsError && <p className="text-rose-800">{acquisitionsError}</p>}
                   {!acquisitionsError && purchaseStats.totalAcquisitions > 0 && purchaseStats.parsedPricesCount === 0 && (
                     <p>
@@ -901,11 +902,6 @@ export const StatisticsPage = () => {
                       <strong className="text-[#5a2f1f]">{formatMoneyEur(purchaseStats.avgPerPurchase)}</strong>
                     </p>
                   )}
-                  <p>
-                    <Link to="/wishlist" className="font-semibold text-[#8e633d] underline-offset-2 hover:underline">
-                      Ir a la lista de deseos
-                    </Link>
-                  </p>
                 </div>
               </article>
             </div>

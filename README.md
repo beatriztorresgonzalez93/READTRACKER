@@ -117,7 +117,7 @@ Variable frontend importante:
 
 ## 📚 Documentacion
 
-La carpeta `docs/` contiene guias funcionales y operativas (mantener alineadas con `docs/api.md` y `docs/api-client.md` tras cambios de API):
+La carpeta `docs/` contiene guias funcionales y operativas:
 
 - `idea.md`
 - `design.md`
