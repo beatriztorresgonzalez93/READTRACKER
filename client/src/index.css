@@ -12,6 +12,16 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  font-size: 90%;
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 100%;
+  }
+}
+
 h1,
 h2,
 h3,
