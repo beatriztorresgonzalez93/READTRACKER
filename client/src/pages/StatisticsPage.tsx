@@ -491,28 +491,15 @@ export const StatisticsPage = () => {
             </ul>
           </article>
 
-          <article className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <div className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
-              🛍️ Compras (lista de deseos)
-            </div>
-            <div className="grid grid-cols-2 gap-3 p-4 text-center">
-              <div>
-                <p className="font-['Fraunces',serif] text-3xl">{acquisitionsLoading ? "…" : purchaseStats.totalAcquisitions}</p>
-                <p className="text-[11px] uppercase tracking-[0.12em]">Registradas</p>
-              </div>
-              <div>
-                <p className="font-['Fraunces',serif] text-2xl leading-tight">
-                  {acquisitionsLoading
-                    ? "…"
-                    : purchaseStats.parsedPricesCount > 0
-                      ? formatMoneyEur(purchaseStats.totalSpentParsed)
-                      : "—"}
-                </p>
-                <p className="text-[11px] uppercase tracking-[0.12em]">Gasto total</p>
-              </div>
-            </div>
-            {acquisitionsError && <p className="border-t border-[#dcc8a7] px-3 py-2 text-[11px] text-rose-800">{acquisitionsError}</p>}
+          <article className="rounded-xl bg-transparent p-4">
+            <img
+              src={ritmoLecturaImage}
+              alt="Ilustración de libros apilados y una taza de café"
+              className="mx-auto h-auto w-full max-w-[220px] object-contain"
+              loading="lazy"
+            />
           </article>
+
         </aside>
 
         <div className="order-1 min-w-0 w-full max-w-full font-['Fraunces',serif] lg:order-2">
@@ -598,36 +585,26 @@ export const StatisticsPage = () => {
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0d49a]">✦ Ritmo de lectura</p>
                     <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
                   </div>
-                  <div className="grid gap-4 md:grid-cols-[1fr_210px] md:items-center">
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><BookOpen className="h-4 w-4" />Páginas por día (media)</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.pagesPerDay.toFixed(1)}</strong>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Clock3 className="h-4 w-4" />Días por libro (media)</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.daysPerBook.toFixed(1)}</strong>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Trophy className="h-4 w-4" />Mejor mes del año</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.bestMonth}</strong>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Flame className="h-4 w-4" />Racha actual</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.currentStreakDays} días</strong>
-                      </div>
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Star className="h-4 w-4 text-[#c89c33]" />Racha más larga</span>
-                        <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.longestStreakDays} días</strong>
-                      </div>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
+                      <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><BookOpen className="h-4 w-4" />Páginas por día (media)</span>
+                      <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.pagesPerDay.toFixed(1)}</strong>
                     </div>
-                    <div className="hidden h-[170px] md:flex md:items-end md:justify-end">
-                      <img
-                        src={ritmoLecturaImage}
-                        alt="Ilustración de libros apilados y una taza de café"
-                        className="h-[128px] w-auto translate-y-8 object-contain"
-                        loading="lazy"
-                      />
+                    <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
+                      <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Clock3 className="h-4 w-4" />Días por libro (media)</span>
+                      <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.daysPerBook.toFixed(1)}</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
+                      <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Trophy className="h-4 w-4" />Mejor mes del año</span>
+                      <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.bestMonth}</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
+                      <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Flame className="h-4 w-4" />Racha actual</span>
+                      <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.currentStreakDays} días</strong>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Star className="h-4 w-4 text-[#c89c33]" />Racha más larga</span>
+                      <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.longestStreakDays} días</strong>
                     </div>
                   </div>
                   <div className="mt-4 h-px w-[72%] bg-[#d6bb92]/45" />
