@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Bookmark, CalendarDays, Clock3, Flame, Heart, Star, Trophy } from "lucide-react";
 import { getReadableErrorMessage, getWishlistAcquisitions } from "../api/client";
+import librosPorAnioImage from "../assets/libros-por-anio.png";
 import ritmoLecturaImage from "../assets/ritmo-de-lectura.png";
 import { Select } from "../components/ui/select";
 import { computeStreakStatsFromDays } from "../components/history/historyComputations";
@@ -528,72 +529,62 @@ export const StatisticsPage = () => {
           {!loading && !error && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-5 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
+                <article className="rounded-md border border-[#c89c66]/35 bg-transparent px-4 py-5 text-center text-[#e6d1af]">
                   <p className="inline-flex items-center justify-center gap-1 text-sm text-[#9a724f]">
                     <BookOpen className="h-6 w-6" />
-                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#7d5637]">{allBooksCount}</span>
+                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#f0dfc5]">{allBooksCount}</span>
                   </p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8d6a4a]">En colección</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#d2b07b]">En colección</p>
                 </article>
-                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-5 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
+                <article className="rounded-md border border-[#c89c66]/35 bg-transparent px-4 py-5 text-center text-[#e6d1af]">
                   <p className="inline-flex items-center justify-center gap-1 text-sm text-[#9a724f]">
                     <CalendarDays className="h-6 w-6" />
-                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#7d5637]">{booksReadThisYear}</span>
+                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#f0dfc5]">{booksReadThisYear}</span>
                   </p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8d6a4a]">Este año</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#d2b07b]">Este año</p>
                 </article>
-                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-5 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
+                <article className="rounded-md border border-[#c89c66]/35 bg-transparent px-4 py-5 text-center text-[#e6d1af]">
                   <p className="inline-flex items-center justify-center gap-1 text-sm text-[#9a724f]">
                     <Star className="h-6 w-6" />
-                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#7d5637]">{averageRating}</span>
+                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#f0dfc5]">{averageRating}</span>
                   </p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8d6a4a]">Valoración media</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#d2b07b]">Valoración media</p>
                 </article>
-                <article className="rounded-md border border-[#c69253] bg-[#e9dcc4] px-4 py-5 text-center text-[#6b4529] shadow-[0_1px_0_rgba(110,69,37,0.18)]">
+                <article className="rounded-md border border-[#c89c66]/35 bg-transparent px-4 py-5 text-center text-[#e6d1af]">
                   <p className="inline-flex items-center justify-center gap-1 text-sm text-[#9a724f]">
                     <Bookmark className="h-6 w-6" />
-                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#7d5637]">{formatCompactNumber(totalReadPages)}</span>
+                    <span className="font-['Fraunces',serif] text-3xl leading-none text-[#f0dfc5]">{formatCompactNumber(totalReadPages)}</span>
                   </p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8d6a4a]">Páginas leídas</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#d2b07b]">Páginas leídas</p>
                 </article>
               </div>
 
               <div className="grid gap-4 lg:grid-cols-2">
-                <article className="overflow-hidden rounded-xl border border-[#c89c66] bg-[#efe3cd] text-[#4d311d] shadow-[0_2px_0_rgba(110,69,37,0.2)]">
-                  <div className="px-4 pb-4 pt-3">
+                <article className="overflow-hidden rounded-xl bg-transparent text-[#e9dcc4]">
+                  <div className="p-4">
                     <div className="mb-3 flex items-center gap-3">
                       <span className="h-px flex-1 bg-[#cfab72]/35" />
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Libros por año</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Libros por año</p>
                       <span className="h-px flex-1 bg-[#cfab72]/35" />
                     </div>
                     {booksByYear.length === 0 ? (
-                      <p className="text-sm text-[#7a573c]">Aún no hay libros leídos para mostrar.</p>
+                      <p className="text-sm text-amber-100/70">Aún no hay libros leídos para mostrar.</p>
                     ) : (
                       <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
-                        {booksByYear.map(([year, count], index) => (
-                          <div key={year} className="rounded-lg border border-[#d6b788]/85 bg-[#f4e7d2] p-2.5">
-                            <div className="mx-auto flex h-[126px] w-[94px] flex-col items-center rounded-t-[999px] border border-b-0 border-[#d9bc90] bg-[#efe0c6] pt-3 shadow-[inset_0_0_0_1px_rgba(203,163,112,0.2)]">
-                              <p className="font-['Fraunces',serif] text-4xl leading-none text-[#563524]">{count}</p>
-                              <div className="mt-auto w-full px-2 pb-2">
-                                <div className="mb-1 h-[2px] w-full bg-[#cfad80]/60" />
-                                <div className="mx-auto flex h-9 w-[54px] items-end justify-center gap-[3px]">
-                                  {[0, 1, 2, 3].map((bookIdx) => {
-                                    const height = 14 + ((year + index + bookIdx * 3) % 14);
-                                    const tone = ["#8a5a39", "#5a4f4a", "#9a643f", "#6a4f37"][bookIdx % 4];
-                                    return (
-                                      <span
-                                        key={`${year}-${bookIdx}`}
-                                        className="inline-block rounded-t-[2px]"
-                                        style={{ height: `${height}px`, width: "9px", backgroundColor: tone }}
-                                      />
-                                    );
-                                  })}
-                                </div>
-                                <div className="mt-1 h-[5px] w-full rounded-[1px] bg-[#7b512f]" />
-                                <div className="mx-auto mt-[2px] h-[2px] w-[92%] bg-[#5f3e24]/80" />
-                              </div>
+                        {booksByYear.map(([year, count]) => (
+                          <div key={year} className="flex flex-col items-center rounded-lg bg-transparent p-2.5">
+                            <div className="relative mx-auto w-[182px]">
+                              <img
+                                src={librosPorAnioImage}
+                                alt={`Estante decorativo para el año ${year}`}
+                                className="h-auto w-full object-contain"
+                                loading="lazy"
+                              />
+                              <p className="absolute left-1/2 top-[22%] -translate-x-1/2 font-['Fraunces',serif] text-3xl leading-none text-[#563524]">
+                                {count}
+                              </p>
                             </div>
-                            <p className="mt-2 text-[11px] font-semibold tracking-[0.08em] text-[#7a573c]">{year}</p>
+                            <p className="mt-2 translate-x-2 text-center text-[11px] font-semibold tracking-[0.08em] text-[#dabb86]">{year}</p>
                           </div>
                         ))}
                       </div>
@@ -601,32 +592,32 @@ export const StatisticsPage = () => {
                   </div>
                 </article>
 
-                <article className="rounded-xl border border-[#c89c66] bg-[#efe3cd] p-4 text-[#4d311d] shadow-[0_2px_0_rgba(110,69,37,0.2)]">
+                <article className="rounded-xl bg-transparent p-4 text-[#e9dcc4]">
                   <div className="mb-3 flex items-center gap-3">
                     <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Ritmo de lectura</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Ritmo de lectura</p>
                     <span className="h-px flex-1 bg-[#cfab72]/35" />
                   </div>
                   <div className="grid gap-4 md:grid-cols-[1fr_210px] md:items-center">
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><BookOpen className="h-4 w-4" />Páginas por día (media)</span>
+                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><BookOpen className="h-4 w-4" />Páginas por día (media)</span>
                         <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.pagesPerDay.toFixed(1)}</strong>
                       </div>
                       <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><Clock3 className="h-4 w-4" />Días por libro (media)</span>
+                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Clock3 className="h-4 w-4" />Días por libro (media)</span>
                         <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.daysPerBook.toFixed(1)}</strong>
                       </div>
                       <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><Trophy className="h-4 w-4" />Mejor mes del año</span>
+                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Trophy className="h-4 w-4" />Mejor mes del año</span>
                         <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.bestMonth}</strong>
                       </div>
                       <div className="flex items-center justify-between gap-2 border-b border-[#d6bb92]/45 pb-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><Flame className="h-4 w-4" />Racha actual</span>
+                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Flame className="h-4 w-4" />Racha actual</span>
                         <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.currentStreakDays} días</strong>
                       </div>
                       <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="inline-flex items-center gap-2 font-sans text-[#6f4b2e]"><Star className="h-4 w-4 text-[#c89c33]" />Racha más larga</span>
+                        <span className="inline-flex items-center gap-2 font-sans text-[#e6d1af]"><Star className="h-4 w-4 text-[#c89c33]" />Racha más larga</span>
                         <strong className="font-['Fraunces',serif] text-lg">{rhythmStats.longestStreakDays} días</strong>
                       </div>
                     </div>
@@ -640,17 +631,17 @@ export const StatisticsPage = () => {
                     </div>
                   </div>
                   <div className="mt-4 h-px w-[72%] bg-[#d6bb92]/45" />
-                  <p className="pt-3 text-sm italic text-[#7a573c]">
+                  <p className="pt-3 text-sm italic text-[#dabb86]">
                     ✦ A este ritmo leerás ~{rhythmStats.yearlyProjection} libros en {currentYear}.
                   </p>
                 </article>
               </div>
 
-              <article className="overflow-visible rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
+              <article className="overflow-visible rounded-md bg-transparent text-[#e9dcc4]">
                 <div className="px-4 pb-4 pt-5">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Actividad de lectura {activityYear}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Actividad de lectura {activityYear}</p>
                     <span className="h-px flex-1 bg-[#cfab72]/35" />
                     <Select
                       id="stats-activity-year"
@@ -671,7 +662,7 @@ export const StatisticsPage = () => {
                       return (
                       <div key={monthLabels[index]} className="group relative text-center">
                         <div className="mb-1 h-14 rounded-sm border border-[#c4a27b]/55" style={{ backgroundColor: activityColorByCount(count) }} />
-                          <p className="text-[10px] uppercase text-[#7a573c]">{monthLabels[index]}</p>
+                          <p className="text-[10px] uppercase text-[#dabb86]">{monthLabels[index]}</p>
                         {monthlyReadActivity.booksByMonth[index].length > 0 && (
                           <div className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-20 hidden w-52 -translate-x-1/2 rounded-md border border-[#c69253] bg-[#f8f1e5] p-2 text-left shadow-lg group-hover:block">
                             <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#7a573c]">
@@ -693,7 +684,7 @@ export const StatisticsPage = () => {
                       );
                     })}
                   </div>
-                  <div className="mt-3 flex items-center gap-2 text-[10px] text-[#7a573c]">
+                  <div className="mt-3 flex items-center gap-2 text-[10px] text-[#dabb86]">
                     {[
                       { label: "0 libros", color: activityColorByCount(0) },
                       { label: "1 libro", color: activityColorByCount(1) },
@@ -789,11 +780,11 @@ export const StatisticsPage = () => {
                 </section>
               </div>
 
-              <article className="overflow-hidden rounded-md border border-amber-700/70 bg-[#e9dcc4] text-[#4d311d]">
+              <article className="overflow-hidden rounded-md bg-transparent text-[#e9dcc4]">
                 <div className="px-4 pb-3 pt-5">
                   <div className="flex items-center gap-3">
                     <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a573c]">✦ Libros comprados</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Libros comprados</p>
                     <span className="h-px flex-1 bg-[#cfab72]/35" />
                   </div>
                 </div>
@@ -802,7 +793,7 @@ export const StatisticsPage = () => {
                     <p className="font-['Fraunces',serif] text-4xl leading-none">
                       {acquisitionsLoading ? "…" : purchaseStats.totalAcquisitions}
                     </p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#7a573c]">Libros comprados (total)</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#dabb86]">Libros comprados (total)</p>
                   </div>
                   <div className="p-4 text-center">
                     <p className="font-['Fraunces',serif] text-3xl leading-none sm:text-4xl">
@@ -812,14 +803,14 @@ export const StatisticsPage = () => {
                           ? formatMoneyEur(purchaseStats.totalSpentParsed)
                           : "—"}
                     </p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#7a573c]">Dinero gastado (total)</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.08em] text-[#dabb86]">Dinero gastado (total)</p>
                   </div>
                 </div>
 
-                <div className="border-t border-[#c4a27b]/50 bg-[#f8f1e5]/40 px-4 py-3">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="border-t border-[#c4a27b]/30 px-4 py-3">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7a573c]">Por mes</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#dabb86]">Por mes</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <label htmlFor="stats-purchase-year" className="sr-only">
@@ -840,26 +831,16 @@ export const StatisticsPage = () => {
                       </Select>
                     </div>
                   </div>
-                  <p className="mt-2 text-center text-sm text-[#5a2f1f]">
-                    En <strong>{purchaseBreakdownYear}</strong>:{" "}
-                    <span className="font-['Fraunces',serif]">{purchaseMonthlyForYear.yearBookTotal}</span> compras
-                    {purchaseMonthlyForYear.yearSpentTotal > 0 && (
-                      <>
-                        {" "}
-                        · <span className="font-['Fraunces',serif]">{formatMoneyEur(purchaseMonthlyForYear.yearSpentTotal)}</span>
-                      </>
-                    )}
-                  </p>
                   <div className="mt-4">
                     <div className="relative mb-2 h-10">
-                      <div className="absolute inset-x-0 top-6 h-px bg-[#c9ab77]/45" />
+                      <div className="absolute inset-x-0 top-6 h-px bg-[#e8d6b5]/70" />
                       <div className="grid grid-cols-12 gap-1">
                         {monthLabels.map((label, idx) => {
                           const count = purchaseMonthlyForYear.counts[idx] ?? 0;
                           return (
                             <div key={`purchase-point-${label}`} className="relative h-10 text-center">
                               {count > 0 && (
-                                <p className="absolute left-1/2 top-[2px] -translate-x-1/2 text-[11px] font-['Fraunces',serif] text-[#8a603b]">
+                                <p className="absolute left-1/2 top-[1px] -translate-x-1/2 text-[11px] font-['Fraunces',serif] text-[#e6d1af]">
                                   {count}
                                 </p>
                               )}
@@ -870,26 +851,30 @@ export const StatisticsPage = () => {
                     </div>
                     <div className="grid grid-cols-12 gap-1 text-center">
                       {monthLabels.map((label) => (
-                        <p key={`purchase-label-${label}`} className="text-[10px] font-semibold uppercase tracking-[0.05em] text-[#8a603b]">
+                        <p key={`purchase-label-${label}`} className="text-[10px] font-semibold uppercase tracking-[0.05em] text-[#dabb86]">
                           {label}
                         </p>
                       ))}
                     </div>
                   </div>
+                  <p className="mt-4 text-left text-xs text-[#dabb86]">
+                    En <strong>{purchaseBreakdownYear}</strong>:{" "}
+                    <span className="font-['Fraunces',serif]">{purchaseMonthlyForYear.yearBookTotal}</span> compras
+                    {purchaseMonthlyForYear.yearSpentTotal > 0 && (
+                      <>
+                        {" "}
+                        · <span className="font-['Fraunces',serif]">{formatMoneyEur(purchaseMonthlyForYear.yearSpentTotal)}</span>
+                      </>
+                    )}
+                  </p>
                 </div>
 
-                <div className="space-y-2 bg-[#f5ecde]/60 px-4 py-3 text-[11px] leading-snug text-[#7a573c]">
+                <div className="space-y-2 px-4 py-3 text-[11px] leading-snug text-[#dabb86]">
                   {acquisitionsError && <p className="text-rose-800">{acquisitionsError}</p>}
                   {!acquisitionsError && purchaseStats.totalAcquisitions > 0 && purchaseStats.parsedPricesCount === 0 && (
                     <p>
                       Añade un precio reconocible (por ejemplo <span className="font-mono text-[#5a2f1f]">14,90 €</span>) al marcar
                       compras en la lista de deseos para ver totales y el desglose por mes.
-                    </p>
-                  )}
-                  {!acquisitionsError && purchaseStats.avgPerPurchase !== null && (
-                    <p>
-                      Media por compra con precio:{" "}
-                      <strong className="text-[#5a2f1f]">{formatMoneyEur(purchaseStats.avgPerPurchase)}</strong>
                     </p>
                   )}
                 </div>
