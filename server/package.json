@@ -4,7 +4,7 @@
   "description": "Backend API for ReadTracker",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "nodemon src/main.ts",
+    "dev": "nodemon",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
     "test": "vitest run",

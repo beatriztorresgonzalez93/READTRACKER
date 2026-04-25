@@ -60,7 +60,7 @@ export const HistoryCalendar = ({
                 const events = cell ? monthEventsByDay.get(dayKey) ?? [] : [];
                 const pages = events.reduce((sum, event) => sum + (event.pagesRead ?? 0), 0);
                 const isDarkCell = pages > 40;
-                const cellClassName = `min-h-[96px] border-r border-b border-[#d6c2a0] p-1.5 text-left last:border-r-0 ${
+                const cellClassName = `flex h-full min-h-[96px] w-full flex-col justify-start border-r border-b border-[#d6c2a0] p-1.5 text-left last:border-r-0 ${
                   cell ? "" : "bg-[#efe5d3]/75"
                 }`;
                 const cellStyle = cell ? { backgroundColor: intensityColorByPages(pages) } : undefined;

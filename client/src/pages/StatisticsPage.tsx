@@ -71,7 +71,7 @@ const activityColorByCount = (count: number) => {
   if (count === 1) return "#e3cfa0";
   if (count === 2) return "#d6b56c";
   if (count === 3) return "#bf9339";
-  return "#8f6430";
+  return "#e6a819";
 };
 
 /** Colores de barra por posición (evita repetir el mismo marrón en géneros 1.º, 6.º, etc.). */
