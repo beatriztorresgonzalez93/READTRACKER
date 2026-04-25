@@ -81,11 +81,24 @@ const buildWhereFragments = (
   const values: unknown[] = [userId];
   let i = 2;
 
-  const s = search?.trim();
+  const s = search?.replace(/\u200B|\uFEFF/g, "").trim();
   if (s) {
-    parts.push(`(title ILIKE $${i} OR author ILIKE $${i} OR publisher ILIKE $${i} OR genre ILIKE $${i})`);
-    values.push(`%${s}%`);
-    i += 1;
+    const pattern = `%${s}%`;
+    const yearMatch = s.match(/\b(19|20)\d{2}\b/);
+    const yearFromSearch = yearMatch ? Number.parseInt(yearMatch[0], 10) : Number.NaN;
+    const hasYearFromSearch = Number.isInteger(yearFromSearch);
+    parts.push(
+      hasYearFromSearch
+        ? `(title ILIKE $${i} OR author ILIKE $${i} OR publisher ILIKE $${i} OR genre ILIKE $${i} OR publication_year::text ILIKE $${i} OR publication_year = $${i + 1})`
+        : `(title ILIKE $${i} OR author ILIKE $${i} OR publisher ILIKE $${i} OR genre ILIKE $${i} OR publication_year::text ILIKE $${i})`
+    );
+    if (hasYearFromSearch) {
+      values.push(pattern, yearFromSearch);
+      i += 2;
+    } else {
+      values.push(pattern);
+      i += 1;
+    }
   }
 
   const hs = hookStatus?.trim();

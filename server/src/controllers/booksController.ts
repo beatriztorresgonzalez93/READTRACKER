@@ -19,7 +19,12 @@ export class BooksController {
   constructor(private readonly service: BooksService) {}
 
   private getSingleQueryValue(value: unknown): string | undefined {
-    return typeof value === "string" ? value : undefined;
+    if (typeof value === "string") return value;
+    if (Array.isArray(value)) {
+      const first = value.find((v): v is string => typeof v === "string");
+      return first;
+    }
+    return undefined;
   }
 
   private getSingleParamValue(value: unknown): string | null {

@@ -726,7 +726,7 @@ export const LibraryPage = () => {
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar por título, autor, editorial o género..."
+                placeholder="Título, autor, editorial, género o año..."
                 className="col-span-2 h-7 border-[#b08a63] bg-[#f8f1e5] px-2 text-sm text-[#4d311d] placeholder:text-[#8d6d4d] sm:col-span-1 sm:h-8 sm:px-2.5 sm:text-base"
               />
               <Select
