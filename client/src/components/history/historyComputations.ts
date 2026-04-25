@@ -2,6 +2,34 @@
 import { HistoryEvent } from "./types";
 import { getDayKey } from "./historyUtils";
 
+const ONE_DAY_MS = 86400000;
+
+export const computeStreakStatsFromDays = (days: number[], today = new Date()) => {
+  if (days.length === 0) return { currentStreakDays: 0, longestStreakDays: 0 };
+
+  let longestStreakDays = 1;
+  let currentRun = 1;
+  for (let i = 1; i < days.length; i += 1) {
+    const deltaDays = Math.round((days[i] - days[i - 1]) / ONE_DAY_MS);
+    currentRun = deltaDays === 1 ? currentRun + 1 : 1;
+    longestStreakDays = Math.max(longestStreakDays, currentRun);
+  }
+
+  const todayDayMs = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  let currentStreakDays = 0;
+  const lastIndex = days.length - 1;
+  if (days[lastIndex] === todayDayMs) {
+    currentStreakDays = 1;
+    for (let i = lastIndex; i > 0; i -= 1) {
+      const deltaDays = Math.round((days[i] - days[i - 1]) / ONE_DAY_MS);
+      if (deltaDays !== 1) break;
+      currentStreakDays += 1;
+    }
+  }
+
+  return { currentStreakDays, longestStreakDays };
+};
+
 export const buildMonthEventsByDay = (events: HistoryEvent[]) => {
   const map = new Map<string, HistoryEvent[]>();
   events.forEach((event) => {
@@ -17,17 +45,11 @@ export const buildMonthEventsByDay = (events: HistoryEvent[]) => {
 
 export const computeCurrentStreak = (events: HistoryEvent[], today = new Date()) => {
   const uniqueDays = Array.from(new Set(events.map((event) => event.dayKey))).sort();
-  if (uniqueDays.length === 0) return 0;
-  const lastDay = uniqueDays[uniqueDays.length - 1];
-  if (lastDay !== getDayKey(today)) return 0;
-  let streak = 1;
-  for (let i = uniqueDays.length - 1; i > 0; i -= 1) {
-    const prev = new Date(`${uniqueDays[i - 1]}T00:00:00`).getTime();
-    const current = new Date(`${uniqueDays[i]}T00:00:00`).getTime();
-    if (Math.round((current - prev) / 86400000) !== 1) break;
-    streak += 1;
-  }
-  return streak;
+  const todayKey = getDayKey(today);
+  const dayMs = uniqueDays
+    .filter((dayKey) => dayKey <= todayKey)
+    .map((dayKey) => new Date(`${dayKey}T00:00:00`).getTime());
+  return computeStreakStatsFromDays(dayMs, today).currentStreakDays;
 };
 
 export const computeBestDays = (events: HistoryEvent[], limit = 5) => {

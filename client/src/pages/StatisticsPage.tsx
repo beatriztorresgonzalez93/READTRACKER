@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { BookOpen, Bookmark, CalendarDays, Clock3, Flame, Heart, ShoppingBag, Star, Trophy } from "lucide-react";
 import { getReadableErrorMessage, getWishlistAcquisitions } from "../api/client";
 import { Select } from "../components/ui/select";
+import { computeStreakStatsFromDays } from "../components/history/historyComputations";
 import { useAuth } from "../context/AuthContext";
 import { useFullBooksSnapshot } from "../hooks/useFullBooksSnapshot";
+import { useReadingSessions } from "../hooks/useReadingSessions";
 import { Book } from "../types/book";
 import { WishlistAcquisition } from "../types/wishlist";
 
@@ -115,6 +117,7 @@ const toRoman = (value: number) => {
 export const StatisticsPage = () => {
   const { isAuthenticated } = useAuth();
   const { books, loading, error } = useFullBooksSnapshot(isAuthenticated);
+  const { sessions } = useReadingSessions();
   const [acquisitions, setAcquisitions] = useState<WishlistAcquisition[]>([]);
   const [acquisitionsLoading, setAcquisitionsLoading] = useState(false);
   const [acquisitionsError, setAcquisitionsError] = useState<string | null>(null);
@@ -348,40 +351,30 @@ export const StatisticsPage = () => {
       bestMonth = monthLabels[month] ?? "-";
     });
 
-    const activityDates = books
-      .map((book) => {
-        if (book.status === "leido") {
-          return getReadDate(book);
-        }
-        if (book.status === "leyendo") {
-          return parseDate(book.lastPageMarkedAt);
-        }
-        return null;
-      })
-      .filter((date): date is Date => date !== null);
+    const uniqueSessionDays = Array.from(
+      new Set(
+        sessions
+          .map((session) => parseDate(session.recordedAt))
+          .filter((date): date is Date => date !== null)
+          .map((date) => toStartOfLocalDayMs(date))
+      )
+    ).sort((a, b) => a - b);
 
-    const uniqueActivityDays = Array.from(new Set(activityDates.map((date) => toStartOfLocalDayMs(date)))).sort(
-      (a, b) => a - b
-    );
-    let longestStreakDays = uniqueActivityDays.length > 0 ? 1 : 0;
-    let currentRun = longestStreakDays;
-    for (let i = 1; i < uniqueActivityDays.length; i += 1) {
-      const prev = uniqueActivityDays[i - 1];
-      const current = uniqueActivityDays[i];
-      const deltaDays = Math.round((current - prev) / ONE_DAY_MS);
-      currentRun = deltaDays === 1 ? currentRun + 1 : 1;
-      longestStreakDays = Math.max(longestStreakDays, currentRun);
-    }
-    const todayDayMs = toStartOfLocalDayMs(now);
-    let currentStreakDays = 0;
-    if (uniqueActivityDays.length > 0 && uniqueActivityDays[uniqueActivityDays.length - 1] === todayDayMs) {
-      currentStreakDays = 1;
-      for (let i = uniqueActivityDays.length - 1; i > 0; i -= 1) {
-        const deltaDays = Math.round((uniqueActivityDays[i] - uniqueActivityDays[i - 1]) / ONE_DAY_MS);
-        if (deltaDays !== 1) break;
-        currentStreakDays += 1;
-      }
-    }
+    const fallbackBookDays = Array.from(
+      new Set(
+        books
+          .map((book) => {
+            if (book.status === "leido") return getReadDate(book);
+            if (book.status === "leyendo") return parseDate(book.lastPageMarkedAt);
+            return null;
+          })
+          .filter((date): date is Date => date !== null)
+          .map((date) => toStartOfLocalDayMs(date))
+      )
+    ).sort((a, b) => a - b);
+
+    const daysForStreak = uniqueSessionDays.length > 0 ? uniqueSessionDays : fallbackBookDays;
+    const { currentStreakDays, longestStreakDays } = computeStreakStatsFromDays(daysForStreak, now);
 
     const yearlyProjection = Math.round((readBooks.length / elapsedDays) * 365);
 
@@ -393,7 +386,7 @@ export const StatisticsPage = () => {
       longestStreakDays,
       yearlyProjection
     };
-  }, [books, now, readBooks, totalReadPages]);
+  }, [books, now, readBooks, sessions, totalReadPages]);
 
   return (
     <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
