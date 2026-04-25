@@ -563,9 +563,9 @@ export const StatisticsPage = () => {
                 <article className="overflow-hidden rounded-xl bg-transparent text-[#e9dcc4]">
                   <div className="p-4">
                     <div className="mb-3 flex items-center gap-3">
-                      <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Libros por año</p>
-                      <span className="h-px flex-1 bg-[#cfab72]/35" />
+                      <span className="h-[2px] flex-1 bg-[#f0d49a]/65" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0d49a]">✦ Libros por año</p>
+                      <span className="h-[2px] flex-1 bg-[#f0d49a]/65" />
                     </div>
                     {booksByYear.length === 0 ? (
                       <p className="text-sm text-amber-100/70">Aún no hay libros leídos para mostrar.</p>
@@ -594,9 +594,9 @@ export const StatisticsPage = () => {
 
                 <article className="rounded-xl bg-transparent p-4 text-[#e9dcc4]">
                   <div className="mb-3 flex items-center gap-3">
-                    <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Ritmo de lectura</p>
-                    <span className="h-px flex-1 bg-[#cfab72]/35" />
+                    <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0d49a]">✦ Ritmo de lectura</p>
+                    <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
                   </div>
                   <div className="grid gap-4 md:grid-cols-[1fr_210px] md:items-center">
                     <div className="space-y-2.5">
@@ -639,23 +639,27 @@ export const StatisticsPage = () => {
 
               <article className="overflow-visible rounded-md bg-transparent text-[#e9dcc4]">
                 <div className="px-4 pb-4 pt-5">
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Actividad de lectura {activityYear}</p>
-                    <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <Select
-                      id="stats-activity-year"
-                      value={String(activityYear)}
-                      onChange={(event) => setActivityYear(Number(event.target.value))}
-                      disabled={loading || activityYearOptions.length === 0}
-                      className="h-8 !w-[84px] shrink-0 rounded-md border-[#8e633d] bg-[#8e633d] px-2 text-[11px] font-semibold !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
-                    >
-                      {activityYearOptions.map((y) => (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      ))}
-                    </Select>
+                  <div className="mb-4 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0d49a]">✦ Actividad de lectura {activityYear}</p>
+                      <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
+                    </div>
+                    <div className="flex justify-end">
+                      <Select
+                        id="stats-activity-year"
+                        value={String(activityYear)}
+                        onChange={(event) => setActivityYear(Number(event.target.value))}
+                        disabled={loading || activityYearOptions.length === 0}
+                        className="h-8 !w-[84px] shrink-0 rounded-md border-[#8e633d] bg-[#8e633d] px-2 text-[11px] font-semibold !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5]"
+                      >
+                        {activityYearOptions.map((y) => (
+                          <option key={y} value={y}>
+                            {y}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-12">
                     {monthlyReadActivity.counts.map((count, index) => {
@@ -708,11 +712,11 @@ export const StatisticsPage = () => {
               </article>
 
               <div className="grid gap-5 lg:grid-cols-2">
-                <section className="text-[#e9dcc4]">
+                <section className="pt-3 text-[#e9dcc4]">
                   <div className="mb-2 flex items-center gap-3">
-                    <span className="h-px flex-1 bg-[#d5b882]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Mejores valorados</p>
-                    <span className="h-px flex-1 bg-[#d5b882]/35" />
+                    <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0d49a]">✦ Mejores valorados</p>
+                    <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
                   </div>
                   {bestRatedBooks.length === 0 ? (
                     <p className="px-1 py-3 text-sm text-amber-100/70">Todavía no hay valoraciones para esta sección.</p>
@@ -756,11 +760,12 @@ export const StatisticsPage = () => {
                   )}
                 </section>
 
-                <section className="flex h-full flex-col border-l border-[#cfab72]/35 pl-5 text-[#dfcda9]">
+                <section className="relative flex h-full flex-col pl-5 pt-3 text-[#dfcda9]">
+                  <span className="absolute bottom-0 left-0 top-6 w-px bg-[#cfab72]/35" />
                   <div className="mb-5 flex items-center gap-3">
-                    <span className="h-px flex-1 bg-[#cfab72]/32" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Géneros favoritos</p>
-                    <span className="h-px flex-1 bg-[#cfab72]/32" />
+                    <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0d49a]">✦ Géneros favoritos</p>
+                    <span className="h-[3px] flex-1 bg-[#f0d49a]/70" />
                   </div>
                   <div className="flex-1 space-y-5">
                     {topGenres.length === 0 && <p className="text-sm text-amber-100/70">Aún no hay géneros suficientes.</p>}
@@ -783,9 +788,9 @@ export const StatisticsPage = () => {
               <article className="overflow-hidden rounded-md bg-transparent text-[#e9dcc4]">
                 <div className="px-4 pb-3 pt-5">
                   <div className="flex items-center gap-3">
-                    <span className="h-px flex-1 bg-[#cfab72]/35" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#dabb86]">✦ Libros comprados</p>
-                    <span className="h-px flex-1 bg-[#cfab72]/35" />
+                    <span className="h-[2px] flex-1 bg-[#f0d49a]/65" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f0d49a]">✦ Libros comprados</p>
+                    <span className="h-[2px] flex-1 bg-[#f0d49a]/65" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2">
