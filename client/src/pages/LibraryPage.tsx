@@ -591,9 +591,9 @@ export const LibraryPage = () => {
     <section className={isPreviewOnly ? "relative z-[45]" : "relative min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6"}>
       {!isPreviewOnly && (
       <div className={`grid gap-5 lg:grid-cols-[260px_1fr] ${previewBookId ? "pointer-events-none select-none" : ""}`}>
-        <aside className="order-2 space-y-4 lg:order-1">
+        <aside className="order-2 space-y-3 lg:order-1">
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 font-['Fraunces',serif] text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
               <div>
                 <p className="font-['Fraunces',serif] text-3xl">{librarySummary?.total ?? 0}</p>
@@ -615,7 +615,7 @@ export const LibraryPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 font-['Fraunces',serif] text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
             {nowReadingPreview.length > 0 ? (
               <div className="divide-y divide-[#dcc8a7]">
                 {nowReadingPreview.slice(0, 2).map((book) => (
@@ -638,15 +638,15 @@ export const LibraryPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
-            <ul className="divide-y divide-[#dcc8a7] text-sm">
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 font-['Fraunces',serif] text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
+            <ul className="divide-y divide-[#dcc8a7] font-['Fraunces',serif] text-[1.02rem]">
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
                   onClick={() => setActiveShelf("todos")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "todos" ? "font-semibold underline" : ""}`}
                 >
-                  <BookOpen className="h-3.5 w-3.5" />Todos
+                  <BookOpen className="h-4 w-4 text-[#8e633d]" />Todos
                 </button>
                 <span className="font-semibold text-[#6f4b2e]">{librarySummary?.total ?? 0}</span>
               </li>
@@ -656,7 +656,7 @@ export const LibraryPage = () => {
                   onClick={() => setActiveShelf("pendiente")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "pendiente" ? "font-semibold underline" : ""}`}
                 >
-                  <BookOpen className="h-3.5 w-3.5" />Pendientes
+                  <BookOpen className="h-4 w-4 text-[#8e633d]" />Pendientes
                 </button>
                 <span className="font-semibold text-[#6f4b2e]">{librarySummary?.pendiente ?? 0}</span>
               </li>
@@ -666,7 +666,7 @@ export const LibraryPage = () => {
                   onClick={() => setActiveShelf("leido")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "leido" ? "font-semibold underline" : ""}`}
                 >
-                  <Bookmark className="h-3.5 w-3.5" />Leídos
+                  <Bookmark className="h-4 w-4 text-[#8e633d]" />Leídos
                 </button>
                 <span className="font-semibold text-[#6f4b2e]">{readCount}</span>
               </li>
@@ -676,7 +676,7 @@ export const LibraryPage = () => {
                   onClick={() => setActiveShelf("leyendo")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "leyendo" ? "font-semibold underline" : ""}`}
                 >
-                  <Clock3 className="h-3.5 w-3.5" />En progreso
+                  <Clock3 className="h-4 w-4 text-[#8e633d]" />En progreso
                 </button>
                 <span className="font-semibold text-[#6f4b2e]">{librarySummary?.leyendo ?? 0}</span>
               </li>
@@ -686,18 +686,18 @@ export const LibraryPage = () => {
                   onClick={() => setActiveShelf("favoritos")}
                   className={`inline-flex items-center gap-2 transition hover:underline ${activeShelf === "favoritos" ? "font-semibold underline" : ""}`}
                 >
-                  <Heart className="h-3.5 w-3.5" />Favoritos
+                  <Heart className="h-4 w-4 text-[#8e633d]" />Favoritos
                 </button>
                 <span className="font-semibold text-[#6f4b2e]">{librarySummary?.favoritos ?? 0}</span>
               </li>
             </ul>
           </div>
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 font-['Fraunces',serif] text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
             {genres.length === 0 ? (
               <p className="px-4 py-3 text-sm">Sin géneros todavía.</p>
             ) : (
-              <ul className="divide-y divide-[#dcc8a7] text-sm">
+              <ul className="divide-y divide-[#dcc8a7] font-['Fraunces',serif] text-[1.02rem]">
                 <li className="flex items-center justify-between px-4 py-2.5">
                   <button
                     type="button"
@@ -735,12 +735,12 @@ export const LibraryPage = () => {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Título, autor, editorial, género o año..."
-                className="col-span-2 h-7 border-[#b08a63] bg-[#f8f1e5] px-2 text-sm text-[#4d311d] placeholder:text-[#8d6d4d] sm:col-span-1 sm:h-8 sm:px-2.5 sm:text-base"
+                className="col-span-2 h-8 border-[#b08a63] bg-[#f8f1e5] px-2 font-['Fraunces',serif] text-sm text-[#4d311d] placeholder:text-[#8d6d4d] sm:col-span-1 sm:h-9 sm:px-2.5"
               />
               <Select
                 value={status}
                 onChange={(event) => setStatus(event.target.value as typeof status)}
-                className="h-7 min-h-7 rounded-lg border-[#8e633d] bg-[#8e633d] px-2 py-1 text-xs text-[#f8f1e5] hover:bg-[#7c5534] dark:border-[#8e633d] dark:bg-[#8e633d] dark:text-[#f8f1e5] sm:h-auto sm:min-h-0 sm:px-3 sm:py-2.5 sm:text-sm"
+                className="h-8 min-h-8 rounded-lg border-[#8e633d] bg-[#8e633d] px-2 font-['Fraunces',serif] text-sm text-[#f8f1e5] hover:bg-[#7c5534] dark:border-[#8e633d] dark:bg-[#8e633d] dark:text-[#f8f1e5] sm:h-9 sm:min-h-9 sm:px-3"
               >
                 <option value="todos">Todos</option>
                 <option value="pendiente">Pendiente</option>
@@ -750,7 +750,7 @@ export const LibraryPage = () => {
               <Select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
-                className="h-7 min-h-7 rounded-lg border-[#8e633d] bg-[#8e633d] px-2 py-1 text-xs text-[#f8f1e5] hover:bg-[#7c5534] dark:border-[#8e633d] dark:bg-[#8e633d] dark:text-[#f8f1e5] sm:h-auto sm:min-h-0 sm:px-3 sm:py-2.5 sm:text-sm"
+                className="h-8 min-h-8 rounded-lg border-[#8e633d] bg-[#8e633d] px-2 font-['Fraunces',serif] text-sm text-[#f8f1e5] hover:bg-[#7c5534] dark:border-[#8e633d] dark:bg-[#8e633d] dark:text-[#f8f1e5] sm:h-9 sm:min-h-9 sm:px-3"
               >
                 <option value="recientes">Más recientes</option>
                 <option value="titulo">Título (A-Z)</option>
@@ -761,7 +761,7 @@ export const LibraryPage = () => {
               <Link to="/books/new" className="col-span-2 sm:col-span-1">
                 <Button
                   size="default"
-                  className="h-7 w-full border border-[#8e633d] bg-[#8e633d] px-3 text-xs font-semibold text-[#f8f1e5] hover:bg-[#7c5534] sm:h-8 sm:w-auto sm:px-4 sm:text-sm"
+                  className="h-8 w-full border border-[#8e633d] bg-[#8e633d] px-3 font-['Fraunces',serif] text-sm font-semibold text-[#f8f1e5] hover:bg-[#7c5534] sm:h-9 sm:w-auto sm:px-4"
                 >
                   + Añadir libro
                 </Button>

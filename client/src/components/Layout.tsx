@@ -48,7 +48,11 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   }, [mobileNavOpen]);
 
   const navLinkClass = (active: boolean) =>
-    `px-3 py-1 ${active ? "rounded-sm border border-amber-500/75 bg-amber-900/30" : ""}`;
+    `relative px-1 py-1.5 font-['Fraunces',serif] text-[0.96rem] tracking-[0.02em] transition-colors ${
+      active
+        ? "text-[#f6d08a]"
+        : "text-amber-100/85 hover:text-amber-100"
+    }`;
 
   const mobileNavLinkClass = (active: boolean) =>
     `block border-b border-amber-800/40 px-4 py-3 text-[0.85rem] font-semibold tracking-[0.06em] text-amber-100/95 last:border-b-0 ${
@@ -89,21 +93,26 @@ export const Layout = ({ children }: { children: ReactNode }) => {
               {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             <div className="hidden justify-center md:flex">
-              <div className="flex flex-wrap items-center justify-center gap-1 text-[0.73rem] font-semibold tracking-[0.08em] text-amber-100/85">
+              <div className="flex flex-wrap items-center justify-center gap-4 border-b border-amber-700/35">
                 <Link to="/" className={navLinkClass(isLibraryView)}>
                   Colección
+                  {isLibraryView && <span className="absolute inset-x-0 -bottom-[7px] h-[2px] bg-[#d7b06f]" aria-hidden />}
                 </Link>
                 <Link to="/reviews" className={navLinkClass(isReviewsView)}>
                   Reseñas
+                  {isReviewsView && <span className="absolute inset-x-0 -bottom-[7px] h-[2px] bg-[#d7b06f]" aria-hidden />}
                 </Link>
                 <Link to="/wishlist" className={navLinkClass(isWishlistView)}>
                   Lista de deseos
+                  {isWishlistView && <span className="absolute inset-x-0 -bottom-[7px] h-[2px] bg-[#d7b06f]" aria-hidden />}
                 </Link>
                 <Link to="/stats" className={navLinkClass(isStatsView)}>
                   Estadísticas
+                  {isStatsView && <span className="absolute inset-x-0 -bottom-[7px] h-[2px] bg-[#d7b06f]" aria-hidden />}
                 </Link>
                 <Link to="/history" className={navLinkClass(isHistoryView)}>
                   Historial
+                  {isHistoryView && <span className="absolute inset-x-0 -bottom-[7px] h-[2px] bg-[#d7b06f]" aria-hidden />}
                 </Link>
               </div>
             </div>

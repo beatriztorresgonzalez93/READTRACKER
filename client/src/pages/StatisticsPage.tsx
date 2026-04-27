@@ -448,7 +448,7 @@ export const StatisticsPage = () => {
             <div className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
               🗂️ Estantes
             </div>
-            <ul className="divide-y divide-[#dcc8a7] text-[1.02rem]">
+            <ul className="divide-y divide-[#dcc8a7] font-['Fraunces',serif] text-[1.02rem]">
               <li className="flex items-center justify-between px-4 py-2.5">
                 <span className="inline-flex items-center gap-2"><BookOpen className="h-4 w-4 text-[#8e633d]" />Todos</span>
                 <span className="font-semibold text-[#6f4b2e]">{shelfStats.todos}</span>
@@ -476,7 +476,7 @@ export const StatisticsPage = () => {
             <div className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">
               🏷️ Géneros
             </div>
-            <ul className="divide-y divide-[#dcc8a7] text-[1.02rem]">
+            <ul className="divide-y divide-[#dcc8a7] font-['Fraunces',serif] text-[1.02rem]">
               <li className="flex items-center justify-between px-4 py-2.5">
                 <span className="line-clamp-1">Todos</span>
                 <span className="font-semibold text-[#6f4b2e]">{books.length}</span>

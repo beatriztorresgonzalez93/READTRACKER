@@ -90,9 +90,9 @@ export const ReviewsPage = () => {
   return (
     <section className="min-h-full space-y-6 bg-transparent pl-1 pr-4 py-2 text-amber-50 sm:pl-2 sm:pr-6">
       <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
-        <aside className="order-2 space-y-4 lg:order-1">
+        <aside className="order-2 space-y-3 lg:order-1">
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 font-['Fraunces',serif] text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">📚 MI BIBLIOTECA</p>
             <div className="grid grid-cols-2 gap-3 p-4 text-center">
               <div>
                 <p className="font-['Fraunces',serif] text-3xl">{books.length}</p>
@@ -114,7 +114,7 @@ export const ReviewsPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 font-['Fraunces',serif] text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">📖 LEYENDO AHORA</p>
             {nowReadingBooks.length > 0 ? (
               <div className="divide-y divide-[#dcc8a7]">
                 {nowReadingBooks.slice(0, 2).map((book) => (
@@ -137,34 +137,34 @@ export const ReviewsPage = () => {
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
-            <ul className="divide-y divide-[#dcc8a7] text-sm">
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 font-['Fraunces',serif] text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">🗂️ ESTANTES</p>
+            <ul className="divide-y divide-[#dcc8a7] font-['Fraunces',serif] text-[1.02rem]">
               <li className="flex items-center justify-between px-4 py-2.5">
-                <span className="inline-flex items-center gap-2"><BookOpen className="h-3.5 w-3.5" />Todos</span>
+                <span className="inline-flex items-center gap-2"><BookOpen className="h-4 w-4 text-[#8e633d]" />Todos</span>
                 <span className="font-semibold text-[#6f4b2e]">{books.length}</span>
               </li>
               <li className="flex items-center justify-between px-4 py-2.5">
-                <span className="inline-flex items-center gap-2"><BookOpen className="h-3.5 w-3.5" />Pendientes</span>
+                <span className="inline-flex items-center gap-2"><BookOpen className="h-4 w-4 text-[#8e633d]" />Pendientes</span>
                 <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.status === "pendiente").length}</span>
               </li>
               <li className="flex items-center justify-between px-4 py-2.5">
-                <span className="inline-flex items-center gap-2"><Bookmark className="h-3.5 w-3.5" />Leídos</span>
+                <span className="inline-flex items-center gap-2"><Bookmark className="h-4 w-4 text-[#8e633d]" />Leídos</span>
                 <span className="font-semibold text-[#6f4b2e]">{readCount}</span>
               </li>
               <li className="flex items-center justify-between px-4 py-2.5">
-                <span className="inline-flex items-center gap-2"><Clock3 className="h-3.5 w-3.5" />En progreso</span>
+                <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-[#8e633d]" />En progreso</span>
                 <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.status === "leyendo").length}</span>
               </li>
               <li className="flex items-center justify-between px-4 py-2.5">
-                <span className="inline-flex items-center gap-2"><Heart className="h-3.5 w-3.5" />Favoritos</span>
+                <span className="inline-flex items-center gap-2"><Heart className="h-4 w-4 text-[#8e633d]" />Favoritos</span>
                 <span className="font-semibold text-[#6f4b2e]">{books.filter((b) => b.isFavorite).length}</span>
               </li>
             </ul>
           </div>
 
           <div className="overflow-hidden rounded-xl border border-[#c69253] bg-[#e9dcc4] text-[#4d311d]">
-            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 text-xs font-semibold tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
-            <ul className="divide-y divide-[#dcc8a7] text-sm">
+            <p className="border-b border-[#c89c33] bg-[#1a0b06]/90 px-4 py-3 font-['Fraunces',serif] text-xs font-semibold uppercase tracking-[0.18em] text-[#e8cf9f]">🏷️ GÉNEROS</p>
+            <ul className="divide-y divide-[#dcc8a7] font-['Fraunces',serif] text-[1.02rem]">
               <li className="flex items-center justify-between px-4 py-2.5">
                 <button
                   type="button"
@@ -200,12 +200,12 @@ export const ReviewsPage = () => {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar por palabras en tus reseñas..."
-                className="col-span-2 h-7 border-[#b08a63] bg-[#f8f1e5] text-xs text-[#4d311d] placeholder:text-[#8d6d4d] sm:col-span-1 sm:h-9 sm:min-w-0 sm:flex-1 sm:text-sm"
+                className="col-span-2 h-8 border-[#b08a63] bg-[#f8f1e5] px-2 font-['Fraunces',serif] text-sm text-[#4d311d] placeholder:text-[#8d6d4d] sm:col-span-1 sm:h-9 sm:min-w-0 sm:flex-1 sm:px-2.5"
               />
               <Select
                 value={ratingFilter}
                 onChange={(event) => setRatingFilter(event.target.value as RatingFilter)}
-                className="h-7 min-w-0 w-full rounded-md !border-[#8e633d] !bg-[#8e633d] !py-1 !text-[0.7rem] !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5] sm:h-9 sm:w-[210px] sm:!py-1.5 sm:!text-sm"
+                className="h-8 min-h-8 min-w-0 w-full rounded-md !border-[#8e633d] !bg-[#8e633d] px-2 font-['Fraunces',serif] !text-sm !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5] sm:h-9 sm:min-h-9 sm:w-[210px] sm:px-3"
               >
                 <option value="todas">Todas las valoraciones</option>
                 <option value="5">5 estrellas</option>
@@ -217,7 +217,7 @@ export const ReviewsPage = () => {
               <Select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as ReviewSort)}
-                className="h-7 min-w-0 w-full rounded-md !border-[#8e633d] !bg-[#8e633d] !py-1 !text-[0.7rem] !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5] sm:h-9 sm:w-[210px] sm:!py-1.5 sm:!text-sm"
+                className="h-8 min-h-8 min-w-0 w-full rounded-md !border-[#8e633d] !bg-[#8e633d] px-2 font-['Fraunces',serif] !text-sm !text-[#f8f1e5] hover:!bg-[#7c5534] dark:!border-[#8e633d] dark:!bg-[#8e633d] dark:!text-[#f8f1e5] sm:h-9 sm:min-h-9 sm:w-[210px] sm:px-3"
               >
                 <option value="reciente">Ordenar: Reciente</option>
                 <option value="valoracion">Ordenar: Valoración</option>
