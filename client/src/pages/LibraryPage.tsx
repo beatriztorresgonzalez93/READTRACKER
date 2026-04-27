@@ -68,6 +68,7 @@ export const LibraryPage = () => {
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [isSavingMarkPage, setIsSavingMarkPage] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
   const [isSavingReview, setIsSavingReview] = useState(false);
   const [recentAcquisitions, setRecentAcquisitions] = useState<WishlistAcquisition[]>([]);
   const [acquisitionsError, setAcquisitionsError] = useState<string | null>(null);
@@ -340,25 +341,32 @@ export const LibraryPage = () => {
     if (!previewBook || isSavingStatus) return;
     if (previewBook.status === nextStatus) return;
     const payload: Partial<Book> & { status: ReadingStatus } = { status: nextStatus };
+    // El selector de estado debe ser robusto: añadimos campos derivados solo cuando son seguros.
     if (nextStatus === "leido") {
       payload.progress = 100;
-      if (typeof previewBook.pages === "number" && previewBook.pages > 0) {
+      if (
+        typeof previewBook.pages === "number" &&
+        previewBook.pages > 0 &&
+        previewBook.pages <= 20000
+      ) {
         payload.currentPage = previewBook.pages;
         payload.lastPageMarkedAt = new Date().toISOString();
       }
     } else if (nextStatus === "pendiente") {
       payload.progress = 0;
       payload.currentPage = 0;
-      payload.lastPageMarkedAt = undefined;
     } else if ((previewBook.progress ?? 0) <= 0) {
       payload.progress = 1;
     }
 
     try {
+      setStatusError(null);
       setIsSavingStatus(true);
       const updated = await updateBook(previewBook.id, payload);
       setPreviewBook(updated);
       upsertBook(updated);
+    } catch (err) {
+      setStatusError(getReadableErrorMessage(err, "No se pudo actualizar el estado. Inténtalo de nuevo."));
     } finally {
       setIsSavingStatus(false);
     }
@@ -1022,6 +1030,7 @@ export const LibraryPage = () => {
                         </Select>
                       </div>
                       {isSavingStatus && <span className="mt-2 inline-block text-xs text-[#7a573c]">Guardando estado...</span>}
+                      {statusError && <p className="mt-2 text-xs text-rose-700">{statusError}</p>}
                     </div>
 
                     <div className="rounded-md bg-[#efe4d1] px-4 py-3 shadow-[0_6px_18px_-14px_rgba(90,47,31,0.55)]">

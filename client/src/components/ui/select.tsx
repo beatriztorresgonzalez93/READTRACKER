@@ -69,8 +69,8 @@ function SelectImpl(
       </SelectPrimitive.Trigger>
 
       <SelectPrimitive.Portal>
-        <SelectPrimitive.Positioner sideOffset={4} className="z-50">
-          <SelectPrimitive.Popup className="z-50 min-w-[var(--anchor-width)] overflow-hidden rounded-xl border border-[#8e633d] bg-[#f8f1e5] p-1 shadow-lg dark:border-[#8e633d] dark:bg-[#f8f1e5]">
+        <SelectPrimitive.Positioner sideOffset={4} className="z-[220]">
+          <SelectPrimitive.Popup className="z-[220] min-w-[var(--anchor-width)] overflow-hidden rounded-xl border border-[#8e633d] bg-[#f8f1e5] p-1 shadow-lg dark:border-[#8e633d] dark:bg-[#f8f1e5]">
             <SelectPrimitive.List>
               {options.map((option) => (
                 <SelectPrimitive.Item
