@@ -60,6 +60,7 @@ export const HistoryCalendar = ({
                 const events = cell ? monthEventsByDay.get(dayKey) ?? [] : [];
                 const pages = events.reduce((sum, event) => sum + (event.pagesRead ?? 0), 0);
                 const isDarkCell = pages > 40;
+                const isMidDarkCell = pages >= 26 && pages <= 40;
                 const cellClassName = `flex h-full min-h-[96px] w-full flex-col justify-start border-r border-b border-[#d6c2a0] p-1.5 text-left last:border-r-0 ${
                   cell ? "" : "bg-[#efe5d3]/75"
                 }`;
@@ -68,7 +69,7 @@ export const HistoryCalendar = ({
                   <>
                     <div className="mb-1 flex items-center justify-between">
                       <span className={`text-[11px] font-semibold ${isDarkCell ? "text-[#fff8ec]" : "text-[#7a573c]"}`}>{cell.getDate()}</span>
-                      <span className={`text-[10px] ${isDarkCell ? "text-[#fff2da]/90" : "text-[#a38253]"}`}>{pages > 0 ? `${pages} pág` : ""}</span>
+                      <span className={`text-[10px] ${(isDarkCell || isMidDarkCell) ? "text-[#fff8ec]" : "text-[#a38253]"}`}>{pages > 0 ? `${pages} pág` : ""}</span>
                     </div>
                     <div className="space-y-1">
                       {events.slice(0, 2).map((event) => (
