@@ -12,6 +12,7 @@ import { CoversController } from "./controllers/coversController";
 import { AuthController } from "./controllers/authController";
 import { WishlistController } from "./controllers/wishlistController";
 import { ReadingSessionsController } from "./controllers/readingSessionsController";
+import { BillingController } from "./controllers/billingController";
 import { errorHandler } from "./middlewares/errorHandler";
 import { requireAuth } from "./middlewares/requireAuth";
 import { BooksRepository } from "./repositories/booksRepository";
@@ -23,11 +24,13 @@ import { createBooksRouter } from "./routes/booksRoutes";
 import { createCoversRouter } from "./routes/coversRoutes";
 import { createWishlistRouter } from "./routes/wishlistRoutes";
 import { createReadingSessionsRouter } from "./routes/readingSessionsRoutes";
+import { createBillingRouter } from "./routes/billingRoutes";
 import { AuthService } from "./services/authService";
 import { BooksService } from "./services/booksService";
 import { CoversService } from "./services/coversService";
 import { WishlistService } from "./services/wishlistService";
 import { ReadingSessionsService } from "./services/readingSessionsService";
+import { BillingService } from "./services/billingService";
 import { sendApiError } from "./utils/apiResponse";
 import { logError, logInfo } from "./logger";
 import { requestLogging } from "./middlewares/requestLogging";
@@ -94,6 +97,8 @@ export const createApp = () => {
       }
     })
   );
+  // Stripe exige body crudo para verificar firma del webhook.
+  app.use("/api/v1/billing/webhook", express.raw({ type: "application/json" }));
   app.use(express.json({ limit: "512kb" }));
 
   const booksRepository = new BooksRepository();
@@ -110,7 +115,10 @@ export const createApp = () => {
   const readingSessionsRepository = new ReadingSessionsRepository();
   const readingSessionsService = new ReadingSessionsService(readingSessionsRepository);
   const readingSessionsController = new ReadingSessionsController(readingSessionsService);
+  const billingService = new BillingService(usersRepository);
+  const billingController = new BillingController(billingService);
 
+  app.post("/api/v1/billing/webhook", billingController.webhook);
   app.get("/api/v1/health", async (_req, res) => {
     try {
       await pool.query("SELECT 1");
@@ -132,6 +140,7 @@ export const createApp = () => {
   app.use("/api/v1/books", createBooksRouter(booksController));
   app.use("/api/v1/wishlist", createWishlistRouter(wishlistController));
   app.use("/api/v1/reading-sessions", createReadingSessionsRouter(readingSessionsController));
+  app.use("/api/v1/billing", createBillingRouter(billingController));
   app.get("/api/v1/acquisitions", requireAuth, wishlistController.listAcquisitions);
 
   app.use((_req, res) => {

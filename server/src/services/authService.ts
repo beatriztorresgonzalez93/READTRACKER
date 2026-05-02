@@ -6,6 +6,7 @@ import { UsersRepository } from "../repositories/usersRepository";
 import { AuthResult, AuthUser, LoginDto, RegisterDto, UpdateProfileDto } from "../types/auth";
 
 const TOKEN_EXPIRES_IN = "7d";
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export class AuthService {
   constructor(private readonly usersRepository: UsersRepository) {}
@@ -24,7 +25,8 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(data.password, 10);
-    const user = await this.usersRepository.create(data.name.trim(), email, passwordHash);
+    const trialEndsAt = new Date(Date.now() + env.proTrialDays * DAY_IN_MS);
+    const user = await this.usersRepository.create(data.name.trim(), email, passwordHash, trialEndsAt);
     return {
       token: this.signToken(user),
       user

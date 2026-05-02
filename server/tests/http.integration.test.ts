@@ -5,11 +5,13 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { env } from "../src/config/env";
 import { AuthController } from "../src/controllers/authController";
+import { BillingController } from "../src/controllers/billingController";
 import { BooksController } from "../src/controllers/booksController";
 import { ReadingSessionsController } from "../src/controllers/readingSessionsController";
 import { WishlistController } from "../src/controllers/wishlistController";
 import { errorHandler } from "../src/middlewares/errorHandler";
 import { createAuthRouter } from "../src/routes/authRoutes";
+import { createBillingRouter } from "../src/routes/billingRoutes";
 import { createBooksRouter } from "../src/routes/booksRoutes";
 import { createReadingSessionsRouter } from "../src/routes/readingSessionsRoutes";
 import { createWishlistRouter } from "../src/routes/wishlistRoutes";
@@ -45,6 +47,12 @@ describe("HTTP integration: contract + auth + errors", () => {
     remove: vi.fn(),
     purchase: vi.fn()
   };
+  const billingServiceMock = {
+    getStatus: vi.fn(),
+    createPaymentIntent: vi.fn(),
+    constructEvent: vi.fn(),
+    handlePaymentSucceeded: vi.fn()
+  };
 
   const app = express();
   app.use(express.json());
@@ -55,6 +63,7 @@ describe("HTTP integration: contract + auth + errors", () => {
     "/api/v1/reading-sessions",
     createReadingSessionsRouter(new ReadingSessionsController(readingSessionsServiceMock as never))
   );
+  app.use("/api/v1/billing", createBillingRouter(new BillingController(billingServiceMock as never)));
   app.use((_req, res) => {
     res.status(404).json({ code: "NOT_FOUND", message: "Ruta no encontrada", error: "Ruta no encontrada" });
   });
@@ -336,6 +345,44 @@ describe("HTTP integration: contract + auth + errors", () => {
 
     expect(response.status).toBe(400);
     expect(response.body.code).toBe("INVALID_TITLE");
+  });
+
+  it("returns billing status for authorized user", async () => {
+    billingServiceMock.getStatus.mockResolvedValueOnce({
+      isPro: false,
+      trialEndsAt: "2026-12-01T00:00:00.000Z",
+      proActivatedAt: null,
+      trialActive: true,
+      needsPayment: false
+    });
+
+    const response = await request(app)
+      .get("/api/v1/billing/status")
+      .set("Authorization", `Bearer ${buildToken()}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({
+      isPro: false,
+      trialActive: true
+    });
+  });
+
+  it("returns payment intent clientSecret for authorized user", async () => {
+    billingServiceMock.createPaymentIntent.mockResolvedValueOnce({
+      clientSecret: "pi_123_secret_456",
+      amountCents: 1999,
+      currency: "eur"
+    });
+
+    const response = await request(app)
+      .post("/api/v1/billing/create-payment-intent")
+      .set("Authorization", `Bearer ${buildToken()}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({
+      clientSecret: "pi_123_secret_456",
+      amountCents: 1999
+    });
   });
 
   it("returns wishlist list and acquisitions for authorized user", async () => {

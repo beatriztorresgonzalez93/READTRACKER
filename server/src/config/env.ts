@@ -60,7 +60,12 @@ export const env = {
   rateLimitWindowMs: parseNumber(process.env.RATE_LIMIT_WINDOW_MS, 60000),
   rateLimitMaxRequests: parseNumber(process.env.RATE_LIMIT_MAX_REQUESTS, 120),
   databaseUrl: process.env.DATABASE_URL ?? "",
-  jwtSecret: jwtSecretFromEnv || "change-this-secret-in-production"
+  jwtSecret: jwtSecretFromEnv || "change-this-secret-in-production",
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+  stripeCurrency: (process.env.STRIPE_CURRENCY ?? "eur").toLowerCase(),
+  proOneTimePriceCents: parseNumber(process.env.PRO_ONE_TIME_PRICE_CENTS, 1999),
+  proTrialDays: parseNumber(process.env.PRO_TRIAL_DAYS, 30)
 };
 
 if (env.isProduction) {
