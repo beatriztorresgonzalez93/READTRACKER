@@ -24,11 +24,10 @@ export class AuthService {
       return existingUid.id;
     }
 
-    const existingEmail = await this.usersRepository.findByEmail(emailRaw);
-    if (existingEmail) {
-      throw new Error(
-        "Ya existe una cuenta local con ese email. Usa la misma cuenta de Firebase o contacta soporte."
-      );
+    const existingRow = await this.usersRepository.findIdAndFirebaseUidByEmailNormalized(emailRaw);
+    if (existingRow) {
+      await this.usersRepository.setFirebaseUid(existingRow.id, uid);
+      return existingRow.id;
     }
 
     const nameFromToken = (decoded.name ?? emailRaw.split("@")[0] ?? "Usuario").trim() || "Usuario";

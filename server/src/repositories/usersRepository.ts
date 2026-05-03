@@ -53,6 +53,28 @@ export class UsersRepository {
     return row ? mapUser(row) : null;
   }
 
+  /** Busca por email en minúsculas (cuentas previas a Firebase pueden tener otro casing). */
+  async findIdAndFirebaseUidByEmailNormalized(emailLower: string): Promise<{
+    id: string;
+    firebaseUid: string | null;
+  } | null> {
+    const result = await pool.query<{ id: string; firebase_uid: string | null }>(
+      `SELECT id, firebase_uid FROM users WHERE LOWER(TRIM(email)) = $1 LIMIT 1`,
+      [emailLower]
+    );
+    const row = result.rows[0];
+    if (!row) return null;
+    return { id: row.id, firebaseUid: row.firebase_uid };
+  }
+
+  /**
+   * Fija el UID de Firebase en el usuario local. Tras un login con ID token,
+   * Firebase ya verificó el email: sustituye UID antiguo o repara migración JWT.
+   */
+  async setFirebaseUid(userId: string, firebaseUid: string): Promise<void> {
+    await pool.query(`UPDATE users SET firebase_uid = $1 WHERE id = $2`, [firebaseUid, userId]);
+  }
+
   async findByFirebaseUid(firebaseUid: string): Promise<AuthUser | null> {
     const result = await pool.query<UserRow>(
       `SELECT ${userSelect}
