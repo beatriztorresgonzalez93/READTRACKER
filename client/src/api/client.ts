@@ -22,11 +22,6 @@ export type UpdateProfileBody = {
   avatarUrl?: string | null;
 };
 
-export interface AuthResult {
-  token: string;
-  user: AuthUser;
-}
-
 interface ApiErrorBody {
   error?: string;
   message?: string;
@@ -200,22 +195,6 @@ export const updateBook = async (id: string, data: UpdateBookDto): Promise<Book>
 export const deleteBook = async (id: string): Promise<{ id: string }> => {
   const response = await apiFetch<ApiResponse<{ id: string }>>(`/books/${id}`, {
     method: "DELETE"
-  });
-  return response.data;
-};
-
-export const registerUser = async (name: string, email: string, password: string): Promise<AuthResult> => {
-  const response = await apiFetch<ApiResponse<AuthResult>>("/auth/register", {
-    method: "POST",
-    body: JSON.stringify({ name, email, password })
-  });
-  return response.data;
-};
-
-export const loginUser = async (email: string, password: string): Promise<AuthResult> => {
-  const response = await apiFetch<ApiResponse<AuthResult>>("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password })
   });
   return response.data;
 };

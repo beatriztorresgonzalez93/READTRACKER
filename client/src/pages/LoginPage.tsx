@@ -30,7 +30,9 @@ export const LoginPage = () => {
       await login(email, password);
       navigate(fromPath, { replace: true });
     } catch (err) {
-      setError(isApiError(err) ? err.message : "No se pudo iniciar sesión");
+      setError(
+        isApiError(err) || err instanceof Error ? (err as Error).message : "No se pudo iniciar sesión"
+      );
     } finally {
       setSubmitting(false);
     }

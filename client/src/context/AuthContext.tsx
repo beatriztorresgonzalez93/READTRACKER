@@ -1,15 +1,22 @@
-// Estado global de autenticación para login/registro/logout.
+// Estado global de autenticación para login/registro/logout (Firebase Auth + API `/auth/me`).
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile as updateFirebaseProfile,
+  onAuthStateChanged
+} from "firebase/auth";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   ApiError,
   authStorage,
   AuthUser,
   getMe,
-  loginUser,
-  registerUser,
   updateProfile as updateProfileRequest,
   type UpdateProfileBody
 } from "../api/client";
+import { firebaseAuth } from "../firebase/app";
+import { mapFirebaseAuthError } from "../firebase/authErrors";
 
 const normalizeAuthUser = (raw: AuthUser): AuthUser => ({
   ...raw,
@@ -34,38 +41,61 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const bootstrap = async () => {
-      const token = authStorage.getToken();
-      if (!token) {
+    const unsub = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        authStorage.clearToken();
+        setUser(null);
         setLoading(false);
         return;
       }
       try {
+        const token = await firebaseUser.getIdToken();
+        authStorage.setToken(token);
         const me = await getMe();
         setUser(normalizeAuthUser(me));
       } catch {
         authStorage.clearToken();
         setUser(null);
+        await signOut(firebaseAuth).catch(() => undefined);
       } finally {
         setLoading(false);
       }
-    };
-    void bootstrap();
+    });
+    return () => unsub();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const auth = await loginUser(email, password);
-    authStorage.setToken(auth.token);
-    setUser(normalizeAuthUser(auth.user));
+    try {
+      const cred = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const token = await cred.user.getIdToken();
+      authStorage.setToken(token);
+      const me = await getMe();
+      setUser(normalizeAuthUser(me));
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new Error(mapFirebaseAuthError(err));
+    }
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const auth = await registerUser(name, email, password);
-    authStorage.setToken(auth.token);
-    setUser(normalizeAuthUser(auth.user));
+    try {
+      const cred = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      const trimmed = name.trim();
+      if (trimmed) {
+        await updateFirebaseProfile(cred.user, { displayName: trimmed });
+      }
+      const token = await cred.user.getIdToken();
+      authStorage.setToken(token);
+      const me = await getMe();
+      setUser(normalizeAuthUser(me));
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new Error(mapFirebaseAuthError(err));
+    }
   };
 
   const logout = () => {
+    void signOut(firebaseAuth);
     authStorage.clearToken();
     setUser(null);
   };

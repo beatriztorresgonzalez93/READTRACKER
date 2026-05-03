@@ -29,7 +29,9 @@ export const RegisterPage = () => {
       await register(name, email, password);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(isApiError(err) ? err.message : "No se pudo crear la cuenta");
+      setError(
+        isApiError(err) || err instanceof Error ? (err as Error).message : "No se pudo crear la cuenta"
+      );
     } finally {
       setSubmitting(false);
     }

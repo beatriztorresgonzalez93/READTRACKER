@@ -14,9 +14,8 @@ El frontend usa una unica capa tipada en:
 ## Funciones de dominio disponibles
 
 ### Auth
-- `registerUser(name, email, password)`
-- `loginUser(email, password)`
-- `getMe()`
+- Registro e inicio de sesion: **Firebase Auth** en `client/src/context/AuthContext.tsx` (email/contraseña); el ID token se guarda y se envia en `Authorization` como antes.
+- `getMe()` — `GET /auth/me` (requiere token Firebase)
 - `updateProfile(body)` — `PATCH /auth/me` (`name`, `lastName`, `avatarUrl` opcionales)
 - `authStorage.getToken()/setToken()/clearToken()`
 
